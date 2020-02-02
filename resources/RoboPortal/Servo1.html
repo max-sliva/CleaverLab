@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet"  href="bootstrap.css">
+		<link rel="stylesheet" href="main.css">
+		<script src="jquery.min.js"></script>
+		<script src="bootstrap.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+
+		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+		<style>
+			div.ex1 {
+				max-width:300px;
+				margin: auto;
+				border: 3px solid #b5b5db;
+			}
+
+		</style>
+		
+	</head>	
+	<body>
+		<div class="ex1" align = "center">
+
+			<p align = "center">Серво-мотор</p>
+			<canvas id="canvas" width="300" height="200"></canvas>
+			<script>
+				var socket1 = io.connect(); //get connection
+				socket1.on('servo1Hello', data=>{
+					console.log("fromServer = ", data.hello);
+					socket1.emit('servo1Active', {'Active': 'Servo1'});
+				});
+
+				var angleDeg = 90;
+				socket1.emit('servo1Angle', {'angle1': angleDeg});
+				
+				function draw(angleDeg) {
+				  var canvas = document.getElementById("canvas");
+				  var ctx = canvas.getContext("2d");
+				  ctx.strokeStyle = '#ff0000';
+				  // Our angle
+				  var angleRad = Math.PI *( 1/180)*angleDeg;
+				  ctx.clearRect(0,0,300,200);
+
+				  // Start a new path
+				  ctx.beginPath();
+				  ctx.lineWidth=5;
+				  // Go to center of the Chart
+				  ctx.moveTo(150, 150);
+				  
+				  // Draw an Arc
+				  // arc(centerX, centerY, radius, angleStart, angleEnd)
+				  ctx.arc(150, 150, 100, -angleRad, 0);
+				  
+				  // Draw a line to close the pie slice
+				  //ctx.lineTo(150, 150);
+				  
+				  
+				  // Print the path
+				  ctx.stroke();
+				  ctx.strokeStyle = '#ffffff';
+				  ctx.lineWidth=10;
+
+				  angleDeg = 180;
+				  angleRad = Math.PI *( 1/180)*angleDeg;
+				  
+				  // Start a new path
+				  ctx.beginPath();
+				  
+				  // Go to center of the Chart
+				  //ctx.moveTo(150, 150);
+				  
+				  // Draw an Arc
+				  // arc(centerX, centerY, radius, angleStart, angleEnd)
+				  ctx.arc(150, 150, 100, -angleRad, 0);
+				  
+				  // Draw a line to close the pie slice
+				  //ctx.lineTo(150, 150);
+				  ctx.stroke();
+				}
+				window.onload = draw(90);
+			</script>
+			<input type="range" class="slider" id="myRange" min="-180" max="0" value="-90"/>
+			<p>Угол: <span id="demo"></span></p>
+				<script>
+					var slider = document.getElementById("myRange");
+					var output = document.getElementById("demo");
+					output.innerHTML = slider.value*(-1);
+
+					slider.oninput = function() {
+					  output.innerHTML = this.value*(-1);
+					  draw(this.value*(-1));
+					}
+					slider.onchange = function(){
+						console.log("sliderValue = ", this.value*(-1));
+						socket1.emit('servo1Angle', {'angle1': this.value*(-1)});
+					}
+				</script>
+
+		</div>	
+	</body>
+</html>	

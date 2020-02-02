@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>RobotLab AdminPage</title>
+		<link rel="stylesheet"  href="bootstrap.css">
+		<link rel="stylesheet" href="main.css">
+		<script src="jquery.min.js"></script>
+		<script src="bootstrap.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<!-- 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> -->
+		<!--     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> -->
+		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+		<script>
+			var logins = [];
+		</script>
+	</head>
+	<body>
+		<div class="navbar">
+			<div class="container">
+				<ul class="pull-left">
+					<li><a href="index.html">Главная</a></li>
+				</ul>
+				<ul class="pull-right">
+					<li><a href="#">Структура сайта</a></li>
+					<li><a href="/Logout?login=Admin">Logout!</a></li>
+					<li><a href="help.html">Помощь</a></li>	
+				</ul>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-6" align="center" >
+			</div>
+			<div class="col-xs-6" align="center" >
+			</div>
+		</div>
+		<script>
+			var socket;
+			var ar = 0;
+			var users;
+			try {
+				<!-- socket = io('ws://localhost:8000'); -->
+				socket = io.connect();
+				<!-- console.log("socket = ", socket); -->
+				socket.on('users', data=>{
+					console.log('user1=', data[0]['fio']);
+					socket.emit('hello',{'hello':'hello'});
+					users = data;
+					//console.log(users.length);
+					ar = 1;					
+					setUsersTable(users);
+					
+				});	
+				socket.on('addUser', data=>{
+					addUser(data);
+					console.log('addUser');
+					//window.location.href = "/admin.html";
+				});
+				//console.log('ar=',ar);
+				setTimeout(function(){ //to reload page, because of bug in socket connection 
+					if (ar===0){
+						console.log("1000");
+						location.reload();
+					}
+				}, 1000);	
+			} catch (err) {
+				console.log("Was error, once more!");
+			}
+			
+			function addUser(user1){
+				console.log(user1);
+				var table = document.getElementById("usersTable");
+				var x = table.rows.length;
+				var row = table.insertRow(x-1);
+				var cell1 = row.insertCell(0);
+				cell1.innerHTML = user1.login;
+				logins[x-2] = user1.login;
+				cell1 = row.insertCell(1);
+				cell1.innerHTML = user1.fio;
+				cell1 = row.insertCell(2);
+				cell1.innerHTML = user1.status;
+				cell1 = row.insertCell(3);
+				cell1.innerHTML = user1.devices;
+				cell1 = row.insertCell(4);
+				cell1.innerHTML = user1.online;
+				console.log(logins);
+				setTimeout(function(){ 
+						console.log("1000 for new user");
+						window.location.href = "/admin.html";
+				}, 1000);	
+				//location.reload();
+			}
+			
+			function setUsersTable(usersArray){
+				console.log(usersArray.length);
+				var table = document.getElementById("usersTable");
+				for (var i = 0; i < usersArray.length; i++){	
+					var row = table.insertRow(1+i);
+					var cell1 = row.insertCell(0);
+					cell1.innerHTML = usersArray[i].login;
+					logins[i] = usersArray[i].login;
+					cell1 = row.insertCell(1);
+					cell1.innerHTML = usersArray[i].fio;
+					cell1 = row.insertCell(2);
+					cell1.innerHTML = usersArray[i].status;
+					cell1 = row.insertCell(3);
+					cell1.innerHTML = usersArray[i].devices;
+					cell1 = row.insertCell(4);
+					cell1.innerHTML = usersArray[i].online;
+				}
+			}
+		</script>
+		
+		<table	border="1" cellpadding="5" align="center" id = "usersTable">
+            <caption>List of users!</caption>
+            <tr>
+                <th>Login</th>
+                <th>FIO</th>
+                <th>Status</th>
+                <th>Devices</th>
+                <th>online</th>
+			</tr>
+			<tr>
+				<td>
+				</td>
+				<td>
+					<button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#myModal">Добавить пользователя</button>
+				</td>
+				<td>
+				</td>
+				<td>
+				</td>
+				<td>
+				</td>
+			</tr>    
+		</table>
+		
+		<div id="myModal" class="modal fade" role="dialog" charset="UTF-8">
+			<div class="modal-dialog">
+				<!-- Modal content-->
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class="modal-title">Новый пользователь</h4>
+					</div>
+					<form action="AddUser" method="post" accept-charset="UTF-8">
+						<div class="modal-body">
+							<p>Введите данные</p>
+							<label>ФИО:</label><input name="FIO" required placeholder="Иванов Иван Иванович" type="text" size="25" maxlength="25" 
+							accept-charset="UTF-8" autofocus><br />
+							<label>e-mail:</label> <input name="email" required pattern="\S+@[a-z]+.[a-z]+" type="email" size="15" 
+							maxlength="25"><br />
+							<label>Логин:</label> <input id="login" name="login" pattern="[A-Za-z].+" placeholder="Начинается с буквы" type="text" size="15" maxlength="15" required>
+							<script>
+								$('#login').blur(function() {
+									var text = $(this).val();
+									//var obj = "${logins}";
+									var index;
+									//for (index = 0; index < obj.length; ++index) {
+									console.log(logins);
+									var n = logins.indexOf(text);
+									if (n==-1) {console.log("No")}
+									else {
+										console.log("Yes");
+										//alert("Такой логин уже есть!!");
+										document.getElementById("login").focus();
+										document.getElementById("login").value = "";
+										document.getElementById("login").placeholder = "Такой логин уже есть";
+									}
+									//	}							  
+								})
+							</script>
+							<br />
+							<label>пароль:</label> <input name="password" type="password" size="15" maxlength="15" required><br />
+						</div>
+						<div class="modal-footer">
+							<input type="submit" class="btn btn-default" value="Сохранить" > <!-- data-dismiss="modal" onclick="javascript: submit()"> -->
+							<button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+						</div>
+					</form>
+				</div>
+				
+			</div>
+		</div>
+		
+		
+	</body>
+</html>

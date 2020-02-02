@@ -1,0 +1,50 @@
+@charset "UTF-8";
+
+.myTable {
+	border: 3px solid #808080;
+/* 	margin:1em auto;  */
+	border-collapse:collapse;
+}
+
+.myTable td{
+	border: 2px solid #808080;
+	cursor:pointer;
+    width:30px; 
+    height:30px;
+    background-color: black;
+    color: black;
+}
+
+.myTable td.clicked {
+	border: 2px solid grey;
+/* 	background-color: white; */
+}
+
+.up {
+/*   background-color: gray; */
+/*   float:left;  */
+/*   margin-right:20px; */
+/*   width:140px; */
+/*   border-right:2px solid #000; */
+    float: left;
+    padding-left: 10px;
+    width: 20%;
+/*     background: red; */
+    height: 100%;
+    overflow: scroll;
+}
+
+.buttom { 
+/*   background-color: white; */
+  overflow:hidden;
+/*   margin:10px; */
+/*   border:2px dashed #ccc; */
+/*   min-height: 100%; */
+/*     float: left; */
+/*     width: 70%; */
+/*     background: blue; */
+    height: 100%;
+    overflow: scroll;
+    position:relative;
+    padding-left: 10px;
+}

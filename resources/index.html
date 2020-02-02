@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"> -->
+		<link rel="stylesheet" href="index.css">
+		<script src="jquery.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		
+		
+		<title>Welcome to the CleverLab!</title>
+		<script type="text/javascript">
+			var selectedCel=0;
+			var clickCount = 0;
+			var x,y;
+			var cross = 1;
+			var clientNumber = '';
+			clientNumber=sessionStorage.getItem("clientNumber");
+			console.log("clientNumberFromSession=",sessionStorage.getItem("clientNumber"));
+			console.log("clientNumber=",clientNumber);
+		</script>
+		
+	</head>
+	<body onLoad = "pageRefresh()">
+		<div id="clientNumber">=</div>
+		
+		<script>
+			var el = $("#ledColorPicker");
+			el.css('position', 'absolute');
+			el.css("left", 10);
+			el.css("top", 10);//	console.log("color is ",this.style.backgroundColor);
+			el.click();
+			// el.hide();
+			
+			var socket = io.connect(); //get connection
+			
+			if (clientNumber == null) { //if it is first time 
+				socket.on('clientNumber', function(data){ //recieve this client number
+					clientNumber=data.clientNumber; //store in variable
+					sessionStorage.setItem("clientNumber", clientNumber); //set session variable
+					$('#clientNumber').text(clientNumber);  //show on web page
+					socket.emit('clientNumber',{'clientNumber':clientNumber});  //sen this client number back to server
+				});
+			}
+			else {  //if it is after page refresh
+				console.log("clNum in body=",clientNumber);
+				$('#clientNumber').text(clientNumber);//show client number on web page
+			}
+			socket.on('matrixArray', data=>{ //get current matrix state with all leds
+				console.log(data.matrixArray);
+				var matrixFromServer = data.matrixArray;
+				for (var k = 0; k < 64; k++){ // cycle through string array representing matrixLed
+					//console.log(k," ",matrixFromServer[k]);
+					var row = parseInt(k / 8);
+					var col= k % 8;
+					var grid = document.getElementById("ledMatrix");
+					var tr = grid.rows[row];
+					var cell = tr.cells[col];
+					cell.style.backgroundColor = '#'+matrixFromServer[k];
+					cell.style.color = '#'+matrixFromServer[k];
+				}	
+			});
+			socket.on('oneLed', data=>{ //receive one led from server
+				var celNum = data.cellNumber;
+				var celColor = data.cellColor;
+				console.log("one led form socket: ",celNum, " ", celColor);
+				var row = parseInt(celNum / 8);
+				var col= celNum % 8;
+				//					console.log(
+				var grid = document.getElementById("ledMatrix");
+				var tr = grid.rows[row];
+				var cell = tr.cells[col];
+				cell.style.backgroundColor = '#'+celColor;
+				cell.style.color = '#'+celColor;
+			});
+			socket.on('cross', data=>{  //receive cross
+				if (data.cross === 'X'){
+					cross=0;
+					showCrossOnMatrix('#ff0000');
+				}
+				else if (data.cross === 'x'){
+					cross=1;
+					showCrossOnMatrix('#000000');
+				}
+				
+			});
+			function send(cellNumber1, cellColor1){ //send one led to server
+				socket.emit('ledDot', {cellNumber:cellNumber1, cellColor: cellColor1});
+				//					socket.broadcast.emit('ledDot', {cellNumber:cellNumber1, cellColor: cellColor1});
+			}
+			function showCross(){
+				if (cross===1) {
+					socket.emit('cross', {'cross':'X'});
+					cross=0;
+					showCrossOnMatrix('#ff0000');
+				}	
+				else {
+					socket.emit('cross', {'cross':'x'});
+					cross=1;
+					showCrossOnMatrix('#000000');
+				}	
+			}
+			
+			function showCrossOnMatrix(crossColor){
+				var grid = document.getElementById("ledMatrix");
+				var tr = grid.rows[0];
+				var cell = tr.cells[0];
+				for (var i = 0; i<8; i++){
+					tr = grid.rows[i];
+					cell = tr.cells[i];
+					cell.style.backgroundColor = crossColor;
+					cell.style.color = crossColor;
+					cell = tr.cells[7-i];
+					cell.style.backgroundColor = crossColor;
+					cell.style.color = crossColor;
+					
+				}
+			}
+			function pageRefresh(){
+				console.log("function onRefresh");
+				if (clientNumber != null){
+					console.log("Page refresh!!");
+					socket.emit('pageRefresh',{});
+				}
+			}
+			
+		</script>
+		
+		<div > <input type = 'button' value = 'Show cross' onclick = "showCross()">   </div>
+		<script>
+		</script>
+		<br>
+		<div >
+			<table class="myTable" id="ledMatrix">
+				<script>
+					table = document.getElementById('ledMatrix');
+					var k=0;
+					for (var i = 0; i < 8; i++) {
+						var tr = document.createElement('tr');
+						for (var j = 0; j<8; j++, k++){
+							tr.appendChild( document.createElement('td') );
+							tr.cells[j].appendChild( document.createTextNode(''+k) );
+						}
+						table.appendChild(tr);
+					}
+				</script>
+			</table>
+		</div>
+		<script type="text/javascript">
+			
+			function rgb2hex(red, green, blue) {  
+				var rgb = blue | (green << 8) | (red << 16);
+				return '#' + (0x1000000 + rgb).toString(16).slice(1)
+			}
+			
+			function handler() {  //cell click
+				var tempBGColor = this.style.backgroundColor;
+				this.style='border: 2px solid grey; background-color: '+tempBGColor+' ; color: '+tempBGColor+';';
+				selectedCel=this.innerHTML;
+				console.log("Cell text is", selectedCel);
+				for (var r=0;r<8;++r){
+					var tr = grid.rows[r];
+					for (var c=0;c<8;++c){
+						var cell = tr.cells[c];
+						var tempBGColor = cell.style.backgroundColor;
+						if (cell!=this ) cell.style='border: 2px solid #808080; background-color: '+tempBGColor+' ; color: '+tempBGColor+';';
+					}
+				}
+				
+				// 				console.log("You clicked3 on element :",this.innerHTML);
+				//var colorPicker = document.getElementById("ledColorPicker");
+				// 			    console.log("x=",x,"  y=",y);
+				var el = $("#ledColorPicker");
+				el.css('position', 'absolute');
+				console.log("This cell color = ",this.style.backgroundColor);
+				var cellColor = this.style.backgroundColor;
+				var sep1 = cellColor.indexOf("(");
+				var comma1 = cellColor.indexOf(",");
+				var comma2 = cellColor.indexOf(",", comma1+1);
+				var sep2 = cellColor.indexOf(")");
+				// 				console.log("(=",sep1," comma1=",comma1," comma2=",comma2," )=", sep2);
+				
+				var red = cellColor.substr(sep1+1,comma1-sep1-1);
+				var green = cellColor.substr(comma1+1,comma2-comma1-1);
+				var blue = cellColor.substr(comma2+1,sep2-comma2-1);			    
+				// 			    console.log("cell red color = ",red);
+				// 			    console.log("cell green color = ",green);
+				// 			    console.log("cell blue color = ",blue);
+				var hexStr = rgb2hex(red, green, blue);
+				if (cellColor == "") hexStr = "#000000";
+				// 			    console.log("Hex = ", hexStr);
+				el.val(hexStr);
+				// 				el.trigger('change');
+				el.css("left", x);
+				el.css("top", y);// 				console.log("color is ",this.style.backgroundColor);
+				if (clickCount==0){ // there is a bug -  on first click there is no color change
+					clickCount=1;   // so we are not showing color picker on first click
+				}	
+				else 
+				el.click();
+			}
+			
+			var i=0;
+			var grid = document.getElementById("ledMatrix");
+			for (var r=0;r<8;++r){ //in cycle add click handler to every cell
+				var tr = grid.rows[r];
+				for (var c=0;c<8;++c){
+					var cell = tr.cells[c];
+					// 		            var text1 = cell.innerHTML;
+					cell.addEventListener('click',handler);
+				}
+			}
+			
+			$("#ledMatrix").mouseover(function(e){
+				x = e.pageX;
+				y = e.pageY;
+				console.log("x=",x,"  y=",y);
+			});
+			// 			var colorPicker = document.getElementById("ledColorPicker");
+			// 			colorPicker.addEventListener();
+		</script>
+		<script type="text/javascript">
+			function getColorVal(){
+				<!-- var colorPicker = $("#ledColorPicker"); -->
+				var colorPicker = document.getElementById("ledColorPicker");
+				<!-- 					if (clickCount===0)  -->
+				var row = parseInt(selectedCel / 8);
+				var col=selectedCel % 8;
+				// 		    alert(colorPicker.value+' row='+ row+' col='+col);
+				var grid = document.getElementById("ledMatrix");
+				var tr = grid.rows[row];
+				var cell = tr.cells[col];
+				cell.style.backgroundColor = colorPicker.value;
+				cell.style.color = colorPicker.value;
+				var color1 = "";
+				color1=colorPicker.value;
+				color = color1.substr(1, 6);;
+				console.log("!!!From picker color is1", color);
+				//send(selectedCel+" "+color);
+				send(selectedCel, color);
+				//load to server row and col and color
+			}
+		</script>		
+		
+		<div> 
+			<input name="eventColor" type = "color" value = "#000000" id = "ledColorPicker" onchange="getColorVal()" style = 'opacity:0'> 
+		</div>	
+		<div id="buttomDiv" class = "buttom"> 
+		</div>
+		
+		<script type="text/javascript">
+			
+		</script>
+		
+	</body>
+</html>																														

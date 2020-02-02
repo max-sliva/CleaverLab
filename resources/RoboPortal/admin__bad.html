@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>RobotLab AdminPage</title>
+	<link rel="stylesheet"  href="bootstrap.css">
+    <link rel="stylesheet" href="main.css">
+	<script src="jquery.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+	<!-- <script src="/socket.io/socket.io.js"></script> -->
+<!-- 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> -->
+<!--     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> -->
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+</head>
+<body>
+    <div class="navbar">
+      <div class="container">
+        <ul class="pull-left">
+          <li><a href="index.html">Главная</a></li>
+        </ul>
+        <ul class="pull-right">
+          <li><a href="#">Структура сайта</a></li>
+          <li><a href="/">Logout!</a></li>
+          <li><a href="help.html">Помощь</a></li>
+        </ul>
+      </div>
+    </div>
+	            <div class="row">
+                <div class="col-xs-6" align="center" >
+                </div>
+                <div class="col-xs-6" align="center" >
+                </div>
+            </div>
+	 <script>
+		var webSocket;
+        if(webSocket !== undefined && webSocket.readyState !== WebSocket.CLOSED){
+            console.log("WebSocket is already opened.");
+           // return;
+        }
+               // Create a new instance of the websocket
+        webSocket = new WebSocket("ws://localhost:8000");
+                 
+                /**
+                 * Binds functions to the listeners for the websocket.
+                 */
+        webSocket.onopen = function(event){
+                 // For reasons I can't determine, onopen gets called twice
+                    // and the first time event.data is undefined.
+                    // Leave a comment if you know the answer.
+			if(event.data === undefined)
+				return;
+				
+			//writeResponse(event.data);
+        };
+		webSocket.onmessage = function (evt) { 
+                  var received_msg = evt.data;
+                  console.log("Message :", received_msg);
+        };
+	</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kotlin WebSockets demo</title>
+</head>
+<body>
+<h1>Kotlin WebSockets demo</h1>
+<div>
+    From Server:<div id="clientid"> </div><br>
+    <button id = "butSend" value="Send" onclick="butPress()" >Send </button>
+
+</div>
+<script>
+    // var clientId = parseInt(Math.random()*100000);
+    var ws = new WebSocket("ws://localhost/");
+    ws.onopen = function() { console.log('connection established') };
+    ws.onclose = function() { console.log('connection closed') };
+    ws.onerror = function(err) { console.log('error: ', err)};
+    ws.onmessage = function(message) {
+        var users = message.data;
+        var usrsJSON=JSON.parse(users);
+        console.log("user = ", usrsJSON);
+        document.querySelector('#clientid').innerHTML += usrsJSON[0].login;
+        ws.send("ok");
+        // var sender = message.data.split(":")[0];
+        // var value = message.data.split(":")[1];
+        // if (sender !== clientId.toString()) {
+        //     document.getElementById('primes').innerHTML += '<div>' + sender + " found a prime: <b>" + value + '</b></div>';
+        // }
+    };
+    function butPress() {
+        console.log("ButPress");
+        ws.send("ButtonPressed");
+    }
+    // window.setInterval(function() {
+    //     var rand = parseInt(Math.random()*100);
+    //     document.getElementById('rand').innerHTML = rand;
+    //     ws.send(clientId + ":" + rand);
+    // }, 500);
+</script>
+</body>
+</html>
