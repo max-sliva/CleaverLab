@@ -7,24 +7,37 @@
 <body>
 <h1>Kotlin WebSockets demo</h1>
 <div>
-    From Server:<div id="clientid"> </div><br>
-    <button id = "butSend" value="Send" onclick="butPress()" >Send </button>
+    From Server:
+    <div id="clientid"></div>
+    <br>
+    <button id="butGetUsers" value="Send" onclick="butGetUsers()">Get users</button><br>
+    <button id="butGetDevices" value="Send" onclick="butGetDevices()">Get devices</button>
 
 </div>
 <script>
     // var clientId = parseInt(Math.random()*100000);
     var ws = new WebSocket("ws://localhost/");
-    ws.onopen = function() { console.log('connection established') };
-    ws.onclose = function() { console.log('connection closed') };
-    ws.onerror = function(err) { console.log('error: ', err)};
-    ws.onmessage = function(message) {
-        var users = message.data;
-        console.log("userData = ", users);
-        var msg=JSON.parse(users);
-        switch(msg.type) {
+    ws.onopen = function () {
+        console.log('connection established')
+    };
+    ws.onclose = function () {
+        console.log('connection closed')
+    };
+    ws.onerror = function (err) {
+        console.log('error: ', err)
+    };
+    ws.onmessage = function (message) {
+        var receivedData = message.data;
+        console.log("userData = ", receivedData);
+        var msg = JSON.parse(receivedData);
+        switch (msg.type) {
             case "users":
                 console.log("users = ", msg.users);
                 document.querySelector('#clientid').innerHTML += msg.users[0].login;
+                break;
+            case "devices":
+                console.log("users = ", msg.devices);
+                document.querySelector('#clientid').innerHTML += msg.devices[0].name;
                 break;
         }
         ws.send("ok");
@@ -34,10 +47,17 @@
         //     document.getElementById('primes').innerHTML += '<div>' + sender + " found a prime: <b>" + value + '</b></div>';
         // }
     };
-    function butPress() {
-        console.log("ButPress");
-        ws.send("ButtonPressed");
+
+    function butGetUsers() {
+        console.log("ButPressNeedUsers");
+        ws.send("NeedUsers");
     }
+
+    function butGetDevices() {
+        console.log("ButPressNeedDevices");
+        ws.send("NeedDevices");
+    }
+
     // window.setInterval(function() {
     //     var rand = parseInt(Math.random()*100);
     //     document.getElementById('rand').innerHTML = rand;

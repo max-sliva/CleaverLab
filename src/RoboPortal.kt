@@ -1,11 +1,11 @@
 package com.example
 
+//import io.ktor.client.features.websocket.WebSockets
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import com.mongodb.MongoClient
 import io.ktor.application.call
 import io.ktor.application.install
-//import io.ktor.client.features.websocket.WebSockets
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.readText
 import io.ktor.http.content.defaultResource
@@ -22,11 +22,10 @@ import io.ktor.websocket.webSocket
 import org.bson.Document
 import org.slf4j.LoggerFactory
 import java.io.File
-import kotlin.collections.ArrayList
 
 fun main(args: Array<String>) {
     val mongoUrl = "localhost";
-    val mongoClient = MongoClient( mongoUrl , 27017 )
+    val mongoClient = MongoClient(mongoUrl, 27017)
     var loginActive = "default"
     var sendCount = 0;
     //для отключения логгирования mongo
@@ -38,7 +37,7 @@ fun main(args: Array<String>) {
     val userCollection = mongoDatabase.getCollection("user")
     println("From Mongo = $userCollection")
     val docs: ArrayList<Document> = ArrayList<Document>()
-
+    val devices = ArrayList<Document>()
     val usersCount = userCollection.countDocuments()
     println("usersCount = $usersCount")
     val deviceCollection = mongoDatabase.getCollection("device")
@@ -58,19 +57,22 @@ fun main(args: Array<String>) {
                         is Frame.Text -> {
                             val text = frame.readText()
                             println("From site: $text")
-                            if (text == "ButtonPressed") {
-                                if (loginActive == "Admin") {
+                            if (loginActive == "Admin") {
+                                if (text == "NeedUsers") {
                                     println("users=$docs")
-//                                    sendCount++;
-//                                    outgoing.send(Frame.Text(sendCount.toString()))
-//                                    outgoing.send(Frame.Text(docs.toString()))
-//                                    outgoing.send(Frame.Text("""[{"login":"log1", "pass":"pas1"}, {"login":"log2", "pass":"pass2"}]"""))
-//                                    arrayListToJSON(docs)
-                                    val caps = arrayListOf("login", "fio", "status", "devices", "online")
-                                    outgoing.send(Frame.Text(arrayListToJSON(docs, caps, "users")))
-                                } else {
-                                    println("Not Admin")
+                                    val userCaps = arrayListOf("login", "fio", "status", "devices", "online")
+                                    outgoing.send(Frame.Text(arrayListToJSON(docs, userCaps, "users")))
                                 }
+                                if (text == "NeedDevices") {
+                                    val iter = deviceCollection.find()
+                                    devices.clear()
+                                    iter.into(devices);
+                                    println("devices=$devices")
+                                    val deviceCaps = arrayListOf("type", "name", "active")
+                                    outgoing.send(Frame.Text(arrayListToJSON(devices, deviceCaps, "devices")))
+                                }
+                            } else {
+                                println("Not Admin")
                             }
                         }
                     }
@@ -85,7 +87,7 @@ fun main(args: Array<String>) {
             }
 
             post("/Login") {
-//                call.receiveParameters().forEach { s, list ->  println("$s -> $list")}
+                //                call.receiveParameters().forEach { s, list ->  println("$s -> $list")}
                 val receivedParams = call.receiveParameters()
                 val login = receivedParams["login"]
                 val pass = receivedParams["password"]
@@ -95,12 +97,12 @@ fun main(args: Array<String>) {
                 val iter = userCollection.find()
                 iter.into(docs);
 
-                val findLogin = docs.filter{it["login"]==login}
-                if  (findLogin.isNotEmpty()) {
+                val findLogin = docs.filter { it["login"] == login }
+                if (findLogin.isNotEmpty()) {
                     println("!Match! Login = ${findLogin.first()["login"]}")
                     if (findLogin.first()["pass"] == pass?.md5()) {
                         println("!Match! pass = ${findLogin.first()["pass"]}")
-                        call.respondFile(File("resources/RoboPortal/admin2.html"))
+                        call.respondFile(File("resources/RoboPortal/admin3.html"))
                         if (login != null) {
                             loginActive = login
                         };
