@@ -95,6 +95,7 @@ fun main(args: Array<String>) {
                 println("pass=$pass pass md5 = ${pass?.md5()}")
 //                bson: Bson = BSon()
                 val iter = userCollection.find()
+                docs.clear()
                 iter.into(docs);
 
                 val findLogin = docs.filter { it["login"] == login }
