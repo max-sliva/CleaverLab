@@ -22,7 +22,7 @@ import io.ktor.websocket.webSocket
 import org.bson.Document
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.util.*
+import kotlin.collections.ArrayList
 
 fun main(args: Array<String>) {
     val mongoUrl = "localhost";
@@ -64,7 +64,10 @@ fun main(args: Array<String>) {
 //                                    sendCount++;
 //                                    outgoing.send(Frame.Text(sendCount.toString()))
 //                                    outgoing.send(Frame.Text(docs.toString()))
-                                      outgoing.send(Frame.Text("""[{"login":111, "pass":222}]"""))
+//                                    outgoing.send(Frame.Text("""[{"login":"log1", "pass":"pas1"}, {"login":"log2", "pass":"pass2"}]"""))
+//                                    arrayListToJSON(docs)
+                                    val caps = arrayListOf("login", "fio", "status", "devices", "online")
+                                    outgoing.send(Frame.Text(arrayListToJSON(docs, caps, "users")))
                                 } else {
                                     println("Not Admin")
                                 }

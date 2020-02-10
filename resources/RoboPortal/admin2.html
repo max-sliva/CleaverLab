@@ -19,9 +19,14 @@
     ws.onerror = function(err) { console.log('error: ', err)};
     ws.onmessage = function(message) {
         var users = message.data;
-        var usrsJSON=JSON.parse(users);
-        console.log("user = ", usrsJSON);
-        document.querySelector('#clientid').innerHTML += usrsJSON[0].login;
+        console.log("userData = ", users);
+        var msg=JSON.parse(users);
+        switch(msg.type) {
+            case "users":
+                console.log("users = ", msg.users);
+                document.querySelector('#clientid').innerHTML += msg.users[0].login;
+                break;
+        }
         ws.send("ok");
         // var sender = message.data.split(":")[0];
         // var value = message.data.split(":")[1];
