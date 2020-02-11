@@ -3,9 +3,11 @@ package com.example
 //import io.ktor.client.features.websocket.WebSockets
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
+import com.google.gson.Gson
 import com.mongodb.MongoClient
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.readText
 import io.ktor.http.content.defaultResource
@@ -71,6 +73,11 @@ fun main(args: Array<String>) {
                                     val deviceCaps = arrayListOf("type", "name", "active")
                                     outgoing.send(Frame.Text(arrayListToJSON(devices, deviceCaps, "devices")))
                                 }
+                                var jsonObj = Gson()
+//                                jsonObj.
+                                if (true){
+
+                                }
                             } else {
                                 println("Not Admin")
                             }
@@ -118,10 +125,6 @@ fun main(args: Array<String>) {
                 } else {
                     println("!No such login!")
                 }
-//                for (doc in docs) {
-//                    println("${doc["login"]} ${doc["pass"]}")
-//                }
-//                if (userCollection.find()==login)
             }
 //            get("/") {
 //                call.respondFile(File("resources/RoboPortal/index.html"))
