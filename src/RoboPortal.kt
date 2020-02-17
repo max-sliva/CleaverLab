@@ -4,9 +4,12 @@ package com.example
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import com.google.gson.Gson
+import com.mongodb.BasicDBObject
 import com.mongodb.MongoClient
+import com.mongodb.MongoException
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.html.insert
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.readText
@@ -36,7 +39,7 @@ fun main(args: Array<String>) {
     rootLogger.level = Level.OFF
 
     val mongoDatabase = mongoClient.getDatabase("local")
-    val userCollection = mongoDatabase.getCollection("user")
+    var userCollection = mongoDatabase.getCollection("user")
     println("From Mongo = $userCollection")
     val docs: ArrayList<Document> = ArrayList<Document>()
     val devices = ArrayList<Document>()
@@ -60,12 +63,12 @@ fun main(args: Array<String>) {
                             val text = frame.readText()
                             println("From site: $text")
                             if (loginActive == "Admin") {
-                                if (text == "NeedUsers") {
+                                if (text == "NeedUsers") { //if from site came request for users
                                     println("users=$docs")
                                     val userCaps = arrayListOf("login", "fio", "status", "devices", "online")
                                     outgoing.send(Frame.Text(arrayListToJSON(docs, userCaps, "users")))
                                 }
-                                if (text == "NeedDevices") {
+                                else if (text == "NeedDevices") { //if from site came request for devices
                                     val iter = deviceCollection.find()
                                     devices.clear()
                                     iter.into(devices);
@@ -73,10 +76,8 @@ fun main(args: Array<String>) {
                                     val deviceCaps = arrayListOf("type", "name", "active")
                                     outgoing.send(Frame.Text(arrayListToJSON(devices, deviceCaps, "devices")))
                                 }
-                                var jsonObj = Gson()
-//                                jsonObj.
-                                if (true){
-
+                                else {
+                                    println("From site: $text")
                                 }
                             } else {
                                 println("Not Admin")
@@ -126,6 +127,24 @@ fun main(args: Array<String>) {
                     println("!No such login!")
                 }
             }
+            post ("/AddUser"){
+                val receivedParams = call.receiveParameters()
+                val login = receivedParams["login"]
+                val pass = receivedParams["password"]
+                println("params=$receivedParams")
+                val insertDocument = BasicDBObject()
+                receivedParams.forEach { s, list ->
+                    println("   $s   ${list[0]}")
+                    insertDocument[s] = list[0]
+                }
+                try {
+//                    userCollection.insert(insertDocument)
+                } catch (e: MongoException) {
+                    e.printStackTrace()
+                }
+                call.respondFile(File("resources/RoboPortal/admin3.html"))
+            }
+
 //            get("/") {
 //                call.respondFile(File("resources/RoboPortal/index.html"))
 //
