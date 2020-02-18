@@ -67,57 +67,15 @@
 						break;
 				}
 				ws.send("ok");
-				// var sender = message.data.split(":")[0];
-				// var value = message.data.split(":")[1];
-				// if (sender !== clientId.toString()) {
-				//     document.getElementById('primes').innerHTML += '<div>' + sender + " found a prime: <b>" + value + '</b></div>';
-				// }
 			};
 
-			// function butGetUsers() {
-			// 	console.log("ButPressNeedUsers");
-			// 	ws.send("NeedUsers");
-			// }
-			//
-			// function butGetDevices() {
-			// 	console.log("ButPressNeedDevices");
-			// 	ws.send("NeedDevices");
-			// }
 			var ar = 0;
-			// try {
-				//socket = io('ws://localhost:8000'); 
-				// socket = io.connect();
-				// console.log("socket = ", socket);
-				// socket.on('users', data=>{
-				// 	console.log('user1=', data[0]['fio']);
-				// 	socket.emit('hello',{'hello':'hello'});
-				// 	users = data;
-				// 	//console.log(users.length);
-				// 	ar = 1;
-				// 	setUsersTable(users);
-				//
-				// });
-				// socket.on('devices', data=>{
-				// 	console.log('devices = ', data);
-				// 	devices = data;
-				// 	setDevicesOnTab(devices);
-				// });
 				socket.on('addUser', data=>{
 					addUser(data);
 					console.log('addUser');
 					//window.location.href = "/admin.html";
 				});
-				//console.log('ar=',ar);
-			// 	setTimeout(function(){ //to reload page, because of bug in socket connection
-			// 		if (ar===0){
-			// 			console.log("1000");
-			// 			location.reload();
-			// 		}
-			// 	}, 1000);
-			// } catch (err) {
-			// 	console.log("Was error, once more!");
-			// }
-			
+
 			function addUser(user1){
 				console.log(user1);
 				var table = document.getElementById("usersTable");

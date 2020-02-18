@@ -25,6 +25,7 @@ import io.ktor.server.netty.Netty
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
 import org.bson.Document
+import org.bson.BsonDocument
 import org.slf4j.LoggerFactory
 import java.io.File
 
@@ -132,13 +133,14 @@ fun main(args: Array<String>) {
                 val login = receivedParams["login"]
                 val pass = receivedParams["password"]
                 println("params=$receivedParams")
-                val insertDocument = BasicDBObject()
+                var insertDocument = Document()
                 receivedParams.forEach { s, list ->
                     println("   $s   ${list[0]}")
                     insertDocument[s] = list[0]
                 }
+                println("Document = $insertDocument")
                 try {
-//                    userCollection.insert(insertDocument)
+                    userCollection.insertOne(insertDocument)
                 } catch (e: MongoException) {
                     e.printStackTrace()
                 }
