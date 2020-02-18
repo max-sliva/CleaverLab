@@ -14,6 +14,7 @@
 			let logins = [];
 			let users = [];
 			let devices = [];
+			let ws = new WebSocket("ws://localhost/");
 		</script>
 	</head>
 	<body>
@@ -36,7 +37,6 @@
 			</div>
 		</div>
 		<script>
-			let ws = new WebSocket("ws://localhost/");
 			ws.onopen = function () {
 				console.log('connection established')
 				ws.send("NeedUsers");
@@ -70,11 +70,11 @@
 			};
 
 			var ar = 0;
-				socket.on('addUser', data=>{
-					addUser(data);
-					console.log('addUser');
-					//window.location.href = "/admin.html";
-				});
+				// socket.on('addUser', data=>{
+				// 	addUser(data);
+				// 	console.log('addUser');
+				// 	//window.location.href = "/admin.html";
+				// });
 
 			function addUser(user1){
 				console.log(user1);
@@ -255,8 +255,17 @@
 							<label>пароль:</label> <input name="pass" type="password" size="15" maxlength="15" required><br />
 						</div>
 						<div class="modal-footer">
-							<input type="submit" class="btn btn-default" value="Сохранить" > <!-- data-dismiss="modal" onclick="javascript: submit()"> -->
+							<input type="submit" id="addUserSave" class="btn btn-default" value="Сохранить" onclick="addUserFromForm()"> <!-- data-dismiss="modal" onclick="javascript: submit()"> -->
 							<button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+							<script>
+								$('#addUserSave').click(function () {
+									console.log("Add user!");
+									ws.send("addUser!");
+								})
+								// function addUserFromForm() {
+								// 	// console.log("Add user!");
+								// }
+							</script>
 						</div>
 					</form>
 				</div>

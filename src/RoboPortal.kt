@@ -140,7 +140,9 @@ fun main(args: Array<String>) {
                 }
                 println("Document = $insertDocument")
                 try {
-                    userCollection.insertOne(insertDocument)
+                    val findLogin= userCollection.find().filter{it["login"] == insertDocument["login"]}
+                    if (findLogin.count()==0) userCollection.insertOne(insertDocument)
+                    else println("found same login = $findLogin")
                 } catch (e: MongoException) {
                     e.printStackTrace()
                 }

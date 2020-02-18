@@ -1,0 +1,88 @@
+{ 
+    "_id" : ObjectId("5ad1975c8fe10811b0cd1046"), 
+    "login" : "Admin", 
+    "fio" : "Слива М.В.", 
+    "status" : "Admin", 
+    "pass" : "d338b3f0f405eb5e51c8cc1e5ca66f02", 
+    "devices" : [
+        ""
+    ], 
+    "online" : true
+}
+{ 
+    "_id" : ObjectId("5ad726912d24271e488b40ba"), 
+    "login" : "user", 
+    "fio" : "Some User", 
+    "status" : "User", 
+    "pass" : "", 
+    "devices" : [
+
+    ], 
+    "online" : false
+}
+{ 
+    "_id" : ObjectId("5aeae97e2b9ef0054c7cf075"), 
+    "fio" : "Иванов Иван Иванович", 
+    "email" : "mail@mail.ru", 
+    "login" : "user2", 
+    "pass" : "bcbe3365e6ac95ea2c0343a2395834dd", 
+    "status" : "User", 
+    "online" : true, 
+    "devices" : [
+
+    ]
+}
+{ 
+    "_id" : ObjectId("5aeae9c32b9ef0054c7cf076"), 
+    "fio" : "Иванов Иван Иванович3", 
+    "email" : "mail3@mail.ru", 
+    "login" : "user3", 
+    "pass" : "310dcbbf4cce62f762a2aaa148d556bd", 
+    "status" : "User", 
+    "online" : true, 
+    "devices" : [
+
+    ]
+}
+{ 
+    "_id" : ObjectId("5e4b93b223640e0b30504433"), 
+    "fio" : "Петров петр", 
+    "email" : "k@m.ru", 
+    "login" : "petr", 
+    "pass" : "111"
+}
+{ 
+    "_id" : ObjectId("5e4ba01423640e131c737683"), 
+    "fio" : "Смирнов Игорь", 
+    "email" : "k2@m.ru", 
+    "login" : "smir", 
+    "pass" : "111"
+}
+{ 
+    "_id" : ObjectId("5e4ba1e823640e0734ed3871"), 
+    "fio" : "Иванов Игорь", 
+    "email" : "k3@m.ru", 
+    "login" : "iva", 
+    "pass" : "333"
+}
+{ 
+    "_id" : ObjectId("5e4ba26f23640e0734ed3873"), 
+    "fio" : "Петров иван", 
+    "email" : "k4@m.ru", 
+    "login" : "user5", 
+    "pass" : "444"
+}
+{ 
+    "_id" : ObjectId("5e4bd17123640e2f8c92e47a"), 
+    "fio" : "Петров петр", 
+    "email" : "k@m.ru", 
+    "login" : "petr2", 
+    "pass" : "111"
+}
+{ 
+    "_id" : ObjectId("5e4bd24423640e2f8c92e47b"), 
+    "fio" : "Смирнов Игорь", 
+    "email" : "k@m.ru", 
+    "login" : "smir2", 
+    "pass" : "222"
+}
