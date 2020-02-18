@@ -64,7 +64,10 @@ fun main(args: Array<String>) {
                             val text = frame.readText()
                             println("From site: $text")
                             if (loginActive == "Admin") {
-                                if (text == "NeedUsers") { //if from site came request for users
+                                if (text == "NeedUsers" || text == "addUser!") { //if from site came request for users
+                                    val iter = userCollection.find()
+                                    docs.clear()
+                                    iter.into(docs);
                                     println("users=$docs")
                                     val userCaps = arrayListOf("login", "fio", "status", "devices", "online")
                                     outgoing.send(Frame.Text(arrayListToJSON(docs, userCaps, "users")))
@@ -115,12 +118,7 @@ fun main(args: Array<String>) {
                         call.respondFile(File("resources/RoboPortal/admin3.html"))
                         if (login != null) {
                             loginActive = login
-                        };
-//                        call.respondHtml {
-//                            body {
-//                                h1 { +"Hello $login" }
-//                            }
-//                        }
+                        }
                     } else {
                         println("!Wrong pass!")
                     }
@@ -131,13 +129,18 @@ fun main(args: Array<String>) {
             post ("/AddUser"){
                 val receivedParams = call.receiveParameters()
                 val login = receivedParams["login"]
-                val pass = receivedParams["password"]
+                var pass = receivedParams["pass"]
                 println("params=$receivedParams")
                 var insertDocument = Document()
                 receivedParams.forEach { s, list ->
                     println("   $s   ${list[0]}")
                     insertDocument[s] = list[0]
                 }
+                insertDocument["pass"] = pass?.md5()
+                insertDocument["status"] = "User"
+                insertDocument["devices"] = "[]"
+                insertDocument["online"] = "false"
+
                 println("Document = $insertDocument")
                 try {
                     val findLogin= userCollection.find().filter{it["login"] == insertDocument["login"]}
