@@ -11,6 +11,10 @@
 		<!--     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> -->
 		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
 		<script>
+			var myHeaders = new Headers(); // Currently empty
+			var curUser = myHeaders.get('user');
+			// var curUser = session.getAttribrute("user");
+			console.log("user = ", curUser)
 			let logins = [];
 			let users = [];
 			let devices = [];
@@ -25,8 +29,9 @@
 				</ul>
 				<ul class="pull-right">
 					<li><a href="#">Структура сайта</a></li>
-					<li><a href="/Logout?login=Admin">Logout!</a></li>
-					<li><a href="help.html">Помощь</a></li>	
+<!--					<li><a href="/Logout?login=Admin">Logout!</a></li>-->
+					<li><a href="/Logout">Logout!</a></li>
+					<li><a href="help.html">Помощь</a></li>
 				</ul>
 			</div>
 		</div>

@@ -17,17 +17,22 @@ import io.ktor.http.content.defaultResource
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
 import io.ktor.request.receiveParameters
+import io.ktor.response.header
 import io.ktor.response.respondFile
 import io.ktor.routing.post
+import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.sessions.*
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
 import org.bson.Document
 import org.bson.BsonDocument
 import org.slf4j.LoggerFactory
 import java.io.File
+
+data class SampleSession(val name: String, val value: String)
 
 fun main(args: Array<String>) {
     val mongoUrl = "localhost";
@@ -38,6 +43,7 @@ fun main(args: Array<String>) {
     val loggerContext: LoggerContext = LoggerFactory.getILoggerFactory() as LoggerContext
     val rootLogger = loggerContext.getLogger("org.mongodb.driver")
     rootLogger.level = Level.OFF
+    var mySession: SampleSession
 
     val mongoDatabase = mongoClient.getDatabase("local")
     var userCollection = mongoDatabase.getCollection("user")
@@ -53,6 +59,9 @@ fun main(args: Array<String>) {
     println("str=$str")
     val server = embeddedServer(Netty, port = 80) {
         install(WebSockets)
+        install(Sessions) {
+            cookie<SampleSession>("ROBO_COOKIE")
+        }
 
         routing {
             webSocket("/") {
@@ -115,7 +124,14 @@ fun main(args: Array<String>) {
                     println("!Match! Login = ${findLogin.first()["login"]}")
                     if (findLogin.first()["pass"] == pass?.md5()) {
                         println("!Match! pass = ${findLogin.first()["pass"]}")
-                        call.respondFile(File("resources/RoboPortal/admin3.html"))
+                        if (login=="Admin") {
+                            //call.sessions.set(SampleSession(name = "user", value = "Admin"))
+                            call.response.header("user", "Admin")
+                            call.respondFile(File("resources/RoboPortal/admin3.html"))
+                        }
+                        else {
+                            call.respondFile(File("resources/RoboPortal/userPage.html"))
+                        }
                         if (login != null) {
                             loginActive = login
                         }
@@ -125,6 +141,11 @@ fun main(args: Array<String>) {
                 } else {
                     println("!No such login!")
                 }
+            }
+            get("/Logout"){
+                loginActive = "default";
+                println("Logout")
+                call.respondFile(File("resources/RoboPortal/index.html"))
             }
             post ("/AddUser"){
                 val receivedParams = call.receiveParameters()
@@ -152,10 +173,12 @@ fun main(args: Array<String>) {
                 call.respondFile(File("resources/RoboPortal/admin3.html"))
             }
 
-//            get("/") {
-//                call.respondFile(File("resources/RoboPortal/index.html"))
-//
-//            }
+            get("/") {
+              //  call.respondFile(File("resources/RoboPortal/index.html"))
+//                mySession = call.sessions.get<SampleSession>()!!
+//                println("Session = $mySession")
+                println("Root ")
+            }
         }
     }
     server.start(wait = true)
