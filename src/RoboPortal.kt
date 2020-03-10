@@ -27,6 +27,7 @@ import io.ktor.server.netty.Netty
 import io.ktor.sessions.*
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
+import io.netty.handler.codec.http.cookie.Cookie
 import org.bson.Document
 import org.bson.BsonDocument
 import org.slf4j.LoggerFactory
@@ -61,6 +62,7 @@ fun main(args: Array<String>) {
         install(WebSockets)
         install(Sessions) {
             cookie<SampleSession>("ROBO_COOKIE")
+//            header<SampleSession>("HTTP_ROBOPORTAL")
         }
 
         routing {
@@ -125,8 +127,10 @@ fun main(args: Array<String>) {
                     if (findLogin.first()["pass"] == pass?.md5()) {
                         println("!Match! pass = ${findLogin.first()["pass"]}")
                         if (login=="Admin") {
-                            //call.sessions.set(SampleSession(name = "user", value = "Admin"))
-                            call.response.header("user", "Admin")
+                            call.sessions.set(SampleSession(name = "user", value = "Admin"))
+//                            call.response.header("user", "Admin")
+//                            val cookie = Cookie()
+//                            call.response.cookies.append(cookie)
                             call.respondFile(File("resources/RoboPortal/admin3.html"))
                         }
                         else {
@@ -137,9 +141,11 @@ fun main(args: Array<String>) {
                         }
                     } else {
                         println("!Wrong pass!")
+                        call.respondFile(File("resources/RoboPortal/index.html"))
                     }
                 } else {
                     println("!No such login!")
+                    call.respondFile(File("resources/RoboPortal/index.html"))
                 }
             }
             get("/Logout"){
