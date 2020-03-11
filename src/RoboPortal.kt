@@ -36,6 +36,7 @@ import java.io.File
 data class SampleSession(val name: String, val value: String)
 
 fun main(args: Array<String>) {
+    setComPort()
     val mongoUrl = "localhost";
     val mongoClient = MongoClient(mongoUrl, 27017)
     var loginActive = "default"
