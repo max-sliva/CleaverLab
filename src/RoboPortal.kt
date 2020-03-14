@@ -36,7 +36,7 @@ import java.io.File
 data class SampleSession(val name: String, val value: String)
 
 fun main(args: Array<String>) {
-    setComPort()
+    val serialPort = setComPort()
     val mongoUrl = "localhost";
     val mongoClient = MongoClient(mongoUrl, 27017)
     var loginActive = "default"
@@ -97,6 +97,14 @@ fun main(args: Array<String>) {
                                 }
                             } else {
                                 println("Not Admin")
+                                if (text == "NeedDevices") { //if from site came request for devices
+                                    val iter = deviceCollection.find()
+                                    devices.clear()
+                                    iter.into(devices);
+                                    println("devices=$devices")
+                                    val deviceCaps = arrayListOf("type", "name", "active")
+                                    outgoing.send(Frame.Text(arrayListToJSON(devices, deviceCaps, "devices")))
+                                }
                             }
                         }
                     }

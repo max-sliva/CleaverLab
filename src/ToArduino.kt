@@ -11,10 +11,32 @@ import javax.swing.JFrame
 
 
 fun main(){
- //   setComPort()
+    var serialPort = setComPort()
+    serialPort!!.openPort() //открываем порт
+    serialPort!!.setParams(
+        9600,
+        8,
+        1,
+        0
+    ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
+    serialPort?.writeString("0")
 }
 
-fun setComPort(){
+
+fun setComPort(): SerialPort?{
+    var serialPort: SerialPort? = null
+    val portNames = SerialPortList.getPortNames() // получаем список портов
+    println("Available Serial ports: ")
+    var i=0
+    portNames.forEach { println("${i++}: $it") }
+    println("Inport port number: ")
+    val portIndex = readLine()!!.toInt()
+    serialPort = SerialPort(portNames[portIndex])
+    println("Chosen port = $serialPort")
+    return serialPort
+}
+
+fun setComPort2(){
     var serialPort: SerialPort? = null
     val myFrame = JFrame("ArduinoControl")
     myFrame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE

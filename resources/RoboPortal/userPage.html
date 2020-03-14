@@ -6,7 +6,7 @@
 		<link rel="stylesheet" href="main.css">
 		<script src="jquery.min.js"></script>
 		<script src="bootstrap.min.js"></script>
-		<script src="/socket.io/socket.io.js"></script>
+<!--		<script src="/socket.io/socket.io.js"></script>-->
 		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
 		<title>Мои устройства</title>
 		
@@ -14,6 +14,34 @@
 			function resizeIframe(obj) {
 				obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
 			}
+			let devices = [];
+			let ws = new WebSocket("ws://localhost/");
+			ws.onopen = function () {
+				console.log('connection established')
+				ws.send("NeedDevices");
+			};
+			ws.onclose = function () {
+				console.log('connection closed')
+			};
+			ws.onerror = function (err) {
+				console.log('error: ', err)
+			};
+			ws.onmessage = function (message) {
+				var receivedData = message.data;
+				console.log("userData = ", receivedData);
+				var msg = JSON.parse(receivedData);
+				switch (msg.type) {
+					case "devices":
+						console.log("devices = ", msg.devices);
+						devices = msg.devices;
+						setDevicesOnLeftTab(devices);
+						// document.querySelector('#clientid').innerHTML += msg.devices[0].name;
+						break;
+				}
+				ws.send("ok");
+			};
+
+
 		</script>
 
 		<script type="text/javascript">
@@ -27,20 +55,20 @@
 			btn.id="imgBut";
 			btn.title="Редактировать";
 			btn.style.cursor='pointer';
-			var devices;
-			try {
-				socket = io.connect();
-				
-				socket.on('devicesForUser', data=>{
-					console.log('devicesForUser = ', data);
-					devices = data;
-					setDevicesOnLeftTab(devices);
-				});
-				
-				
-				} catch (err) {
-				console.log("Was error, once more!");
-			}
+			// var devices;
+			// try {
+			// 	socket = io.connect();
+			//
+			// 	socket.on('devicesForUser', data=>{
+			// 		console.log('devicesForUser = ', data);
+			// 		devices = data;
+			// 		setDevicesOnLeftTab(devices);
+			// 	});
+			//
+			//
+			// 	} catch (err) {
+			// 	console.log("Was error, once more!");
+			// }
 			
 			function setDevicesOnLeftTab(devicesArray){
 				var devicesTable = document.getElementById("deviceTable");
