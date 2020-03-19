@@ -5,7 +5,7 @@
 		<link rel="stylesheet" href="main.css">
 		<script src="jquery.min.js"></script>
 		<script src="bootstrap.min.js"></script>
-		<script src="/socket.io/socket.io.js"></script>
+<!--		<script src="/socket.io/socket.io.js"></script>-->
 
 		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
 		<style>
@@ -16,22 +16,25 @@
 			}
 
 		</style>
-		
-	</head>	
+		<script type="text/javascript">
+			var socket1 = new WebSocket("ws://localhost/");
+		</script>
+
+	</head>
 	<body>
 		<div class="ex1" align = "center">
 
 			<p align = "center">Серво-мотор</p>
 			<canvas id="canvas" width="300" height="200"></canvas>
 			<script>
-				var socket1 = io.connect(); //get connection
-				socket1.on('servo1Hello', data=>{
-					console.log("fromServer = ", data.hello);
-					socket1.emit('servo1Active', {'Active': 'Servo1'});
-				});
+				// var socket1 = io.connect(); //get connection
+				// socket1.on('servo1Hello', data=>{
+				// 	console.log("fromServer = ", data.hello);
+				// 	socket1.emit('servo1Active', {'Active': 'Servo1'});
+				// });
 
 				var angleDeg = 90;
-				socket1.emit('servo1Angle', {'angle1': angleDeg});
+				//socket1.send("{'device' : 'servo1Angle',  'angle1':"+ angleDeg+"}");
 				
 				function draw(angleDeg) {
 				  var canvas = document.getElementById("canvas");
@@ -92,7 +95,7 @@
 					}
 					slider.onchange = function(){
 						console.log("sliderValue = ", this.value*(-1));
-						socket1.emit('servo1Angle', {'angle1': this.value*(-1)});
+						socket1.send("{'device' : 'servo1Angle',  'angle1':" + this.value*(-1)+"}");
 					}
 				</script>
 

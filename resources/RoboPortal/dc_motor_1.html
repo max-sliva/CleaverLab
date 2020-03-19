@@ -5,7 +5,7 @@
 		<link rel="stylesheet" href="main.css">
 		<script src="jquery.min.js"></script>
 		<script src="bootstrap.min.js"></script>
-		<script src="/socket.io/socket.io.js"></script>
+<!--		<script src="/socket.io/socket.io.js"></script>-->
 		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
 		<style>
 			div.ex1 {
@@ -18,7 +18,7 @@
 		<script type="text/javascript">
 			var motorValue = 0;
 			var sliderValue = 30;
-
+			var socket2 = new WebSocket("ws://localhost/");
 		</script>
 	</head>	
 	<body>
@@ -28,12 +28,11 @@
 				<p>Мощность: <span id="dcPower"></span></p>
 				<script>
 
-					var socket2 = io.connect(); //get connection
-					socket2.on('motor1Hello', data=>{
-						console.log("fromServer = ", data.hello);
-						socket2.emit('motor1Active', {'Active': 'motor1'});
-					});
-
+					//var socket2 = io.connect(); //get connection
+					// socket2.on('motor1Hello', data=>{
+					// 	console.log("fromServer = ", data.hello);
+					// 	socket2.emit('motor1Active', {'Active': 'motor1'});
+					// });
 					var dcMotorSlider = document.getElementById("myRangeForDC");
 					var outputForDC = document.getElementById("dcPower");
 					outputForDC.innerHTML = dcMotorSlider.value;
@@ -45,7 +44,7 @@
 						console.log("sliderValue = ", this.value);
 						//socket2.emit('motor1Slider', {'motor1Slider': this.value});
 						sliderValue = this.value;
-						socket2.emit('motor1', {'motor1': motorValue, 'motor1Slider': -this.value*motorValue});
+						socket2.send("{'device' : 'motor1', 'motor1':"+ motorValue+", 'motor1Slider':"+ (-this.value*motorValue)+"}");
 					}
 				</script>
 				 <div class="btn-group btn-toggle" align = 'center'> 
@@ -54,25 +53,29 @@
 					<button class="btn btn-lg btn-default" value="Сюда">Сюда</button>
 					<script>
 						$('.btn').click(function() {
+							// let socket2 = new WebSocket("ws://localhost/");
 							console.log($(this).attr('class'));
 							console.log($(this).val());
 							if ($(this).val() === 'Выкл') {
 								console.log("Мотор выкл");
 								motorValue = 0;
 								// socket2.emit('motor1', {'motor1': 0});
-								socket2.emit('motor1', {'motor1': motorValue, 'motor1Slider': sliderValue});
+								socket2.send("{'device' : 'motor1', 'motor1':"+ motorValue+", 'motor1Slider':"+ sliderValue+"}");
+								// socket2.send('motor1', {'motor1': motorValue, 'motor1Slider': sliderValue});
 							}
 							if ($(this).val() === 'Туда') {
 								console.log("Мотор туда");
 								motorValue = -1;
 								// socket2.emit('motor1', {'motor1': -1});
-								socket2.emit('motor1', {'motor1': motorValue, 'motor1Slider': sliderValue});
+								socket2.send("{'device' : 'motor1', 'motor1':"+ motorValue+", 'motor1Slider':"+ sliderValue+"}");
+								// socket2.send('motor1', {'motor1': motorValue, 'motor1Slider': sliderValue});
 							}
 							if ($(this).val() === 'Сюда') {
 								console.log("Мотор сюда");
 								motorValue = 1;
 								// socket2.emit('motor1', {'motor1': 1});
-								socket2.emit('motor1', {'motor1': motorValue, 'motor1Slider': -sliderValue});
+								socket2.send("{'device' : 'motor1', 'motor1':"+ motorValue+", 'motor1Slider':"+ sliderValue+"}");
+								// socket2.send('motor1', {'motor1': motorValue, 'motor1Slider': -sliderValue});
 							}
 							if ($(this).hasClass('btn-default')) {
 								// console.log("default");

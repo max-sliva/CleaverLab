@@ -37,6 +37,14 @@ data class SampleSession(val name: String, val value: String)
 
 fun main(args: Array<String>) {
     val serialPort = setComPort()
+    serialPort!!.openPort() //открываем порт
+    serialPort!!.setParams(
+        9600,
+        8,
+        1,
+        0
+    ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
+
     val mongoUrl = "localhost";
     val mongoClient = MongoClient(mongoUrl, 27017)
     var loginActive = "default"
@@ -76,6 +84,7 @@ fun main(args: Array<String>) {
                             val text = frame.readText()
                             println("From site: $text")
                             if (loginActive == "Admin") {
+                                println("!AdminMode!")
                                 if (text == "NeedUsers" || text == "addUser!") { //if from site came request for users
                                     val iter = userCollection.find()
                                     docs.clear()
@@ -93,7 +102,7 @@ fun main(args: Array<String>) {
                                     outgoing.send(Frame.Text(arrayListToJSON(devices, deviceCaps, "devices")))
                                 }
                                 else {
-                                    println("From site: $text")
+                                    println("From Admin: $text")
                                 }
                             } else {
                                 println("Not Admin")
@@ -104,7 +113,11 @@ fun main(args: Array<String>) {
                                     println("devices=$devices")
                                     val deviceCaps = arrayListOf("type", "name", "active")
                                     outgoing.send(Frame.Text(arrayListToJSON(devices, deviceCaps, "devices")))
+                                } else {
+                                    println("From user = $text")
+                                    serialPort!!.writeString(text)
                                 }
+
                             }
                         }
                     }

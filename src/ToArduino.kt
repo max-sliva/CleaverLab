@@ -29,7 +29,7 @@ fun setComPort(): SerialPort?{
     println("Available Serial ports: ")
     var i=0
     portNames.forEach { println("${i++}: $it") }
-    println("Inport port number: ")
+    print("Input port number: ")
     val portIndex = readLine()!!.toInt()
     serialPort = SerialPort(portNames[portIndex])
     println("Chosen port = $serialPort")

@@ -4,19 +4,20 @@
 		<!--  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"> -->
 		<link rel="stylesheet" href="index.css">
 		<script src="jquery.min.js"></script>
-		<script src="/socket.io/socket.io.js"></script>
+<!--		<script src="/socket.io/socket.io.js"></script>-->
 		
 		
-		<title>Welcome to the CleverLab!</title>
+<!--		<title>Welcome to the CleverLab!</title>-->
 		<script type="text/javascript">
 			var selectedCel=0;
 			var clickCount = 0;
 			var x,y;
 			var cross = 1;
-			var clientNumber = '';
-			clientNumber=sessionStorage.getItem("clientNumber");
-			console.log("clientNumberFromSession=",sessionStorage.getItem("clientNumber"));
-			console.log("clientNumber=",clientNumber);
+			var socket = new WebSocket("ws://localhost/");
+			// var clientNumber = '';
+			// clientNumber=sessionStorage.getItem("clientNumber");
+			// console.log("clientNumberFromSession=",sessionStorage.getItem("clientNumber"));
+			// console.log("clientNumber=",clientNumber);
 		</script>
 		
 	</head>
@@ -31,71 +32,72 @@
 			el.click();
 			// el.hide();
 			
-			var socket = io.connect(); //get connection
-			
-			if (clientNumber == null) { //if it is first time 
-				socket.on('clientNumber', function(data){ //recieve this client number
-					clientNumber=data.clientNumber; //store in variable
-					sessionStorage.setItem("clientNumber", clientNumber); //set session variable
-					console.log("clNum in body=",clientNumber);
-					$('#clientNumber').text("Светодиодная RGB-матрица 8x8");  //show on web page
-					socket.emit('clientNumber',{'clientNumber':clientNumber});  //sen this client number back to server
-				});
-			}
-			else {  //if it is after page refresh
-				console.log("clNum in body=",clientNumber);
-				$('#clientNumber').text("Светодиодная RGB-матрица 8x8");//show client number on web page
-			}
-			socket.on('matrixArray', data=>{ //get current matrix state with all leds
-				console.log(data.matrixArray);
-				var matrixFromServer = data.matrixArray;
-				for (var k = 0; k < 64; k++){ // cycle through string array representing matrixLed
-					//console.log(k," ",matrixFromServer[k]);
-					var row = parseInt(k / 8);
-					var col= k % 8;
-					var grid = document.getElementById("ledMatrix");
-					var tr = grid.rows[row];
-					var cell = tr.cells[col];
-					cell.style.backgroundColor = '#'+matrixFromServer[k];
-					cell.style.color = '#'+matrixFromServer[k];
-				}	
-			});
-			socket.on('oneLed', data=>{ //receive one led from server
-				var celNum = data.cellNumber;
-				var celColor = data.cellColor;
-				console.log("one led form socket: ",celNum, " ", celColor);
-				var row = parseInt(celNum / 8);
-				var col= celNum % 8;
-				//					console.log(
-				var grid = document.getElementById("ledMatrix");
-				var tr = grid.rows[row];
-				var cell = tr.cells[col];
-				cell.style.backgroundColor = '#'+celColor;
-				cell.style.color = '#'+celColor;
-			});
-			socket.on('cross', data=>{  //receive cross
-				if (data.cross === 'X'){
-					cross=0;
-					showCrossOnMatrix('#ff0000');
-				}
-				else if (data.cross === 'x'){
-					cross=1;
-					showCrossOnMatrix('#000000');
-				}
-				
-			});
+			// var socket = io.connect(); //get connection
+			//for shared usage with other users
+			// if (clientNumber == null) { //if it is first time
+			// 	socket.on('clientNumber', function(data){ //recieve this client number
+			// 		clientNumber=data.clientNumber; //store in variable
+			// 		sessionStorage.setItem("clientNumber", clientNumber); //set session variable
+			// 		console.log("clNum in body=",clientNumber);
+			// 		$('#clientNumber').text("Светодиодная RGB-матрица 8x8");  //show on web page
+			// 		socket.emit('clientNumber',{'clientNumber':clientNumber});  //sen this client number back to server
+			// 	});
+			// }
+			// else {  //if it is after page refresh
+			// 	console.log("clNum in body=",clientNumber);
+			// 	$('#clientNumber').text("Светодиодная RGB-матрица 8x8");//show client number on web page
+			// }
+			// socket.on('matrixArray', data=>{ //get current matrix state with all leds
+			// 	console.log(data.matrixArray);
+			// 	var matrixFromServer = data.matrixArray;
+			// 	for (var k = 0; k < 64; k++){ // cycle through string array representing matrixLed
+			// 		//console.log(k," ",matrixFromServer[k]);
+			// 		var row = parseInt(k / 8);
+			// 		var col= k % 8;
+			// 		var grid = document.getElementById("ledMatrix");
+			// 		var tr = grid.rows[row];
+			// 		var cell = tr.cells[col];
+			// 		cell.style.backgroundColor = '#'+matrixFromServer[k];
+			// 		cell.style.color = '#'+matrixFromServer[k];
+			// 	}
+			// });
+			// socket.on('oneLed', data=>{ //receive one led from server
+			// 	var celNum = data.cellNumber;
+			// 	var celColor = data.cellColor;
+			// 	console.log("one led form socket: ",celNum, " ", celColor);
+			// 	var row = parseInt(celNum / 8);
+			// 	var col= celNum % 8;
+			// 	//					console.log(
+			// 	var grid = document.getElementById("ledMatrix");
+			// 	var tr = grid.rows[row];
+			// 	var cell = tr.cells[col];
+			// 	cell.style.backgroundColor = '#'+celColor;
+			// 	cell.style.color = '#'+celColor;
+			// });
+			// socket.on('cross', data=>{  //receive cross
+			// 	if (data.cross === 'X'){
+			// 		cross=0;
+			// 		showCrossOnMatrix('#ff0000');
+			// 	}
+			// 	else if (data.cross === 'x'){
+			// 		cross=1;
+			// 		showCrossOnMatrix('#000000');
+			// 	}
+			//
+			// });
 			function send(cellNumber1, cellColor1){ //send one led to server
-				socket.emit('ledDot', {cellNumber:cellNumber1, cellColor: cellColor1});
+				socket.send("{'device' : 'ledDot', 'cellNumber': "+cellNumber1+", 'cellColor':"+cellColor1+ "}")
+				// socket.emit('ledDot', {cellNumber:cellNumber1, cellColor: cellColor1});
 				//					socket.broadcast.emit('ledDot', {cellNumber:cellNumber1, cellColor: cellColor1});
 			}
 			function showCross(){
 				if (cross===1) {
-					socket.emit('cross', {'cross':'X'});
+					// socket.emit('cross', {'cross':'X'});
 					cross=0;
 					showCrossOnMatrix('#ff0000');
 				}	
 				else {
-					socket.emit('cross', {'cross':'x'});
+					// socket.emit('cross', {'cross':'x'});
 					cross=1;
 					showCrossOnMatrix('#000000');
 				}	
@@ -120,7 +122,7 @@
 				console.log("function onRefresh");
 				if (clientNumber != null){
 					console.log("Page refresh!!");
-					socket.emit('pageRefresh',{});
+					// socket.emit('pageRefresh',{});
 				}
 			}
 			
