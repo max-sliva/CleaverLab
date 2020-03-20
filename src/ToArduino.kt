@@ -5,21 +5,37 @@ import jssc.SerialPortException
 import jssc.SerialPortList
 import java.awt.BorderLayout
 import java.awt.event.ActionEvent
+import java.net.DatagramSocket
+import java.net.InetAddress
 import javax.swing.JCheckBox
 import javax.swing.JComboBox
 import javax.swing.JFrame
 
 
 fun main(){
-    var serialPort = setComPort()
-    serialPort!!.openPort() //открываем порт
-    serialPort!!.setParams(
-        9600,
-        8,
-        1,
-        0
-    ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
-    serialPort?.writeString("0")
+//    val e: Enumeration<*> = NetworkInterface.getNetworkInterfaces()
+//    while (e.hasMoreElements()) {
+//        val n = e.nextElement() as NetworkInterface
+//        val ee: Enumeration<*> = n.inetAddresses
+//        while (ee.hasMoreElements()) {
+//            val i = ee.nextElement() as InetAddress
+//            println(i.hostAddress)
+//        }
+//    }
+    DatagramSocket().use { socket ->
+        socket.connect(InetAddress.getByName("8.8.8.8"), 10002)
+        val ip = socket.localAddress.hostAddress
+        println(ip)
+    }
+//    var serialPort = setComPort()
+//    serialPort!!.openPort() //открываем порт
+//    serialPort!!.setParams(
+//        9600,
+//        8,
+//        1,
+//        0
+//    ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
+//    serialPort?.writeString("0")
 }
 
 

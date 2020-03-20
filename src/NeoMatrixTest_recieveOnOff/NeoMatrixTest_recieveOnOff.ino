@@ -49,6 +49,7 @@ void loop()
     JsonObject& root = jsonBuffer1.parse(Serial);
     if (root.success()) {
        const char* myN = root["cellNumber"];
+       const char* clearMatrix = root["clear"];
        const char* pos1 = root["angle1"];
        const char* motor1 = root["motor1"];
 //       const char* motor1Slider = root["motor1Slider"];
@@ -69,6 +70,11 @@ void loop()
 //        OzOled.setCursorXY(0, 1);
 //        OzOled.printString(myRed);
         Serial.flush();
+      }
+      else if (clearMatrix){
+        Serial.println("Clear");
+        strip.clear();
+        strip.show();
       }
       else if (pos1)
       {
@@ -155,4 +161,3 @@ void showPixel(int i, byte r, byte g, byte b)
   strip.setPixelColor(i, strip.Color(r, g, b));
   strip.show();
 }
-

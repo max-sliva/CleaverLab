@@ -15,7 +15,9 @@
 				obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
 			}
 			let devices = [];
-			let ws = new WebSocket("ws://localhost/");
+			var ip_adress = "192.168.1.9"
+			// var ws = new WebSocket("ws://localhost/");
+			var ws = new WebSocket("ws://"+ip_adress+"/");
 			ws.onopen = function () {
 				console.log('connection established')
 				ws.send("NeedDevices");
