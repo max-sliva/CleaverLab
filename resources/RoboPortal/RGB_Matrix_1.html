@@ -1,94 +1,34 @@
 ﻿<!DOCTYPE html>
 <html>
 	<head>
-		<!--  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"> -->
 		<link rel="stylesheet" href="index.css">
 		<script src="jquery.min.js"></script>
-<!--		<script src="/socket.io/socket.io.js"></script>-->
-		
-		
-<!--		<title>Welcome to the CleverLab!</title>-->
+
 		<script type="text/javascript">
 			var selectedCel=0;
 			var clickCount = 0;
 			var x,y;
 			var cross = 1;
 			var socket = new WebSocket("ws://localhost/");
-			// var clientNumber = '';
-			// clientNumber=sessionStorage.getItem("clientNumber");
-			// console.log("clientNumberFromSession=",sessionStorage.getItem("clientNumber"));
-			// console.log("clientNumber=",clientNumber);
 		</script>
-		
+
 	</head>
-	<body onLoad = "pageRefresh()">
-		<div id="clientNumber">=</div>
-		
+	<body >
+<!--		<div id="clientNumber">=</div>-->
 		<script>
 			var el = $("#ledColorPicker");
-			el.css('position', 'absolute');
+		//	el.css('position', 'absolute');
 			el.css("left", 10);
 			el.css("top", 10);//	console.log("color is ",this.style.backgroundColor);
-			el.click();
-			// el.hide();
-			
-			// var socket = io.connect(); //get connection
-			//for shared usage with other users
-			// if (clientNumber == null) { //if it is first time
-			// 	socket.on('clientNumber', function(data){ //recieve this client number
-			// 		clientNumber=data.clientNumber; //store in variable
-			// 		sessionStorage.setItem("clientNumber", clientNumber); //set session variable
-			// 		console.log("clNum in body=",clientNumber);
-			// 		$('#clientNumber').text("Светодиодная RGB-матрица 8x8");  //show on web page
-			// 		socket.emit('clientNumber',{'clientNumber':clientNumber});  //sen this client number back to server
-			// 	});
-			// }
-			// else {  //if it is after page refresh
-			// 	console.log("clNum in body=",clientNumber);
-			// 	$('#clientNumber').text("Светодиодная RGB-матрица 8x8");//show client number on web page
-			// }
-			// socket.on('matrixArray', data=>{ //get current matrix state with all leds
-			// 	console.log(data.matrixArray);
-			// 	var matrixFromServer = data.matrixArray;
-			// 	for (var k = 0; k < 64; k++){ // cycle through string array representing matrixLed
-			// 		//console.log(k," ",matrixFromServer[k]);
-			// 		var row = parseInt(k / 8);
-			// 		var col= k % 8;
-			// 		var grid = document.getElementById("ledMatrix");
-			// 		var tr = grid.rows[row];
-			// 		var cell = tr.cells[col];
-			// 		cell.style.backgroundColor = '#'+matrixFromServer[k];
-			// 		cell.style.color = '#'+matrixFromServer[k];
-			// 	}
-			// });
-			// socket.on('oneLed', data=>{ //receive one led from server
-			// 	var celNum = data.cellNumber;
-			// 	var celColor = data.cellColor;
-			// 	console.log("one led form socket: ",celNum, " ", celColor);
-			// 	var row = parseInt(celNum / 8);
-			// 	var col= celNum % 8;
-			// 	//					console.log(
-			// 	var grid = document.getElementById("ledMatrix");
-			// 	var tr = grid.rows[row];
-			// 	var cell = tr.cells[col];
-			// 	cell.style.backgroundColor = '#'+celColor;
-			// 	cell.style.color = '#'+celColor;
-			// });
-			// socket.on('cross', data=>{  //receive cross
-			// 	if (data.cross === 'X'){
-			// 		cross=0;
-			// 		showCrossOnMatrix('#ff0000');
-			// 	}
-			// 	else if (data.cross === 'x'){
-			// 		cross=1;
-			// 		showCrossOnMatrix('#000000');
-			// 	}
-			//
-			// });
 			function send(cellNumber1, cellColor1){ //send one led to server
-				socket.send("{'device' : 'ledDot', 'cellNumber': "+cellNumber1+", 'cellColor':"+cellColor1+ "}")
-				// socket.emit('ledDot', {cellNumber:cellNumber1, cellColor: cellColor1});
-				//					socket.broadcast.emit('ledDot', {cellNumber:cellNumber1, cellColor: cellColor1});
+				var red = cellColor1[0] + cellColor1[1];
+				var green = cellColor1[2] + cellColor1[3];
+				var blue = cellColor1[4] + cellColor1[5];
+				var red10 = parseInt(red, 16);
+				var green10 = parseInt(green, 16);
+				var blue10 = parseInt(blue, 16);
+				console.log("red = ",red10, " green = ",green10," blue = ", blue10);
+				socket.send("{'device' : 'ledDot', 'cellNumber': '"+cellNumber1+"', 'red':"+red10+", 'green':"+green10+", 'blue':"+blue10+ "}")
 			}
 			function showCross(){
 				if (cross===1) {
@@ -118,20 +58,16 @@
 					
 				}
 			}
-			function pageRefresh(){
-				console.log("function onRefresh");
-				if (clientNumber != null){
-					console.log("Page refresh!!");
-					// socket.emit('pageRefresh',{});
-				}
-			}
+			// function pageRefresh(){
+			// 	console.log("function onRefresh");
+			// 	if (clientNumber != null){
+			// 		console.log("Page refresh!!");
+			// 		// socket.emit('pageRefresh',{});
+			// 	}
+			// }
 			
 		</script>
-		
-<!-- 		<div > <input type = 'button' value = 'Show cross' onclick = "showCross()">   </div>
- -->		<script>
-		</script>
-		<br>
+
 		<div >
 			<table class="myTable" id="ledMatrix">
 				<script>
@@ -141,7 +77,9 @@
 						var tr = document.createElement('tr');
 						for (var j = 0; j<8; j++, k++){
 							tr.appendChild( document.createElement('td') );
-							tr.cells[j].appendChild( document.createTextNode(''+k) );
+							// tr.cells[j].appendChild( document.createTextNode(''+k) ); //for straight matrix
+							tr.cells[j].appendChild( document.createTextNode(''+ ((i%2 === 1)? (8*i+j):(8*(i+1)-(j+1))) ) ); //for new matrix
+							// console.log((i%2 == 1)? (8*i+j):(8*(i+1)-(j+1)))
 						}
 						table.appendChild(tr);
 					}
@@ -160,6 +98,7 @@
 				this.style='border: 2px solid grey; background-color: '+tempBGColor+' ; color: '+tempBGColor+';';
 				selectedCel=this.innerHTML;
 				console.log("Cell text is", selectedCel);
+				var grid = document.getElementById("ledMatrix");
 				for (var r=0;r<8;++r){
 					var tr = grid.rows[r];
 					for (var c=0;c<8;++c){
@@ -169,11 +108,8 @@
 					}
 				}
 				
-				// 				console.log("You clicked3 on element :",this.innerHTML);
-				//var colorPicker = document.getElementById("ledColorPicker");
-				// 			    console.log("x=",x,"  y=",y);
 				var el = $("#ledColorPicker");
-				el.css('position', 'absolute');
+			//	el.css('position', 'absolute');
 				console.log("This cell color = ",this.style.backgroundColor);
 				var cellColor = this.style.backgroundColor;
 				var sep1 = cellColor.indexOf("(");
@@ -191,15 +127,25 @@
 				var hexStr = rgb2hex(red, green, blue);
 				if (cellColor == "") hexStr = "#000000";
 				// 			    console.log("Hex = ", hexStr);
-				el.val(hexStr);
+			//	el.val(hexStr);
 				// 				el.trigger('change');
 				el.css("left", x);
 				el.css("top", y);// 				console.log("color is ",this.style.backgroundColor);
-				if (clickCount==0){ // there is a bug -  on first click there is no color change
-					clickCount=1;   // so we are not showing color picker on first click
-				}	
-				else 
-				el.click();
+				var colorPicker = document.getElementById("ledColorPicker");
+				var row = parseInt(selectedCel / 8);
+				var col=selectedCel % 8;
+				if (row % 2 === 0) col = 8 - (col+1); //for new matrix
+				var tr = grid.rows[row];
+				var cell = tr.cells[col];
+				cell.style.backgroundColor = colorPicker.value;
+				cell.style.color = colorPicker.value;
+				var color1 = "";
+				color1=colorPicker.value;
+				color = color1.substr(1, 6);
+				console.log("!!!From picker color is1", color);
+				//send(selectedCel+" "+color);
+				send(selectedCel, color);
+
 			}
 			
 			var i=0;
@@ -222,12 +168,13 @@
 			// 			colorPicker.addEventListener();
 		</script>
 		<script type="text/javascript">
-			function getColorVal(){
+			function getColorVal(){ //not using now
 				<!-- var colorPicker = $("#ledColorPicker"); -->
 				var colorPicker = document.getElementById("ledColorPicker");
 				<!-- 					if (clickCount===0)  -->
 				var row = parseInt(selectedCel / 8);
 				var col=selectedCel % 8;
+				if (row % 2 === 0) col = 8 - (col+1); //for new matrix
 				// 		    alert(colorPicker.value+' row='+ row+' col='+col);
 				var grid = document.getElementById("ledMatrix");
 				var tr = grid.rows[row];
@@ -236,22 +183,32 @@
 				cell.style.color = colorPicker.value;
 				var color1 = "";
 				color1=colorPicker.value;
-				color = color1.substr(1, 6);;
+				color = color1.substr(1, 6);
 				console.log("!!!From picker color is1", color);
 				//send(selectedCel+" "+color);
 				send(selectedCel, color);
-				//load to server row and col and color
 			}
 		</script>		
 		
-		<div> 
-			<input name="eventColor" type = "color" value = "#000000" id = "ledColorPicker" onchange="getColorVal()" style = 'opacity:0'> 
-		</div>	
-		<div id="buttomDiv" class = "buttom"> 
+		<div>
+<!--			<input name="eventColor" type = "color" value = "#000000" id = "ledColorPicker" onchange="getColorVal()" style = 'opacity:0'>-->
+			<input name="eventColor" type = "color" value = "#ff0000" id = "ledColorPicker" >
+			<button name="clear" value = "Clear" onclick="clearMatrix()">Clear </button>
 		</div>
-		
+
 		<script type="text/javascript">
-			
+			function clearMatrix() {
+				var grid = document.getElementById("ledMatrix");
+				for (var r=0;r<8;++r){
+					var tr = grid.rows[r];
+					for (var c=0;c<8;++c){
+						var cell = tr.cells[c];
+						if (cell!=this ) cell.style='border: 2px solid #808080; background-color: #000000; color: #000000;';
+					}
+				}
+
+				socket.send("{'device' : 'matrix', 'clear': 'clear' }")
+			}
 		</script>
 		
 	</body>

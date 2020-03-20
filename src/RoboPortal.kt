@@ -73,7 +73,7 @@ fun main(args: Array<String>) {
             cookie<SampleSession>("ROBO_COOKIE")
 //            header<SampleSession>("HTTP_ROBOPORTAL")
         }
-
+        //TODO Add array for storing matrix values for different users
         routing {
             webSocket("/") {
                 println("onConnect")
