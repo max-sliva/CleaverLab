@@ -18,7 +18,10 @@
 			let logins = [];
 			let users = [];
 			let devices = [];
-			let ws = new WebSocket("ws://localhost/");
+			var str = window.location.href;
+			var res = str.split("/");
+			ip_adress = res[2]
+			let ws = new WebSocket("ws://"+ip_adress+"/");
 		</script>
 	</head>
 	<body>

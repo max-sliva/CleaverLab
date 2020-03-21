@@ -4,6 +4,8 @@ import org.bson.Document
 import java.util.ArrayList
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.net.DatagramSocket
+import java.net.InetAddress
 
 fun arrayListToJSON(docs: ArrayList<Document>, caps: ArrayList<String>, typeStr: String): String {
     var strJSON = """{"type": "$typeStr", "$typeStr": ["""
@@ -20,6 +22,16 @@ fun arrayListToJSON(docs: ArrayList<Document>, caps: ArrayList<String>, typeStr:
     strJSON = strJSON.replaceRange(strJSON.length-1, strJSON.length, "]}")
 //    println("strJSON = $strJSON")
     return strJSON
+}
+
+fun getCurrentIp(): String {
+    var ip: String = ""
+    DatagramSocket().use { socket ->
+        socket.connect(InetAddress.getByName("8.8.8.8"), 10002)
+        ip = socket.localAddress.hostAddress
+        println(ip)
+    }
+    return ip
 }
 
 fun getMapFromJson(json: String): Map<String, Any> {

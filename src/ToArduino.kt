@@ -22,11 +22,7 @@ fun main(){
 //            println(i.hostAddress)
 //        }
 //    }
-    DatagramSocket().use { socket ->
-        socket.connect(InetAddress.getByName("8.8.8.8"), 10002)
-        val ip = socket.localAddress.hostAddress
-        println(ip)
-    }
+
 //    var serialPort = setComPort()
 //    serialPort!!.openPort() //открываем порт
 //    serialPort!!.setParams(

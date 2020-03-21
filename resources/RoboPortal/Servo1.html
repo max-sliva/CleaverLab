@@ -17,7 +17,10 @@
 
 		</style>
 		<script type="text/javascript">
-			var socket1 = new WebSocket("ws://localhost/");
+			var str = window.location.href;
+			var res = str.split("/");
+			ip_adress = res[2]
+			var socket1 = new WebSocket("ws://"+ip_adress+"/");
 		</script>
 
 	</head>

@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title>RobotLab</title>
-	<link rel="stylesheet"  href="bootstrap.css">
-    <link rel="stylesheet" href="main.css">
-	<script src="jquery.min.js"></script>
-    <script src="bootstrap.min.js"></script>
-<!-- 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> -->
-<!--     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> -->
-		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+	<head>
+		<title>RobotLab</title>
+		<link rel="stylesheet"  href="bootstrap.css">
+		<link rel="stylesheet" href="main.css">
+		<script src="jquery.min.js"></script>
+		<script src="bootstrap.min.js"></script>
+	<!-- 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> -->
+	<!--     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> -->
+			<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+		<script>
+			var str = window.location.href;
+			var res = str.split("/");
+			ip_adress = res[2]
+			console.log("Location: ",ip_adress);
+		</script>
+
 	</head>
 
 

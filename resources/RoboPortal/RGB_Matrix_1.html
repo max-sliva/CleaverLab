@@ -9,8 +9,11 @@
 			var clickCount = 0;
 			var x,y;
 			var cross = 1;
-			var ip_adress = "192.168.1.9"
+			// var ip_adress = "192.168.1.9"
 			// var socket = new WebSocket("ws://localhost/");
+			var str = window.location.href;
+			var res = str.split("/");
+			ip_adress = res[2]
 			var socket = new WebSocket("ws://"+ip_adress+"/");
 		</script>
 

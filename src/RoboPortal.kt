@@ -45,6 +45,7 @@ fun main(args: Array<String>) {
         0
     ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
 
+    val curIP = getCurrentIp()
     val mongoUrl = "localhost";
     val mongoClient = MongoClient(mongoUrl, 27017)
     var loginActive = "default"
@@ -113,9 +114,9 @@ fun main(args: Array<String>) {
                                     println("devices=$devices")
                                     val deviceCaps = arrayListOf("type", "name", "active")
                                     outgoing.send(Frame.Text(arrayListToJSON(devices, deviceCaps, "devices")))
-                                } else {
+                                } else { //if received JSON from site
                                     println("From user = $text")
-                                    serialPort!!.writeString(text)
+                                    serialPort!!.writeString(text) //send data to Arduino
                                 }
 
                             }
