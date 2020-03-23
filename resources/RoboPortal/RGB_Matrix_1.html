@@ -15,16 +15,47 @@
 			var res = str.split("/");
 			ip_adress = res[2]
 			var socket = new WebSocket("ws://"+ip_adress+"/");
+			var normalCurCellNumber = 0
 		</script>
 
 	</head>
 	<body >
-<!--		<div id="clientNumber">=</div>-->
+	<!--		<div id="clientNumber">=</div>-->
 		<script>
 			var el = $("#ledColorPicker");
 		//	el.css('position', 'absolute');
 			el.css("left", 10);
 			el.css("top", 10);//	console.log("color is ",this.style.backgroundColor);
+			socket.onmessage = function (message) {
+				var receivedData = message.data;
+				// console.log("from Server = ", message)
+				var msg = JSON.parse(receivedData);
+				if (msg.device === "ledDot") {
+					var celNum = msg.normalCurCellNumber;
+					var celColor = msg.cellColor1;
+					// console.log("one led form socket: ", celNum, " ", celColor);
+					var row = parseInt(celNum / 8);
+					var col = celNum % 8;
+					//					console.log(
+					var grid = document.getElementById("ledMatrix");
+					var tr = grid.rows[row];
+					var cell = tr.cells[col];
+					cell.style.backgroundColor = '#' + celColor;
+					cell.style.color = '#' + celColor;
+				}
+				if (msg.device === "matrix" && msg.clear === "clear") {
+					var grid = document.getElementById("ledMatrix");
+					for (var r=0;r<8;++r){
+						var tr = grid.rows[r];
+						for (var c=0;c<8;++c){
+							var cell = tr.cells[c];
+							if (cell!=this ) cell.style='border: 2px solid #808080; background-color: #000000; color: #000000;';
+						}
+					}
+				}
+			}
+
+
 			function send(cellNumber1, cellColor1){ //send one led to server
 				var red = cellColor1[0] + cellColor1[1];
 				var green = cellColor1[2] + cellColor1[3];
@@ -32,8 +63,8 @@
 				var red10 = parseInt(red, 16);
 				var green10 = parseInt(green, 16);
 				var blue10 = parseInt(blue, 16);
-				console.log("red = ",red10, " green = ",green10," blue = ", blue10);
-				socket.send("{'device' : 'ledDot', 'cellNumber': '"+cellNumber1+"', 'red':"+red10+", 'green':"+green10+", 'blue':"+blue10+ "}")
+				// console.log("red = ",red10, " green = ",green10," blue = ", blue10);
+				socket.send('{"device" : "ledDot", "cellNumber": "'+cellNumber1+'", "red":'+red10+', "green":'+green10+', "blue":'+blue10+ ', "cellColor1": "'+cellColor1+'", "normalCurCellNumber": '+normalCurCellNumber+'}')
 			}
 			function showCross(){
 				if (cross===1) {
@@ -102,7 +133,7 @@
 				var tempBGColor = this.style.backgroundColor;
 				this.style='border: 2px solid grey; background-color: '+tempBGColor+' ; color: '+tempBGColor+';';
 				selectedCel=this.innerHTML;
-				console.log("Cell text is", selectedCel);
+				// console.log("Cell text is", selectedCel);
 				var grid = document.getElementById("ledMatrix");
 				for (var r=0;r<8;++r){
 					var tr = grid.rows[r];
@@ -115,7 +146,7 @@
 				
 				var el = $("#ledColorPicker");
 			//	el.css('position', 'absolute');
-				console.log("This cell color = ",this.style.backgroundColor);
+			// 	console.log("This cell color = ",this.style.backgroundColor);
 				var cellColor = this.style.backgroundColor;
 				var sep1 = cellColor.indexOf("(");
 				var comma1 = cellColor.indexOf(",");
@@ -142,12 +173,14 @@
 				if (row % 2 === 0) col = 8 - (col+1); //for new matrix
 				var tr = grid.rows[row];
 				var cell = tr.cells[col];
+				normalCurCellNumber = row*8+col
+				//console.log("normalCurCellNumber = ", normalCurCellNumber)
 				cell.style.backgroundColor = colorPicker.value;
 				cell.style.color = colorPicker.value;
 				var color1 = "";
 				color1=colorPicker.value;
 				color = color1.substr(1, 6);
-				console.log("!!!From picker color is1", color);
+				//console.log("!!!From picker color is1", color);
 				//send(selectedCel+" "+color);
 				send(selectedCel, color);
 
@@ -167,7 +200,7 @@
 			$("#ledMatrix").mouseover(function(e){
 				x = e.pageX;
 				y = e.pageY;
-				console.log("x=",x,"  y=",y);
+				//console.log("x=",x,"  y=",y);
 			});
 			// 			var colorPicker = document.getElementById("ledColorPicker");
 			// 			colorPicker.addEventListener();
@@ -189,7 +222,7 @@
 				var color1 = "";
 				color1=colorPicker.value;
 				color = color1.substr(1, 6);
-				console.log("!!!From picker color is1", color);
+				//console.log("!!!From picker color is1", color);
 				//send(selectedCel+" "+color);
 				send(selectedCel, color);
 			}

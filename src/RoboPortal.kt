@@ -12,6 +12,7 @@ import io.ktor.application.install
 import io.ktor.html.insert
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.cio.websocket.Frame
+import io.ktor.http.cio.websocket.WebSocketSession
 import io.ktor.http.cio.websocket.readText
 import io.ktor.http.content.defaultResource
 import io.ktor.http.content.resources
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 data class SampleSession(val name: String, val value: String)
+data class MatrixLed(val device: String, val cellNumber: Int, val cellColor1:String, val normalCurCellNumber: Int, val red: Int, val green:Int, val blue:Int)
 
 fun main(args: Array<String>) {
     val serialPort = setComPort()
@@ -55,6 +57,14 @@ fun main(args: Array<String>) {
     val rootLogger = loggerContext.getLogger("org.mongodb.driver")
     rootLogger.level = Level.OFF
     var mySession: SampleSession
+    var ledMatrixArray = arrayOf("000000","000000","000000","000000","000000","000000","000000","000000",
+                                  "000000","000000","000000","000000","000000","000000","000000","000000",
+                                  "000000","000000","000000","000000","000000","000000","000000","000000",
+                                  "000000","000000","000000","000000","000000","000000","000000","000000",
+                                  "000000","000000","000000","000000","000000","000000","000000","000000",
+                                  "000000","000000","000000","000000","000000","000000","000000","000000",
+                                  "000000","000000","000000","000000","000000","000000","000000","000000",
+                                  "000000","000000","000000","000000","000000","000000","000000","000000")
 
     val mongoDatabase = mongoClient.getDatabase("local")
     var userCollection = mongoDatabase.getCollection("user")
@@ -66,18 +76,22 @@ fun main(args: Array<String>) {
     val deviceCollection = mongoDatabase.getCollection("device")
     val deviceCount = deviceCollection.countDocuments()
     println("deviceCount = $deviceCount")
-    var str: String = "111".md5()
-    println("str=$str")
+    val webSockSessions = ArrayList<WebSocketSession>()
+//    var str: String = "111".md5()
+//    println("str=$str")
     val server = embeddedServer(Netty, port = 80) {
         install(WebSockets)
         install(Sessions) {
             cookie<SampleSession>("ROBO_COOKIE")
 //            header<SampleSession>("HTTP_ROBOPORTAL")
         }
-        //TODO Add array for storing matrix values for different users
+        //TODO Add sending matrix array when user starts working with led matrix
+
         routing {
             webSocket("/") {
-                println("onConnect")
+                println("onConnect session = $this")
+                webSockSessions.add(this)
+                val thisSession = this
 //                outgoing.send(Frame.Text(loginActive))
                 for (frame in incoming) {
                     when (frame) {
@@ -117,6 +131,23 @@ fun main(args: Array<String>) {
                                 } else { //if received JSON from site
                                     println("From user = $text")
                                     serialPort!!.writeString(text) //send data to Arduino
+                                    if (text.contains(""""ledDot"""")) {
+                                        val gson = Gson()
+                                        val myObj = gson.fromJson(text, MatrixLed::class.java)
+                                        println("cellColor = ${myObj.cellColor1}")
+                                        ledMatrixArray[myObj.normalCurCellNumber] = myObj.cellColor1
+//                                        ledMatrixArray.forEach { print("$it ") }
+                                        if (webSockSessions.size>1)
+                                            webSockSessions.forEach { socket ->
+                                                if (socket!= thisSession) socket.send(Frame.Text(text))
+                                            }
+                                    }
+                                    if (text.contains("{'device' : 'matrix', 'clear': 'clear' }")){
+                                        if (webSockSessions.size>1)
+                                            webSockSessions.forEach { socket ->
+                                                if (socket!= thisSession) socket.send(Frame.Text("""{"device" : "matrix", "clear": "clear" }"""))
+                                            }
+                                    }
                                 }
 
                             }
