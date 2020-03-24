@@ -46,7 +46,7 @@ fun main(args: Array<String>) {
         1,
         0
     ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
-
+    serialPort.writeString("{'device' : 'matrix', 'clear': 'clear' }")
     val curIP = getCurrentIp()
     val mongoUrl = "localhost";
     val mongoClient = MongoClient(mongoUrl, 27017)
@@ -85,7 +85,6 @@ fun main(args: Array<String>) {
             cookie<SampleSession>("ROBO_COOKIE")
 //            header<SampleSession>("HTTP_ROBOPORTAL")
         }
-        //TODO Add sending matrix array when user starts working with led matrix
 
         routing {
             webSocket("/") {
@@ -128,7 +127,12 @@ fun main(args: Array<String>) {
                                     println("devices=$devices")
                                     val deviceCaps = arrayListOf("type", "name", "active")
                                     outgoing.send(Frame.Text(arrayListToJSON(devices, deviceCaps, "devices")))
-                                } else { //if received JSON from site
+                                } else if (text == "Need matrix"){
+                                    val arrString = matrixArrayToString(ledMatrixArray)
+//                                    println("Sending matrix $arrString")
+                                    outgoing.send(Frame.Text(arrString))
+                                }
+                                else { //if received JSON from site
                                     println("From user = $text")
                                     serialPort!!.writeString(text) //send data to Arduino
                                     if (text.contains(""""ledDot"""")) {

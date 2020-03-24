@@ -7,6 +7,14 @@ import com.google.gson.reflect.TypeToken
 import java.net.DatagramSocket
 import java.net.InetAddress
 
+fun matrixArrayToString(matrixArray: Array<String>): String{
+    var str = """{"device": "matrix", "matrixType": "all", "matrixArray": ["""
+    matrixArray.forEach { str +=  """"$it","""}
+    str = str.replaceRange(str.length-1, str.length, "]}")
+
+    return  str
+}
+
 fun arrayListToJSON(docs: ArrayList<Document>, caps: ArrayList<String>, typeStr: String): String {
     var strJSON = """{"type": "$typeStr", "$typeStr": ["""
 //    println("from function = $docs")
