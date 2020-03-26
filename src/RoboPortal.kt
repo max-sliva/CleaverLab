@@ -58,13 +58,13 @@ fun main(args: Array<String>) {
     rootLogger.level = Level.OFF
     var mySession: SampleSession
     var ledMatrixArray = arrayOf("000000","000000","000000","000000","000000","000000","000000","000000",
-                                  "000000","000000","000000","000000","000000","000000","000000","000000",
-                                  "000000","000000","000000","000000","000000","000000","000000","000000",
-                                  "000000","000000","000000","000000","000000","000000","000000","000000",
-                                  "000000","000000","000000","000000","000000","000000","000000","000000",
-                                  "000000","000000","000000","000000","000000","000000","000000","000000",
-                                  "000000","000000","000000","000000","000000","000000","000000","000000",
-                                  "000000","000000","000000","000000","000000","000000","000000","000000")
+                                              "000000","000000","000000","000000","000000","000000","000000","000000",
+                                              "000000","000000","000000","000000","000000","000000","000000","000000",
+                                              "000000","000000","000000","000000","000000","000000","000000","000000",
+                                              "000000","000000","000000","000000","000000","000000","000000","000000",
+                                              "000000","000000","000000","000000","000000","000000","000000","000000",
+                                              "000000","000000","000000","000000","000000","000000","000000","000000",
+                                              "000000","000000","000000","000000","000000","000000","000000","000000")
 
     val mongoDatabase = mongoClient.getDatabase("local")
     var userCollection = mongoDatabase.getCollection("user")
@@ -138,13 +138,18 @@ fun main(args: Array<String>) {
                                     if (text.contains(""""ledDot"""")) {
                                         val gson = Gson()
                                         val myObj = gson.fromJson(text, MatrixLed::class.java)
-                                        println("cellColor = ${myObj.cellColor1}")
+                                        println("cellColor = ${myObj.cellColor1} number = ${myObj.normalCurCellNumber}")
                                         ledMatrixArray[myObj.normalCurCellNumber] = myObj.cellColor1
-//                                        ledMatrixArray.forEach { print("$it ") }
-                                        if (webSockSessions.size>1)
+                                        ledMatrixArray.forEachIndexed {index, str ->
+                                            if (index % 7 != 0 || index == 0) print("$str ")
+                                            else println("$str ")
+                                        }
+                                        if (webSockSessions.size>1) {
+                                            println("Sending matrix to all users")
                                             webSockSessions.forEach { socket ->
-                                                if (socket!= thisSession) socket.send(Frame.Text(text))
+                                                if (socket != thisSession) socket.send(Frame.Text(text))
                                             }
+                                        }
                                     }
                                     if (text.contains("{'device' : 'matrix', 'clear': 'clear' }")){
                                         if (webSockSessions.size>1)
