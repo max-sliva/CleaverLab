@@ -1,0 +1,45 @@
+{"user": [
+{ 
+    "login" : "Admin", 
+    "fio" : "Слива М.В.", 
+    "status" : "Admin", 
+    "pass" : "d338b3f0f405eb5e51c8cc1e5ca66f02", 
+    "devices" : [
+        ""
+    ], 
+    "online" : true
+},
+{ 
+    "login" : "user", 
+    "fio" : "Some User", 
+    "status" : "User", 
+    "pass" : "", 
+    "devices" : [
+
+    ], 
+    "online" : false
+},
+{ 
+    "fio" : "Иванов Иван Иванович", 
+    "email" : "mail@mail.ru", 
+    "login" : "user2", 
+    "pass" : "bcbe3365e6ac95ea2c0343a2395834dd", 
+    "status" : "User", 
+    "online" : false, 
+    "devices" : [
+
+    ]
+},
+{ 
+    "fio" : "Иванов Иван Иванович3", 
+    "email" : "mail3@mail.ru", 
+    "login" : "user3", 
+    "pass" : "310dcbbf4cce62f762a2aaa148d556bd", 
+    "status" : "User", 
+    "online" : false, 
+    "devices" : [
+
+    ]
+}
+]
+}

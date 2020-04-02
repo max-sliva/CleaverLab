@@ -1,0 +1,18 @@
+{"device": [
+{ 
+    "type" : "RGB_Matrix_8x8", 
+    "name" : "RGB_Matrix_1", 
+    "active" : "true"
+},
+{
+    "type" : "DC_motor", 
+    "name" : "dc_motor_1", 
+    "active" : "true"
+},
+{ 
+    "type" : "ServoMotor", 
+    "name" : "Servo1", 
+    "active" : "true"
+}
+]
+}
