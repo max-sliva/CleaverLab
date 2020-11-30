@@ -35,16 +35,18 @@ fun main(){
 }
 
 
-fun setComPort(): SerialPort?{
+fun setComPort(par: Int=0): SerialPort?{
     var serialPort: SerialPort? = null
-    val portNames = SerialPortList.getPortNames() // получаем список портов
-    println("Available Serial ports: ")
-    var i=0
-    portNames.forEach { println("${i++}: $it") }
-    print("Input port number: ")
-    val portIndex = readLine()!!.toInt()
-    serialPort = SerialPort(portNames[portIndex])
-    println("Chosen port = $serialPort")
+//    if (par!=0) {
+        val portNames = SerialPortList.getPortNames() // получаем список портов
+        println("Available Serial ports: ")
+        var i = 0
+        portNames.forEach { println("${i++}: $it") }
+        print("Input port number: ")
+        val portIndex = readLine()!!.toInt()
+        serialPort = SerialPort(portNames[portIndex])
+        println("Chosen port = $serialPort")
+//    }
     return serialPort
 }
 

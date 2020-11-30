@@ -55,6 +55,7 @@ fun Application.module() {
 //    val mongoClient = MongoClient(mongoUrl, 27017)
     var loginActive = "default"
     var sendCount = 0;
+    var userData : JSONObject? = null
     //для отключения логгирования mongo
     val loggerContext: LoggerContext = LoggerFactory.getILoggerFactory() as LoggerContext
 //    val rootLogger = loggerContext.getLogger("org.mongodb.driver")
@@ -191,8 +192,8 @@ fun Application.module() {
 //                docs.clear()
 //                iter.into(docs);
 //                val findLogin = docs.filter { it["login"] == login }
-                val userData = fromFileToJSON("userData.json")
-                val userArray = JSONArray(" ${userData["user"]}")
+                userData = fromFileToJSON("userData.json")
+                val userArray = JSONArray(" ${userData!!["user"]}")
                 val findLogin = userArray.filter {
                     val jsonArObj = JSONObject("$it")
                     jsonArObj["login"] == login
@@ -231,10 +232,26 @@ fun Application.module() {
                 call.respondFile(File("resources/RoboPortal/index.html"))
             }
             post("/AddUser") {
+                val userArray = JSONArray(" ${userData?.get("user")}")
+                println("all users = $userArray")
                 val receivedParams = call.receiveParameters()
                 val login = receivedParams["login"]
                 var pass = receivedParams["pass"]
+                val email = receivedParams["email"]
+                var fio = receivedParams["fio"]
                 println("params=$receivedParams")
+                var jo =  JSONObject()
+                jo.put("login", login)
+                jo.put("fio", fio)
+                jo.put("email", email)
+                jo.put("pass", pass?.md5())
+                jo.put("status", "User")
+                jo.put("online", false)
+                userArray.put(jo)
+                println("all users = $userArray")
+                userData?.put("user", userArray)
+                println("new userData = $userData")
+                fromJSONtoFile(userData!!, "userData.json")
 //                var insertDocument = Document()
 //                receivedParams.forEach { s, list ->
 //                    println("   $s   ${list[0]}")

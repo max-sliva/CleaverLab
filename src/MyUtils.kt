@@ -1,7 +1,6 @@
 package com.example
 
 //import org.bson.Document
-import java.util.ArrayList
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.json.JSONArray
@@ -39,10 +38,13 @@ fun jsonToFile(){
 }
 
 fun fromFileToJSON(fileName: String): JSONObject {
-    var str =  File(fileName).readText(Charsets.UTF_8)
-//    println("file data = $str")
-    val jsonObj = JSONObject(str)
-    return jsonObj
+    val str =  File(fileName).readText(Charsets.UTF_8)
+    println("file data = $str")
+    return JSONObject(str)
+}
+
+fun fromJSONtoFile(jo: JSONObject, fileName: String){
+    File(fileName).writeText(jo.toString())
 }
 
 fun matrixArrayToString(matrixArray: Array<String>): String{
