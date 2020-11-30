@@ -33,9 +33,9 @@ fun main(){
 //    println("device = ${deviceJSON["device"]}")
 }
 
-fun jsonToFile(){
-
-}
+//fun jsonToFile(){
+//
+//}
 
 fun fromFileToJSON(fileName: String): JSONObject {
     val str =  File(fileName).readText(Charsets.UTF_8)
