@@ -1,0 +1,19 @@
+ #catPic {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    background: red;
+    top: 10px;
+    left: 10px;
+  }
+  
+  #dogPic {
+    /* background: blue; */
+    /* image: url('RaspberryPi_3B.png');
+    transform: scale(0.1, 0.1); */
+    position: absolute;
+    width: 50%;
+    height: 50%; 
+    top: 50px;
+    left: 50px;
+  }
