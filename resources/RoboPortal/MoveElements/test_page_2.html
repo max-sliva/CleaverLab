@@ -20,38 +20,69 @@
     <p>This page contains multiple inline SVGs to make sure they don't interact with one another.</p>
 
     <p>Here is the first</p>
-    <div id="svg-1" class="svg-wrapper"></div>
-    <div id="svg-2" class="svg-wrapper"></div>
+<!--    <div id="svg-1" class="svg-wrapper"></div>-->
+<!--    <div id="svg-2" class="svg-wrapper"></div>-->
     <div id="svg-3" class="svg-wrapper"></div>
-    <div id="svg-4" class="svg-wrapper"></div>
-    <div id="svg-5" class="svg-wrapper"></div>
+<!--    <div id="svg-4" class="svg-wrapper"></div>-->
+<!--    <div id="svg-5" class="svg-wrapper"></div>-->
+    <button onclick="check()"><input type="checkbox" id="check" /> Toggle image visibility</button>
+    <div><img src="RaspberryPi_3B.png" id="RasPi" style="position: absolute;  width: 15%; height: auto;"/></div>
+    <div><img src="iskra2.jpg" id="Ardu" style="position: absolute;  width: 10%; height: auto;"/></div>
 
     <script type="text/javascript">
         // Point example
-        (function() {
-            var svg = InteractiveSVG.create('svg-1', 200, 200);
-            svg.addPoint({ x: 50, y: 50 });
-            svg.addPoint(100, 80);
-            svg.addStaticPoint(100, 120);
-            svg.addPoint({ x: 150, y: 50, static: true });
-            svg.addPoint({ x: 50, y: 150, r: 10 });
-            svg.addPoint({ x: 150, y: 150, class: 'controllable-point' });
-        })();
+        // (function() {
+        //     var svg = InteractiveSVG.create('svg-1', 200, 200);
+        //     svg.addPoint({ x: 50, y: 50 });
+        //     svg.addPoint(100, 80);
+        //     svg.addStaticPoint(100, 120);
+        //     svg.addPoint({ x: 150, y: 50, static: true });
+        //     svg.addPoint({ x: 50, y: 150, r: 10 });
+        //     svg.addPoint({ x: 150, y: 150, class: 'controllable-point' });
+        // })();
 
         // Linked attributes example
-        (function() {
-            var svg = InteractiveSVG.create('svg-2', 200, 200);
-            var A = svg.addPoint(100, 180);
-            var B = svg.addPoint(10, 100);
-            var C = svg.addPoint(100, 100);
+        // (function() {
+        //     var svg = InteractiveSVG.create('svg-2', 200, 200);
+        //     var A = svg.addPoint(100, 180);
+        //     var B = svg.addPoint(10, 100);
+        //     var C = svg.addPoint(100, 100);
+        //
+        //     svg.linkAttributes(A, 'x', C, 'x');
+        //     svg.linkAttributes(B, 'y', C, 'y');
+        // })();
+        let rasPi = document.getElementById("RasPi");
+        let ardu = document.getElementById("Ardu");
+        rasPi.style.visibility = "hidden";
+        ardu.style.visibility = "hidden";
+        let moving = false;
+        rasPi.addEventListener("mousedown", initialClick, false);
+        ardu.addEventListener("mousedown", initialClick, false);
 
-            svg.linkAttributes(A, 'x', C, 'x');
-            svg.linkAttributes(B, 'y', C, 'y');
-        })();
+        function move(e) {
+            // var newX = e.clientX - 10;
+            // var newY = e.clientY - 10;
+            let newX = e.clientX - image.clientWidth / 2
+            let newY = e.clientY - image.clientHeight / 2;
+
+            image.style.left = newX + "px";
+            image.style.top = newY + "px";
+        }
+
+        function initialClick(e) {
+            if (moving) {
+                document.removeEventListener("mousemove", move);
+                moving = !moving;
+                return;
+            }
+            moving = !moving;
+            image = this;
+            document.addEventListener("mousemove", move, false);
+        }
 
         // Line example
         (function() {
-            var svg = InteractiveSVG.create('svg-3', 200, 200);
+            var svg = InteractiveSVG.create('svg-3', 500, 400);
             var A = svg.addPoint({ x: 40, y: 75 });
             var B = svg.addPoint({ x: 160, y: 75 });
             svg.addLine({p1: A, p2: B});
@@ -62,36 +93,50 @@
 
             svg.addPoint({ label: 'C', x: 100, y: 25 });
             svg.addLine([A, 'C', B])
+            let circle1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle1.setAttributeNS(null, 'cx', '10');
+            circle1.setAttributeNS(null, 'cy', '10');
+            circle1.setAttributeNS(null, 'r', '5');
+            circle1.setAttribute("stroke", "red");
+            circle1.setAttribute('id', 'circle1');
+            svg.addElement(circle1);
         })();
+        function check() {
+            let c = document.getElementById('check') ;
+            c.checked = (c.checked) ? false : true ;
+            (c.checked)? (rasPi.style.visibility = "visible"):(rasPi.style.visibility = "hidden");
+            (c.checked)? (ardu.style.visibility = "visible"):(ardu.style.visibility = "hidden");
+
+        }
 
         // Text example
-        (function() {
-            var svg = InteractiveSVG.create('svg-4', 200, 200);
-            var P = svg.addPoint({ x: 100, y: 40 });
-            var txt = svg.addText({ x: 100, y: 20, value: "100" });
-            svg.linkAttributes(txt, 'value', P, 'x');
-
-            var txt2 = svg.addText({ x: 100, y: 80, draggable: true, value: "Draggable" });
-            var txt3 = svg.addText({ x: 100, y: 120, scrubber: true, value: 5 });
-            var txt4 = svg.addText({ x: 100, y: 150, scrubber: true, value: 0, scrubberScale: 0.1 });
-
-            P = svg.addPoint({ x: 100, y: 160 });
-            svg.linkAttributes(txt3, 'value', P, 'x');
-            svg.linkAttributes(txt4, 'value', P, 'x');
-        })();
+        // (function() {
+        //     var svg = InteractiveSVG.create('svg-4', 200, 200);
+        //     var P = svg.addPoint({ x: 100, y: 40 });
+        //     var txt = svg.addText({ x: 100, y: 20, value: "100" });
+        //     svg.linkAttributes(txt, 'value', P, 'x');
+        //
+        //     var txt2 = svg.addText({ x: 100, y: 80, draggable: true, value: "Draggable" });
+        //     var txt3 = svg.addText({ x: 100, y: 120, scrubber: true, value: 5 });
+        //     var txt4 = svg.addText({ x: 100, y: 150, scrubber: true, value: 0, scrubberScale: 0.1 });
+        //
+        //     P = svg.addPoint({ x: 100, y: 160 });
+        //     svg.linkAttributes(txt3, 'value', P, 'x');
+        //     svg.linkAttributes(txt4, 'value', P, 'x');
+        // })();
 
         // Tspan example
-        (function() {
-            var svg = InteractiveSVG.create('svg-5', 200, 200);
-            var txt = svg.addText({ x: 10, y: 20, value: "Point: " });
-            var xCoord = txt.addChild({scrubber: true, value: 5 });
-            txt.addChild({ value: ", " });
-            var yCoord = txt.addChild({scrubber: true, value: 20 });
-
-            var P = svg.addPoint({ x: 100, y: 160 });
-            svg.linkAttributes(xCoord, 'value', P, 'x');
-            svg.linkAttributes(yCoord, 'value', P, 'y');
-        })();
+        // (function() {
+        //     var svg = InteractiveSVG.create('svg-5', 200, 200);
+        //     var txt = svg.addText({ x: 10, y: 20, value: "Point: " });
+        //     var xCoord = txt.addChild({scrubber: true, value: 5 });
+        //     txt.addChild({ value: ", " });
+        //     var yCoord = txt.addChild({scrubber: true, value: 20 });
+        //
+        //     var P = svg.addPoint({ x: 100, y: 160 });
+        //     svg.linkAttributes(xCoord, 'value', P, 'x');
+        //     svg.linkAttributes(yCoord, 'value', P, 'y');
+        // })();
     </script>
 </body>
 </html>
