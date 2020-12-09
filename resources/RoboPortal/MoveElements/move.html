@@ -5,23 +5,32 @@
     <title>Moving</title>
     <link rel="stylesheet" href="index.css">
     <script src="jquery.min.js"></script>
+    <script src="jquery-ui.js"></script>
+    <script>
+        $( function() {
+            $( "#Layer_1" ).draggable();
+        } );
+    </script>
 </head>
 
 <body>
-    <div><img src="RaspberryPi_3B.png" id="RasPi" style="position: absolute;  width: 15%; height: auto;" /></div>
-    <div><img src="iskra2.jpg" id="Ardu" style="position: absolute;  width: 10%; height: auto;" /></div></div>
+    <div><img src="RaspberryPi_3B.png" id="RasPi" style="position: absolute;  width: 15%; height: auto;"/></div>
+    <div><img src="iskra2.jpg" id="Ardu" style="position: absolute;  width: 10%; height: auto;"/></div>
+    </div>
     <script>
-        var rasPi = document.getElementById("RasPi");
-        var ardu = document.getElementById("Ardu");
-        var moving = false;
+        let rasPi = document.getElementById("RasPi");
+        let ardu = document.getElementById("Ardu");
+        rasPi.style.visibility = "hidden";
+        ardu.style.visibility = "hidden";
+        let moving = false;
         rasPi.addEventListener("mousedown", initialClick, false);
         ardu.addEventListener("mousedown", initialClick, false);
 
         function move(e) {
             // var newX = e.clientX - 10;
             // var newY = e.clientY - 10;
-            var newX = e.clientX - image.clientWidth/2
-            var newY = e.clientY - image.clientHeight/2;
+            let newX = e.clientX - image.clientWidth / 2
+            let newY = e.clientY - image.clientHeight / 2;
 
             image.style.left = newX + "px";
             image.style.top = newY + "px";
@@ -37,27 +46,59 @@
             image = this;
             document.addEventListener("mousemove", move, false);
         }
-        $(document).ready(function(){
-            $("#btn1").click(function(){
+
+        $(document).ready(function () {
+            $("#btn1").click(function () {
                 //   $("svg").append('<line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,0,0,1);stroke-width:2" />' );
                 console.log("done!");
 
-                var newLine = document.createElementNS('http://www.w3.org/2000/svg','line');
-                newLine.setAttribute('id','line2');
-                newLine.setAttribute('x1','0');
-                newLine.setAttribute('y1','0');
-                newLine.setAttribute('x2','300');
-                newLine.setAttribute('y2','300');
+                let newLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                newLine.setAttribute('id', 'line2');
+                newLine.setAttribute('x1', '10');
+                newLine.setAttribute('y1', '10');
+                newLine.setAttribute('x2', '300');
+                newLine.setAttribute('y2', '300');
+                newLine.setAttribute('id', 'line1');
                 newLine.setAttribute("stroke", "black")
-                $("svg").append(newLine);
+                $("#Layer_2").append(newLine);
 
+                let circle1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle1.setAttributeNS(null, 'cx', '10');
+                circle1.setAttributeNS(null, 'cy', '10');
+                circle1.setAttributeNS(null, 'r', '5');
+                circle1.setAttribute("stroke", "red");
+                newLine.setAttribute('id', 'circle1');
+                $("#Layer_1").append(circle1);
+
+                let circle2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle2.setAttributeNS(null, 'cx', '300');
+                circle2.setAttributeNS(null, 'cy', '300');
+                circle2.setAttributeNS(null, 'r', '5');
+                circle2.setAttribute("stroke", "red");
+                $("#Layer_3").append(circle2);
+                // var mouseX;
+                // var mouseY;
+                // window.onmousemove = handleMouseMove;
+                // function handleMouseMove(event) {
+                //     event = event || window.event;
+                //     document.getElementById('circle1').style.top=event.clientY + "px";
+                //     document.getElementById('circle1').style.left=event.clientX + "px";
+                // }
             });
         });
+        function check() {
+            let c = document.getElementById('check') ;
+            c.checked = (c.checked) ? false : true ;
+            (c.checked)? (rasPi.style.visibility = "visible"):(rasPi.style.visibility = "hidden");
+            (c.checked)? (ardu.style.visibility = "visible"):(ardu.style.visibility = "hidden");
+        }
     </script>
 
-    <svg  width="500" height="400">
-    </svg>
-    <button id="btn1">Append text</button>
-    </body>
+    <svg id="Layer_1" width="20" height="20"></svg>
+<!--    <svg id="Layer_2"></svg>-->
+<!--    <svg id="Layer_3" width="20" height="20"></svg>-->
+    <button id="btn1">Append line</button>
+    <button onclick="check()"><input type="checkbox" id="check" /> Toggle image visibility</button>
+</body>
 
 </html>

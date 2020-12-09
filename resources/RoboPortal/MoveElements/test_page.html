@@ -1,0 +1,284 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <title>Interactive SVGs</title>
+    <link rel="stylesheet" type="text/css" href="interactiveSVG.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="interactiveSVG.js"></script>
+
+    <style type="text/css">
+        .svg-wrapper {
+            display: inline-block;  
+        }
+    </style>
+
+</head>
+
+<body>
+    <h1>Test page</h1>
+    <p>This page contains multiple inline SVGs to make sure they don't interact with one another.</p>
+
+    <p>Here is the first</p>
+    <div id="svg0" class="svg-wrapper"></div>
+    <div id="svg1" class="svg-wrapper"></div>
+    <div id="svg2" class="svg-wrapper"></div>
+    <div id="svg3" class="svg-wrapper"></div>
+    <div id="svg4" class="svg-wrapper"></div>
+    <div id="svg5" class="svg-wrapper"></div>
+    <div id="svg6" class="svg-wrapper"></div>
+    <div id="svg7" class="svg-wrapper"></div>
+    <div id="svg8" class="svg-wrapper"></div>
+    <div id="svg9" class="svg-wrapper"></div>
+    <div id="svg10" class="svg-wrapper"></div>
+    <div id="svg11" class="svg-wrapper"></div>
+    <div id="svg12" class="svg-wrapper"></div>
+    <div id="svg13" class="svg-wrapper"></div>
+
+    <script type="text/javascript">
+        (function() {
+            var svg = InteractiveSVG.create('svg1', 400, 400);
+            
+            // Create circle for defining inversion
+            var staticCenter = svg.addStaticPoint({ x: 200, y: 200 });
+            svg.addCircle({ center: staticCenter, r: 100, static: true });
+
+            var A = svg.addPoint({ x: 200, y: 180 });
+            var B = svg.addPoint({ x: 220, y: 200 });            
+            var C = svg.addPoint({ x: 180, y: 200 });
+
+            // Create circle that depends on three points
+            var c = svg.addCircle({ center: {x: 200, y: 200}, r: 20, 'class': 'controllable-line' });
+            c.addDependency([A, B, C], defineCircleFromThreePoints);
+        })();
+
+        // Line-line intersection
+        (function() {
+            var canvas1 = InteractiveSVG.create('svg2', 240, 200);
+            var A = canvas1.addPoint({ x: 100, y: 150 });
+            var B = canvas1.addPoint({ x: 200, y: 50 });
+            var C = canvas1.addPoint({ x: 50, y: 25 });
+            var D = canvas1.addPoint({ x: 150, y: 160 });
+            var L1 = canvas1.addLine({ p1: A, p2: B });
+            var L2 = canvas1.addLine({ p1: C, p2: D });
+
+            // Make point E dependent on lines L1 and L2
+            canvas1.addPoint({
+                r: 4, static: true, class: 'generated-point'
+            }).addDependency(
+                [L1, L2],
+                function(L1, L2) {
+                    var intersection = lineLineIntersection(L1, L2);
+                    if (intersection) {
+                        L1.$element.attr("class", "line highlight-line");
+                        L2.$element.attr("class", "line highlight-line");
+                        return { cx: intersection.x, cy: intersection.y, visibility: 'visible' };
+                    } else {
+                        L1.$element.attr("class", "line controllable-line");
+                        L2.$element.attr("class", "line controllable-line");
+                        return { visibility: 'hidden' };
+                    }
+                }
+            );
+        })();
+
+        InteractiveSVG.createFromJSON({
+            id: 'svg4',
+            width: 300,
+            height: 200,
+            points: [
+                { label: "A", x: 100, y: 150 },
+                { label: "B", x: 200, y: 50 }
+            ],
+            lines: [
+                { p1: 'A', p2: 'B' },
+                { p1: {x: 50, y: 25}, p2: {x: 150, y: 160} }
+            ],
+            circles: [
+                { x: 125, y: 50, r: 30 }
+            ]
+        });
+
+// Point example
+(function() {
+    var svg = InteractiveSVG.create('svg0', 200, 200);
+    svg.addPoint({ x: 50, y: 50 });
+    svg.addPoint(100, 80);
+    svg.addStaticPoint(100, 120);
+    svg.addPoint({ x: 150, y: 50, static: true });
+    svg.addPoint({ x: 50, y: 150, r: 10 });
+    svg.addPoint({ x: 150, y: 150, class: 'controllable-point' });
+})();
+
+(function() {
+    var svg = InteractiveSVG.create('svg5', 200, 200);
+    var A = svg.addPoint({ x: 80, y: 100 });
+    svg.addPoint({ label: 'B', x: 120, y: 100 });
+    A.update({r: 20});
+    svg.elements.B.$element.addClass("highlight-point");
+})();
+
+// Line example
+(function() {
+    var svg = InteractiveSVG.create('svg6', 200, 200);
+    var A = svg.addPoint({ x: 40, y: 75 });
+    var B = svg.addPoint({ x: 160, y: 75 });
+    svg.addLine({p1: A, p2: B});
+
+    svg.addLine({p1: A, p2: {x: 40, y: 160}});
+    svg.addLine({x1: 160, y1: 160, p2: B});
+    svg.addLine({x1: 30, y1: 175, x2: 170, y2: 175});
+
+    svg.addPoint({ label: 'C', x: 100, y: 25 });
+    svg.addLine([A, 'C', B])
+})();
+
+// Circle example
+(function() {
+    var svg = InteractiveSVG.create('svg6', 200, 200);
+    var A = svg.addPoint({ x: 50, y: 50 });
+    var B = svg.addPoint({ x: 80, y: 50 });
+    svg.addCircle({ center: A, r: B });
+    svg.addCircle({ center: {x: 150, y: 50}, r: 30 });
+    svg.addCircle({ cx: 50, cy: 150, r: 30 });
+    svg.addPoint({ label: 'C', x: 120, y: 150 });
+    svg.addCircle({ cx: 150, cy: 150, r: 'C' });
+})();
+
+// Bezier example
+(function() {
+    var svg = InteractiveSVG.create('svg3', 240, 200);
+    var A = svg.addPoint({ x: 40, y: 160 });
+    svg.addPoint({ label: 'B', x: 120, y: 25 });
+    svg.addBezier({ p1: A, p2: 'B', p3: { x: 200, y: 160 } });
+    svg.addBezier([A, {x: 25, y: 50}, {x: 175, y: 100}, 'B' ]);
+})();
+
+// Bezier example
+(function() {
+    var svg = InteractiveSVG.create('svg9', 240, 200);
+    var A = svg.addPoint({ x: 40, y: 50 });
+    var B = svg.addPoint({ x: 80, y: 150 });
+    var C = svg.addPoint({ x: 120, y: 50 });
+    var D = svg.addPoint({ x: 160, y: 150 });
+    svg.addBezier([A, B, C, D], { showHandles: true });
+})();
+
+// Line circle intersections
+(function() {
+    var svg = InteractiveSVG.create('svg6', 200, 200);
+    var A = svg.addPoint({ x: 40, y: 50 });
+    var B = svg.addPoint({ x: 160, y: 50 });
+    var C = svg.addPoint({ x: 100, y: 120 });
+    svg.addLine({p1: A, p2: B});
+    var circle = svg.addCircle({center: C, r: 60});
+
+    var I1 = svg.addStaticPoint({ x: 100, y: 120, visibility: 'hidden', r: 4, class: 'point generated-point'});
+    var I2 = svg.addStaticPoint({ x: 100, y: 120, visibility: 'hidden', r: 4, class: 'point generated-point'});
+
+    var circleLineIntersection = function() {
+        var dx = A.x - B.x;
+        var dy = A.y - B.y;
+        var dx2 = B.x - C.x;
+        var dy2 = B.y - C.y;
+
+        var a = dx * dx + dy * dy;
+        var b = dx * dx2 + dy * dy2;
+        var c = dx2 * dx2 + dy2 * dy2 - circle.r * circle.r;
+
+        var discriminant = b * b - a * c;
+
+        if (discriminant > 0) {
+            discriminant = Math.sqrt(discriminant);
+            
+            var t = (-b - discriminant) / a;
+            if (t >= 0 && t <= 1) {
+                var x = B.x + t * dx;
+                var y = B.y + t * dy;
+                I1.update({cx: x, cy: y, visibility: 'visble'});
+            } else {
+                I1.update({visibility: 'hidden'});
+            }
+
+            var t = (-b + discriminant) / a;
+            if (t >= 0 && t <= 1) {
+                var x = B.x + t * dx;
+                var y = B.y + t * dy;
+                I2.update({cx: x, cy: y, visibility: 'visble'});
+            } else {
+                I2.update({visibility: 'hidden'});
+            }
+        } else {
+            I1.update({visibility: 'hidden'});
+            I2.update({visibility: 'hidden'});
+        }
+    };
+
+    A.dependents.push(circleLineIntersection);
+    B.dependents.push(circleLineIntersection);
+    C.dependents.push(circleLineIntersection);
+})();
+
+// Midpoints
+(function() {
+    var svg = InteractiveSVG.create('svg10', 200, 200);
+    var A = svg.addPoint({ x: 100, y: 20 });
+    var B = svg.addPoint({ x: 160, y: 20 });
+    var C = svg.addPoint({ x: 150, y: 140 });
+    var D = svg.addPoint({ x: 20, y: 180 });
+    svg.addLine([A, B, C, D, A]);
+
+    var m1 = svg.addMidPoint(A, B);
+    var m2 = svg.addMidPoint(B, C);
+    var m3 = svg.addMidPoint(C, D);
+    var m4 = svg.addMidPoint(D, A);
+    svg.addLine([m1, m2, m3, m4, m1]);
+})();
+
+// Dependency example
+(function() {
+    var svg = InteractiveSVG.create('svg11', 200, 200);
+    var A = svg.addPoint({ x: 100, y: 20 });
+    var B = svg.addPoint({ x: 160, y: 160 });
+    svg.addStaticPoint({
+        x: 160, y: 20, class: 'generated-point'
+    }).addDependency(
+        [A, B],
+        function(A, B) {
+            return { cx: A.x, cy: B.y };
+        }
+    );
+})();
+
+// Text example
+(function() {
+    var svg = InteractiveSVG.create('svg12', 200, 200);
+    var P = svg.addPoint({ x: 100, y: 40 });
+    svg.addText({
+        x: 100, y: 20, value: "100"
+    }).addDependency(
+        // Make the value of the text depend on the position of the point
+        P, function(P) {
+            return { value: P.x };
+        }
+    );
+
+    svg.addText({
+        x: 100, y: 40, dynamicValue: [P, 'x']
+    });
+})();
+
+// Linked attributes example
+(function() {
+    var svg = InteractiveSVG.create('svg13', 200, 200);
+    var A = svg.addPoint(100, 20);
+    var B = svg.addPoint(160, 160);
+    var C = svg.addPoint(10, 10);
+
+    svg.linkAttributes(A, 'x', C, 'x');
+    svg.linkAttributes(B, 'y', C, 'y');
+})();
+
+    </script>
+</body>
+</html>

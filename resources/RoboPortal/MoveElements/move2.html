@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $( function() {
+            $( "#Layer_1" ).draggable();
+        } );
+    </script>
+</head>
+
+<body>
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" style="enable-background:new 0 0 500 500;" xml:space="preserve">
+		<polygon class="st0" points=" 0,5 10,0 20,5 10,10" stroke="none" fill="red"/>
+	</svg>
+<button id="btn1">Append line</button>
+<button onclick="check()"><input type="checkbox" id="check" /> Toggle image visibility</button>
+
+</body>
+</html>
