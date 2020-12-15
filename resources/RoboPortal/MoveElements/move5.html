@@ -16,6 +16,7 @@
 <body>
    <div id="container"></div>  <!-- контейнер для объектов Konva-->
     <script>
+        var conStart = null;
         var width = window.innerWidth;
         var height = window.innerHeight;
         var stage = new Konva.Stage({
@@ -32,7 +33,7 @@
         });
         layer.add(line);
         stage.add(layer);
-        var group = new Konva.Group({ //группа для объектов Konva
+        var group = new Konva.Group({ //группа для объектов Konva, чтоб двигать все объекты
             x: 20,
             y: 0,
             draggable: true,
@@ -69,13 +70,13 @@
 
         var raspiImg = new Image();
         var usbPorts = [];
+        let portNum = -1;
         raspiImg.onload = function () {
             const img = drawImage(this);
             group.add(img);
             // objTargets.push(group);
-
             for (var i = 0; i < 4; i++) {
-                let box = new Konva.Rect({
+                let box = new Konva.Rect({ //рамка вокруг надписи
                     x: img.width() - 25,
                     y: img.y() + 5 + (i) * 20,
                     width: 40,
@@ -86,16 +87,24 @@
                     strokeWidth: 2,
                 });
                 group.add(box);
-                usbPorts.push(box);
-                var usb = new Konva.Text({
+                var usb = new Konva.Text({ //надписи USB
                     text: 'USB'+i,
                     x: img.width() - 24,
                     y: img.y() + 6 + (i)*20,
                     fontSize: 14,
-                    // draggable: true,
                     width: 200,
-                    // drawBorder: true,
                 });
+                usbPorts.push(usb);
+                usb.on('mousedown', function () {
+                    conStart = this;
+                    console.log('selected ',conStart.text());
+                    portNum = usbPorts.indexOf(conStart);
+                    console.log("i = ", portNum);
+                    // line.points([group.x()+objTargets[0].width()+20, group.y()+(portNum*box.height())+(portNum+1)*(box.height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
+                    line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
+                    layer.batchDraw();
+                });
+
                 group.add(usb);
             }
             // group.add(usb);
@@ -116,11 +125,27 @@
         arduImg.src = 'iskra2.jpg';
 
         function updateLine() {
-            console.log("raspiImage x = ", group.x(), " arduImage x = ", arduImg.x);
+            // console.log("raspiImage x = ", group.x(), " arduImage x = ", arduImg.x);
             // line.points([objTargets[0].x()+objTargets[0].width(), objTargets[0].y()+objTargets[0].height()/2, objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
-            line.points([group.x()+objTargets[0].width()+20, group.y()+usbPorts[0].height()/2, objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
+            // line.points([group.x()+objTargets[0].width()+20, group.y()+usbPorts[0].height()/2, objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
+            if (portNum != -1) line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
             layer.batchDraw();
         }
+        var container = stage.container();
+        container.tabIndex = 1;// make it focusable
+        // focus it
+        // also stage will be in focus on its click
+        container.focus();
+        const DELTA = 4;
+        container.addEventListener('keydown', function (e) {
+            if (e.keyCode === 27) {
+                console.log('ESC pressed')
+            }  else {
+                return;
+            }
+            e.preventDefault();
+            layer.batchDraw();
+        });
     </script>
 
 </body>
