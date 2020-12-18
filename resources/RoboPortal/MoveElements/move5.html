@@ -15,23 +15,24 @@
 </head>
 <body>
    <div id="container"></div>  <!-- контейнер для объектов Konva-->
-    <script>
+   <script>
         var conStart = null;
         var width = window.innerWidth;
-        var height = window.innerHeight;
+        var height = window.innerHeight-100;
         var stage = new Konva.Stage({
             container: 'container',
             width: width,
             height: height,
         });
         var layer = new Konva.Layer();
+
         var objTargets = [];
         var line = new Konva.Line({
             points: [0, 0, 0, 0],
             stroke: 'green',
             strokeWidth: 2,
         });
-        layer.add(line);
+        // layer.add(line);
         stage.add(layer);
         var group = new Konva.Group({ //группа для объектов Konva, чтоб двигать все объекты
             x: 20,
@@ -49,10 +50,35 @@
                 height: 137,
                 // draggable: true,
             });
-            if (i==1) {
+            if (i>0) {
                 img.setDraggable(true);
                 console.log("2nd image");
+                img.on('click', function(){ //для добавления красной рамки ардуино
+                    const box1=stage.find('.redBox');
+                    // console.log("box = ", box);
+                    box1.destroy();
+                    let box = new Konva.Rect({
+                        name: "redBox",
+                        x: img.x(),
+                        y: img.y(),
+                        width: img.width()+1,
+                        height: img.height()+1,
+                        // fill: 'white',
+                        stroke: 'red',
+                        strokeWidth: 2,
+                    });
+                    console.log("click! x=",img.x(), "i=",i);
+                    layer.add(box);
+                });
+            } else {
+                img.on('click', function (){ //для удаления красной рамки ардуино
+                    console.log("raspi click!");
+                    const box=stage.find('.redBox');
+                    // console.log("box = ", box);
+                    box.destroy();
+                });
             }
+
             i++;
             // add cursor styling
             img.on('mouseover', function () {
@@ -61,7 +87,6 @@
             img.on('mouseout', function () {
                 document.body.style.cursor = 'default';
             });
-
             layer.add(img);
             stage.add(layer);
             objTargets.push(img);
@@ -95,14 +120,21 @@
                     width: 200,
                 });
                 usbPorts.push(usb);
-                usb.on('mousedown', function () {
+                usb.on('click', function () {
                     conStart = this;
                     console.log('selected ',conStart.text());
                     portNum = usbPorts.indexOf(conStart);
                     console.log("i = ", portNum);
                     // line.points([group.x()+objTargets[0].width()+20, group.y()+(portNum*box.height())+(portNum+1)*(box.height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
-                    line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
-                    layer.batchDraw();
+                    let box2=layer.find('.redBox');
+                    // console.log("box=", box2[0].name());
+                    if  (box2[0]!==undefined)  {
+                        // line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
+                        line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2]);
+                        //TODO сделать добавление линии в массив и изменение текущей линии
+                        layer.add(line);
+                        layer.batchDraw();
+                    }
                 });
 
                 group.add(usb);
@@ -124,7 +156,7 @@
         };
         arduImg.src = 'iskra2.jpg';
 
-        function updateLine() {
+        function updateLine() { //обновление положения концов линии
             // console.log("raspiImage x = ", group.x(), " arduImage x = ", arduImg.x);
             // line.points([objTargets[0].x()+objTargets[0].width(), objTargets[0].y()+objTargets[0].height()/2, objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
             // line.points([group.x()+objTargets[0].width()+20, group.y()+usbPorts[0].height()/2, objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
@@ -146,7 +178,13 @@
             e.preventDefault();
             layer.batchDraw();
         });
+        function addArdu(){
+            drawImage(arduImg);
+        }
     </script>
+   <button id="btn1" onclick="addArdu()">Add Arduino</button>
+   <button onclick="check()"><input type="checkbox" id="check" /> Toggle image visibility</button>
 
+<!--TODO сделать сохранение в JSON https://konvajs.org/docs/data_and_serialization/Serialize_a_Stage.html и передать в БД-->
 </body>
 </html>
