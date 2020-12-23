@@ -40,6 +40,7 @@
             draggable: true,
         });
         let i = 0;
+        let objMap = new Map();
         function drawImage(imageObj) { //создание Konva.Image с нужным изображением
             // darth vader
             var img = new Konva.Image({
@@ -128,11 +129,18 @@
                     // line.points([group.x()+objTargets[0].width()+20, group.y()+(portNum*box.height())+(portNum+1)*(box.height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
                     let box2=layer.find('.redBox');
                     // console.log("box=", box2[0].name());
-                    if  (box2[0]!==undefined)  {
+                    if  (box2[0]!==undefined && !objMap.has(box2[0]))  {
                         // line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
-                        line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2]);
+                        // line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2]);
                         //TODO сделать добавление линии в массив и изменение текущей линии
-                        layer.add(line);
+                        // layer.add(line);
+                        let newLine = new Konva.Line({
+                            points: [group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2],
+                            stroke: 'green',
+                            strokeWidth: 2,
+                        });
+                        objMap.set(box2[0], newLine);
+                        layer.add(newLine);
                         layer.batchDraw();
                     }
                 });
@@ -160,7 +168,11 @@
             // console.log("raspiImage x = ", group.x(), " arduImage x = ", arduImg.x);
             // line.points([objTargets[0].x()+objTargets[0].width(), objTargets[0].y()+objTargets[0].height()/2, objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
             // line.points([group.x()+objTargets[0].width()+20, group.y()+usbPorts[0].height()/2, objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
-            if (portNum != -1) line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
+            // if (portNum != -1) line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
+            for (let obj of objMap.keys()) {
+                console.log('obj = ', obj);
+            }
+            console.log('objMap.size = ', objMap.size);
             layer.batchDraw();
         }
         var container = stage.container();
