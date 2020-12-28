@@ -27,11 +27,11 @@
         var layer = new Konva.Layer();
 
         var objTargets = [];
-        var line = new Konva.Line({
-            points: [0, 0, 0, 0],
-            stroke: 'green',
-            strokeWidth: 2,
-        });
+        // var line = new Konva.Line({
+        //     points: [0, 0, 0, 0],
+        //     stroke: 'green',
+        //     strokeWidth: 2,
+        // });
         // layer.add(line);
         stage.add(layer);
         var group = new Konva.Group({ //группа для объектов Konva, чтоб двигать все объекты
@@ -41,6 +41,8 @@
         });
         let i = 0;
         let objMap = new Map();
+        let connMap = new Map();
+        let curImage = null;
         function drawImage(imageObj) { //создание Konva.Image с нужным изображением
             // darth vader
             var img = new Konva.Image({
@@ -68,7 +70,8 @@
                         stroke: 'red',
                         strokeWidth: 2,
                     });
-                    console.log("click! x=",img.x(), "i=",i);
+                    curImage = img;
+                    console.log("click! x=",curImage.x(), "i=",i);
                     layer.add(box);
                 });
             } else {
@@ -91,6 +94,7 @@
             layer.add(img);
             stage.add(layer);
             objTargets.push(img);
+            img.on('dragmove', updateLine);
             return img;
         }
 
@@ -129,22 +133,33 @@
                     // line.points([group.x()+objTargets[0].width()+20, group.y()+(portNum*box.height())+(portNum+1)*(box.height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
                     let box2=layer.find('.redBox');
                     // console.log("box=", box2[0].name());
-                    if  (box2[0]!==undefined && !objMap.has(box2[0]))  {
-                        // line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
-                        // line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2]);
-                        //TODO сделать добавление линии в массив и изменение текущей линии
-                        // layer.add(line);
+                    let usbAr = connMap.values();
+                    // console.log('!usb in map = ',usbAr);
+                    let usbInUse = false;
+                    for (let value of usbAr) {
+                        // console.log("usb = ",value);
+                        if (value == portNum) usbInUse = true;
+                    }
+                    console.log('usbInUse = ', usbInUse);
+                    if  (box2[0]!==undefined && !objMap.has(box2[0]) && !usbInUse)  {
                         let newLine = new Konva.Line({
                             points: [group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2],
                             stroke: 'green',
                             strokeWidth: 2,
                         });
-                        objMap.set(box2[0], newLine);
+                        if (objMap.get(curImage)!=null){
+                            let tempLine = objMap.get(curImage);
+                            tempLine.destroy()
+                            layer.draw();
+                            stage.add(layer);
+                            console.log("!!2 lines!!")
+                        }
+                        objMap.set(curImage, newLine);
+                        connMap.set(curImage, portNum);
                         layer.add(newLine);
                         layer.batchDraw();
                     }
                 });
-
                 group.add(usb);
             }
             // group.add(usb);
@@ -155,8 +170,8 @@
         var arduImg = new Image();
         arduImg.onload = function () {
             drawImage(this);
-            layer.add(line);
-            stage.add(layer);
+            // layer.add(line);
+            // stage.add(layer);
             objTargets.forEach((target) => {
                 target.on('dragmove', updateLine);
             });
@@ -166,13 +181,18 @@
 
         function updateLine() { //обновление положения концов линии
             // console.log("raspiImage x = ", group.x(), " arduImage x = ", arduImg.x);
-            // line.points([objTargets[0].x()+objTargets[0].width(), objTargets[0].y()+objTargets[0].height()/2, objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
-            // line.points([group.x()+objTargets[0].width()+20, group.y()+usbPorts[0].height()/2, objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
             // if (portNum != -1) line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
-            for (let obj of objMap.keys()) {
-                console.log('obj = ', obj);
+            for (let obj of objMap.keys()) { //цикл по всем объектам мапа
+                // console.log('obj = ', obj);
+                let tempLine = objMap.get(obj);
+                let portNum = connMap.get(obj);
+                const x1 = group.x()+objTargets[0].width()+20;
+                const y1 = 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2);
+                const x2 = obj.x();
+                const y2 = obj.y()+obj.height()/2;
+                tempLine.points([x1, y1, x2, y2]);
             }
-            console.log('objMap.size = ', objMap.size);
+            // console.log('objMap.size = ', objMap.size);
             layer.batchDraw();
         }
         var container = stage.container();
@@ -198,5 +218,6 @@
    <button onclick="check()"><input type="checkbox" id="check" /> Toggle image visibility</button>
 
 <!--TODO сделать сохранение в JSON https://konvajs.org/docs/data_and_serialization/Serialize_a_Stage.html и передать в БД-->
+<!--TODO сделать добавление устройств-->
 </body>
 </html>
