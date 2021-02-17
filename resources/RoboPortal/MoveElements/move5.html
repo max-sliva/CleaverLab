@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
     <script src="konva.min.js"></script>
     <meta charset="utf-8"/>
-    <title>Konva Drag and Drop an Image Demo</title>
+    <title>Raspberry and Arduino connection</title>
     <style>
         body {
             margin: 0;
@@ -125,15 +125,15 @@
                     width: 200,
                 });
                 usbPorts.push(usb);
-                usb.on('click', function () {
+                usb.on('click', function () { //при клике на юсб-порт
                     conStart = this;
                     console.log('selected ',conStart.text());
-                    portNum = usbPorts.indexOf(conStart);
+                    portNum = usbPorts.indexOf(conStart); //получаем номер порта в массиве
                     console.log("i = ", portNum);
                     // line.points([group.x()+objTargets[0].width()+20, group.y()+(portNum*box.height())+(portNum+1)*(box.height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
-                    let box2=layer.find('.redBox');
+                    let box2=layer.find('.redBox'); //находим объект с красной рамкой
                     // console.log("box=", box2[0].name());
-                    let usbAr = connMap.values();
+                    let usbAr = connMap.values(); //массив из мапов
                     // console.log('!usb in map = ',usbAr);
                     let usbInUse = false;
                     for (let value of usbAr) {
@@ -142,8 +142,9 @@
                     }
                     console.log('usbInUse = ', usbInUse);
                     if  (box2[0]!==undefined && !objMap.has(box2[0]) && !usbInUse)  {
-                        let newLine = new Konva.Line({
-                            points: [group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2],
+                        let newLine = new Konva.Line({ //создаем новую линию от малины до ардуины
+                            // points: [group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2],
+                            points: [group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+40],
                             stroke: 'green',
                             strokeWidth: 2,
                         });
@@ -189,7 +190,8 @@
                 const x1 = group.x()+objTargets[0].width()+20;
                 const y1 = 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2);
                 const x2 = obj.x();
-                const y2 = obj.y()+obj.height()/2;
+                // const y2 = obj.y()+obj.height()/2;
+                const y2 = obj.y()+40;
                 tempLine.points([x1, y1, x2, y2]);
             }
             // console.log('objMap.size = ', objMap.size);
@@ -213,11 +215,24 @@
         function addArdu(){
             drawImage(arduImg);
         }
+        function addDevice(){
+            let device = document.getElementById("devices")
+            console.log("device = ",device.value)
+            let deviceImg = new Image()
+            deviceImg.src = ""+device.value+".jpg"
+            drawImage(deviceImg) //сделать отдельную функцию для девайсов
+            //TODO сделать добавление картинки устройства
+        }
     </script>
-   <button id="btn1" onclick="addArdu()">Add Arduino</button>
-   <button onclick="check()"><input type="checkbox" id="check" /> Toggle image visibility</button>
+   <button id="btn1" onclick="addArdu()">Add Arduino</button> </br>
+<!--   <button onclick="check()"><input type="checkbox" id="check" /> Toggle image visibility</button>-->
+   <select name="devices" id="devices">
+       <option value="dc_motor">DC motor</option>
+       <option value="servo">Servo motor</option>
+       <option value="rgb_matrix">RGB matrix</option>
+   </select>
+   <button id="btn2" onclick="addDevice()">Add device</button>
+   <!--TODO сделать сохранение в JSON https://konvajs.org/docs/data_and_serialization/Serialize_a_Stage.html и передать в БД-->
 
-<!--TODO сделать сохранение в JSON https://konvajs.org/docs/data_and_serialization/Serialize_a_Stage.html и передать в БД-->
-<!--TODO сделать добавление устройств-->
 </body>
 </html>
