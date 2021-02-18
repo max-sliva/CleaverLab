@@ -43,8 +43,20 @@
         let objMap = new Map();
         let connMap = new Map();
         let curImage = null;
+        function drawDevice(imageObj){
+            var img = new Konva.Image({
+                image: imageObj,
+                x: i*220+20,
+                y: 0,
+                // width: 100,
+                // height: 137,
+                draggable: true,
+            });
+            layer.add(img);
+            stage.add(layer);
+        }
+
         function drawImage(imageObj) { //создание Konva.Image с нужным изображением
-            // darth vader
             var img = new Konva.Image({
                 image: imageObj,
                 x: i*220+20,
@@ -101,11 +113,11 @@
         var raspiImg = new Image();
         var usbPorts = [];
         let portNum = -1;
-        raspiImg.onload = function () {
-            const img = drawImage(this);
-            group.add(img);
+        raspiImg.onload = function () { //вызывается при загрузке изображения малины
+            const img = drawImage(this); //добавляем на канвас
+            group.add(img); //добавляем в группу
             // objTargets.push(group);
-            for (var i = 0; i < 4; i++) {
+            for (var i = 0; i < 4; i++) { //цикл для юсб-портов
                 let box = new Konva.Rect({ //рамка вокруг надписи
                     x: img.width() - 25,
                     y: img.y() + 5 + (i) * 20,
@@ -219,8 +231,11 @@
             let device = document.getElementById("devices")
             console.log("device = ",device.value)
             let deviceImg = new Image()
+            deviceImg.onload = function () {
+                drawDevice(this);
+            }
             deviceImg.src = ""+device.value+".jpg"
-            drawImage(deviceImg) //сделать отдельную функцию для девайсов
+            //drawDevice(deviceImg) //сделать отдельную функцию для девайсов
             //TODO сделать добавление картинки устройства
         }
     </script>
