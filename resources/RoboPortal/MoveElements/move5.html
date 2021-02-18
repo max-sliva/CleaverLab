@@ -52,6 +52,26 @@
                 // height: 137,
                 draggable: true,
             });
+            img.on('click', function(){ //для добавления красной рамки ардуино
+                const box1=stage.find('.redBox'); //находим предудущую красную рамку
+                // console.log("box = ", box);
+                box1.destroy();  //убираем ее
+                let box = new Konva.Rect({  //новая красная рамка у текущего объекта
+                    name: "blueBox",
+                    x: img.x(),
+                    y: img.y(),
+                    width: img.width()+1,
+                    height: img.height()+1,
+                    // fill: 'white',
+                    stroke: 'blue',
+                    strokeWidth: 2,
+                });
+                // group.add(box);
+                curImage = img;
+                console.log("click! x=",curImage.x(), "i=",i);
+                layer.add(box);
+            });
+
             layer.add(img);
             stage.add(layer);
         }
@@ -65,14 +85,14 @@
                 height: 137,
                 // draggable: true,
             });
-            if (i>0) {
+            if (i>0) { //если выбрали ардуино
                 img.setDraggable(true);
                 console.log("2nd image");
                 img.on('click', function(){ //для добавления красной рамки ардуино
-                    const box1=stage.find('.redBox');
+                    const box1=stage.find('.redBox'); //находим предудущую красную рамку
                     // console.log("box = ", box);
-                    box1.destroy();
-                    let box = new Konva.Rect({
+                    box1.destroy();  //убираем ее
+                    let box = new Konva.Rect({  //новая красная рамка у текущего объекта
                         name: "redBox",
                         x: img.x(),
                         y: img.y(),
@@ -82,11 +102,12 @@
                         stroke: 'red',
                         strokeWidth: 2,
                     });
+                    // group.add(box);
                     curImage = img;
                     console.log("click! x=",curImage.x(), "i=",i);
                     layer.add(box);
                 });
-            } else {
+            } else { //если выбрали малину
                 img.on('click', function (){ //для удаления красной рамки ардуино
                     console.log("raspi click!");
                     const box=stage.find('.redBox');
@@ -96,7 +117,6 @@
             }
 
             i++;
-            // add cursor styling
             img.on('mouseover', function () {
                 document.body.style.cursor = 'pointer';
             });
@@ -148,11 +168,12 @@
                     let usbAr = connMap.values(); //массив из мапов
                     // console.log('!usb in map = ',usbAr);
                     let usbInUse = false;
-                    for (let value of usbAr) {
+                    for (let value of usbAr) { //цикл по массиву юсб
                         // console.log("usb = ",value);
-                        if (value == portNum) usbInUse = true;
+                        if (value == portNum) usbInUse = true; //если выбранный порт уже занят
                     }
                     console.log('usbInUse = ', usbInUse);
+                    //условие для корректной отрисовки линии от малины до ардуино
                     if  (box2[0]!==undefined && !objMap.has(box2[0]) && !usbInUse)  {
                         let newLine = new Konva.Line({ //создаем новую линию от малины до ардуины
                             // points: [group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2],
@@ -160,15 +181,15 @@
                             stroke: 'green',
                             strokeWidth: 2,
                         });
-                        if (objMap.get(curImage)!=null){
-                            let tempLine = objMap.get(curImage);
-                            tempLine.destroy()
+                        if (objMap.get(curImage)!=null){ //если текущая картинка уже соединена с малиной
+                            let tempLine = objMap.get(curImage); //находим соединительную линию
+                            tempLine.destroy() //удаляем ее
                             layer.draw();
                             stage.add(layer);
                             console.log("!!2 lines!!")
                         }
-                        objMap.set(curImage, newLine);
-                        connMap.set(curImage, portNum);
+                        objMap.set(curImage, newLine); //добавляем набор картинка-линия
+                        connMap.set(curImage, portNum); //добавляем набор картинка-порт
                         layer.add(newLine);
                         layer.batchDraw();
                     }
@@ -185,7 +206,7 @@
             drawImage(this);
             // layer.add(line);
             // stage.add(layer);
-            objTargets.forEach((target) => {
+            objTargets.forEach((target) => { //цикл для обновления линий
                 target.on('dragmove', updateLine);
             });
             group.on('dragmove', updateLine);
@@ -211,8 +232,6 @@
         }
         var container = stage.container();
         container.tabIndex = 1;// make it focusable
-        // focus it
-        // also stage will be in focus on its click
         container.focus();
         const DELTA = 4;
         container.addEventListener('keydown', function (e) {
@@ -236,7 +255,7 @@
             }
             deviceImg.src = ""+device.value+".jpg"
             //drawDevice(deviceImg) //сделать отдельную функцию для девайсов
-            //TODO сделать добавление картинки устройства
+            //TODO сделать соединение устройства с ардуино
         }
     </script>
    <button id="btn1" onclick="addArdu()">Add Arduino</button> </br>
