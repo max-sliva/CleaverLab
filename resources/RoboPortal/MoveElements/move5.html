@@ -93,7 +93,7 @@
                 console.log("click! x=",img.x(), "i=",i);
                 layer.add(box);
             });
-
+            objTargets.push(img);
             layer.add(img);
             stage.add(layer);
         }
@@ -262,12 +262,12 @@
             for (let obj of objMap2.keys()) { //цикл по всем объектам мапа
                 // console.log('obj = ', obj);
                 let tempLine = objMap2.get(obj);
-                let deviceObj = connMap2.get(obj);
-                const x1 = group.x()+objTargets[0].width()+20;
-                const y1 = 5+group.y()+(deviceObj*usbPorts[0].height())+(deviceObj+1)*(usbPorts[0].height()/2);
+                let arduObj = connMap2.get(obj);
+                const x1 = arduObj.x()+arduObj.width();
+                const y1 = arduObj.y()+arduObj.height()/2;
                 const x2 = obj.x();
                 // const y2 = obj.y()+obj.height()/2;
-                const y2 = obj.y()+40;
+                const y2 = obj.y()+obj.height()/2;
                 tempLine.points([x1, y1, x2, y2]);
             }
             // console.log('objMap.size = ', objMap.size);
@@ -301,8 +301,6 @@
                 });
             }
             deviceImg.src = ""+device.value+".jpg"
-            //drawDevice(deviceImg) //сделать отдельную функцию для девайсов
-            //TODO сделать соединение устройства с ардуино
         }
     </script>
    <button id="btn1" onclick="addArdu()">Add Arduino</button> </br>
