@@ -42,8 +42,11 @@
         let i = 0;
         let objMap = new Map();
         let connMap = new Map();
+        let objMap2 = new Map();
+        let connMap2 = new Map();
+
         let curImage = null;
-        function drawDevice(imageObj){
+        function drawDevice(imageObj){ //для отрисовки девайса
             var img = new Konva.Image({
                 image: imageObj,
                 x: i*220+20,
@@ -52,11 +55,11 @@
                 // height: 137,
                 draggable: true,
             });
-            img.on('click', function(){ //для добавления красной рамки ардуино
-                const box1=stage.find('.redBox'); //находим предудущую красную рамку
+            img.on('click', function(){ //для добавления синей рамки ардуино
+                const box1=stage.find('.blueBox'); //находим предудущую синюю рамку
                 // console.log("box = ", box);
                 box1.destroy();  //убираем ее
-                let box = new Konva.Rect({  //новая красная рамка у текущего объекта
+                let box = new Konva.Rect({  //новая синяя рамка у текущего объекта
                     name: "blueBox",
                     x: img.x(),
                     y: img.y(),
@@ -66,9 +69,28 @@
                     stroke: 'blue',
                     strokeWidth: 2,
                 });
-                // group.add(box);
-                curImage = img;
-                console.log("click! x=",curImage.x(), "i=",i);
+                let box2=layer.find('.redBox');
+                if  (box2[0]!==undefined && !objMap.has(box2[0])) {
+                    let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса
+                        points: [curImage.x()+curImage.width(), curImage.y()+curImage.height()/2, img.x(), img.y() + img.height()/2],
+                        stroke: 'green',
+                        strokeWidth: 2,
+                    });
+                    if (objMap2.get(img) != null) { //если текущая картинка уже соединена с малиной
+                        let tempLine = objMap2.get(img); //находим соединительную линию
+                        tempLine.destroy() //удаляем ее
+                        layer.draw();
+                        stage.add(layer);
+                        console.log("!!2 lines!!")
+                    }
+                    objMap2.set(img, newLine); //добавляем набор девайс-линия
+                    connMap2.set(img, curImage); //добавляем набор девайс-ардуино
+                    layer.add(newLine);
+                    layer.batchDraw();
+                }
+                    // group.add(box);
+                // curImage = img;
+                console.log("click! x=",img.x(), "i=",i);
                 layer.add(box);
             });
 
@@ -110,9 +132,13 @@
             } else { //если выбрали малину
                 img.on('click', function (){ //для удаления красной рамки ардуино
                     console.log("raspi click!");
-                    const box=stage.find('.redBox');
+                    const redBox=stage.find('.redBox');
                     // console.log("box = ", box);
-                    box.destroy();
+                    redBox.destroy();
+                    const blueBox=stage.find('.blueBox');
+                    // console.log("box = ", box);
+                    blueBox.destroy();
+
                 });
             }
 
@@ -213,7 +239,7 @@
         };
         arduImg.src = 'iskra2.jpg';
 
-        function updateLine() { //обновление положения концов линии
+        function updateLine() { //обновление положения концов линии от малины к ардуино
             // console.log("raspiImage x = ", group.x(), " arduImage x = ", arduImg.x);
             // if (portNum != -1) line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
             for (let obj of objMap.keys()) { //цикл по всем объектам мапа
@@ -230,6 +256,24 @@
             // console.log('objMap.size = ', objMap.size);
             layer.batchDraw();
         }
+        function updateLine2() { //обновление положения концов линии от ардуино к девайсу
+            // console.log("raspiImage x = ", group.x(), " arduImage x = ", arduImg.x);
+            // if (portNum != -1) line.points([group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
+            for (let obj of objMap2.keys()) { //цикл по всем объектам мапа
+                // console.log('obj = ', obj);
+                let tempLine = objMap2.get(obj);
+                let deviceObj = connMap2.get(obj);
+                const x1 = group.x()+objTargets[0].width()+20;
+                const y1 = 5+group.y()+(deviceObj*usbPorts[0].height())+(deviceObj+1)*(usbPorts[0].height()/2);
+                const x2 = obj.x();
+                // const y2 = obj.y()+obj.height()/2;
+                const y2 = obj.y()+40;
+                tempLine.points([x1, y1, x2, y2]);
+            }
+            // console.log('objMap.size = ', objMap.size);
+            layer.batchDraw();
+        }
+
         var container = stage.container();
         container.tabIndex = 1;// make it focusable
         container.focus();
@@ -252,6 +296,9 @@
             let deviceImg = new Image()
             deviceImg.onload = function () {
                 drawDevice(this);
+                objTargets.forEach((target) => { //цикл для обновления линий
+                    target.on('dragmove', updateLine2);
+                });
             }
             deviceImg.src = ""+device.value+".jpg"
             //drawDevice(deviceImg) //сделать отдельную функцию для девайсов
