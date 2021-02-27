@@ -27,14 +27,8 @@
         var layer = new Konva.Layer();
 
         var objTargets = [];
-        // var line = new Konva.Line({
-        //     points: [0, 0, 0, 0],
-        //     stroke: 'green',
-        //     strokeWidth: 2,
-        // });
-        // layer.add(line);
         stage.add(layer);
-        var group = new Konva.Group({ //группа для объектов Konva, чтоб двигать все объекты
+        var group = new Konva.Group({ //группа для объектов Konva, чтоб двигать объекты (RasPi+usb)
             x: 20,
             y: 0,
             draggable: true,
@@ -47,7 +41,7 @@
 
         let curImage = null;
         function drawDevice(imageObj){ //для отрисовки девайса
-            var img = new Konva.Image({
+            var img = new Konva.Image({ //сам девайс
                 image: imageObj,
                 x: i*220+20,
                 y: 0,
@@ -55,7 +49,7 @@
                 // height: 137,
                 draggable: true,
             });
-            img.on('click', function(){ //для добавления синей рамки ардуино
+            img.on('click', function(){ //для добавления синей рамки девайса при клике на нем
                 const box1=stage.find('.blueBox'); //находим предудущую синюю рамку
                 // console.log("box = ", box);
                 box1.destroy();  //убираем ее
@@ -279,8 +273,14 @@
         container.focus();
         const DELTA = 4;
         container.addEventListener('keydown', function (e) {
-            if (e.keyCode === 27) {
+            if (e.keyCode === 27) { //для снятия красной и синей рамки при нажатии ESC
                 console.log('ESC pressed')
+                let box1=stage.find('.blueBox'); //находим предудущую синюю рамку
+                // console.log("box = ", box);
+                box1.destroy();  //убираем ее
+                box1=stage.find('.redBox'); //находим предудущую синюю рамку
+                // console.log("box = ", box);
+                box1.destroy();
             }  else {
                 return;
             }
