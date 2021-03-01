@@ -5,7 +5,7 @@
     <meta charset="utf-8"/>
     <title>Raspberry and Arduino connection</title>
     <style>
-        body {
+        #container {
             margin: 0;
             padding: 0;
             overflow: hidden;
@@ -289,6 +289,7 @@
             e.preventDefault();
             layer.batchDraw();
         });
+
         function addArdu(){
             drawImage(arduImg);
         }
@@ -314,6 +315,6 @@
    </select>
    <button id="btn2" onclick="addDevice()">Add device</button>
    <!--TODO сделать сохранение в JSON https://konvajs.org/docs/data_and_serialization/Serialize_a_Stage.html и передать в БД-->
-
+    <!--TODO сделать удаление объектов-->
 </body>
 </html>

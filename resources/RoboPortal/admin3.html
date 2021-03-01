@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<script src="konva.min.js"></script>
 		<title>RobotLab AdminPage</title>
 		<link rel="stylesheet"  href="bootstrap.css">
 		<link rel="stylesheet" href="main.css">
@@ -24,6 +25,14 @@
 			ip_adress = res[2]
 			let ws = new WebSocket("ws://"+ip_adress+"/");
 		</script>
+		<style>
+			#container {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				background-color: #f0f0f0;
+			}
+		</style>
 	</head>
 	<body>
 		<div class="navbar">
@@ -223,7 +232,18 @@
 		  </div>
 		<div id="devices" class="tab-pane fade">
 			<h3 align="center">Устройства</h3>
-			<!--TODO вставить сюда код из move5.html-->
+			<div id="container"></div>  <!-- контейнер для объектов Konva-->
+			<script src="konvaScript.js"></script>
+			<button id="btn1" onclick="addArdu()">Add Arduino</button> </br>
+			<!--   <button onclick="check()"><input type="checkbox" id="check" /> Toggle image visibility</button>-->
+			<select name="devices" id="devicesCombo">
+				<option value="dc_motor">DC motor</option>
+				<option value="servo">Servo motor</option>
+				<option value="rgb_matrix">RGB matrix</option>
+			</select>
+			<button id="btn2" onclick="addDevice()">Add device</button>
+			<!--TODO сделать сохранение в JSON https://konvajs.org/docs/data_and_serialization/Serialize_a_Stage.html и передать в БД-->
+			<!--TODO сделать удаление объектов-->
 
 		</div>
 		
