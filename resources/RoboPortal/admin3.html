@@ -233,8 +233,8 @@
 		<div id="devices" class="tab-pane fade">
 			<h3 align="center">Устройства</h3>
 			<div id="container"></div>  <!-- контейнер для объектов Konva-->
-			<script src="konvaScript.js"></script>
-			<button id="btn1" onclick="addArdu()">Add Arduino</button> </br>
+			<script src="konvaScript.js"></script> <!-- работа с девайсами, ардуино и распберри-->
+			<button id="btn1" onclick="addArdu()">Add Arduino</button>
 			<!--   <button onclick="check()"><input type="checkbox" id="check" /> Toggle image visibility</button>-->
 			<select name="devices" id="devicesCombo">
 				<option value="dc_motor">DC motor</option>
@@ -242,6 +242,8 @@
 				<option value="rgb_matrix">RGB matrix</option>
 			</select>
 			<button id="btn2" onclick="addDevice()">Add device</button>
+			<button id="btnRemove" onclick="removeDevice()" disabled>Delete device/ardu</button>
+
 			<!--TODO сделать сохранение в JSON https://konvajs.org/docs/data_and_serialization/Serialize_a_Stage.html и передать в БД-->
 			<!--TODO сделать удаление объектов-->
 

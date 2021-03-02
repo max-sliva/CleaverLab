@@ -21,12 +21,15 @@ let objMap = new Map();
 let connMap = new Map();
 let objMap2 = new Map();
 let connMap2 = new Map();
+let connMapArduDev = new Map();
 
-let curImage = null;
+let j = 0;
+let curArdu = null;
+let curDevice = null;
 function drawDevice(imageObj){ //для отрисовки девайса
     var img = new Konva.Image({ //сам девайс
         image: imageObj,
-        x: i*220+20,
+        x: 220+20+(j++)*5,
         y: 0,
         // width: 100,
         // height: 137,
@@ -46,10 +49,14 @@ function drawDevice(imageObj){ //для отрисовки девайса
             stroke: 'blue',
             strokeWidth: 2,
         });
+        let delBtn = document.getElementById("btnRemove");
+        delBtn.disabled = false;
+        console.log("btn text = ",delBtn);
+        curDevice = img;
         let box2=layer.find('.redBox');
         if  (box2[0]!==undefined && !objMap.has(box2[0])) {
             let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса
-                points: [curImage.x()+curImage.width(), curImage.y()+curImage.height()/2, img.x(), img.y() + img.height()/2],
+                points: [curArdu.x()+curArdu.width(), curArdu.y()+curArdu.height()/2, img.x(), img.y() + img.height()/2],
                 stroke: 'green',
                 strokeWidth: 2,
             });
@@ -62,7 +69,8 @@ function drawDevice(imageObj){ //для отрисовки девайса
                 console.log("!!2 lines!!")
             }
             objMap2.set(img, newLine); //добавляем набор девайс-линия
-            connMap2.set(img, curImage); //добавляем набор девайс-ардуино
+            connMap2.set(img, curArdu); //добавляем набор девайс-ардуино
+            connMapArduDev.set(curArdu, img);
             layer.add(newLine);
             layer.batchDraw();
         }
@@ -79,7 +87,7 @@ function drawDevice(imageObj){ //для отрисовки девайса
 function drawImage(imageObj) { //создание Konva.Image с нужным изображением
     var img = new Konva.Image({
         image: imageObj,
-        x: i*220+20,
+        x: i==0?20:220+i*2,
         y: 0,
         width: 200,
         height: 137,
@@ -102,9 +110,12 @@ function drawImage(imageObj) { //создание Konva.Image с нужным и
                 stroke: 'red',
                 strokeWidth: 2,
             });
+            let delBtn = document.getElementById("btnRemove");
+            delBtn.disabled = false;
+
             // group.add(box);
-            curImage = img;
-            console.log("click! x=",curImage.x(), "i=",i);
+            curArdu = img; //текущая выбранная ардуино
+            console.log("click! x=",curArdu.x(), "i=",i);
             layer.add(box);
         });
     } else { //если выбрали малину
@@ -116,7 +127,10 @@ function drawImage(imageObj) { //создание Konva.Image с нужным и
             const blueBox=stage.find('.blueBox');
             // console.log("box = ", box);
             blueBox.destroy();
-
+            let delBtn = document.getElementById("btnRemove");
+            delBtn.disabled = true;
+            curDevice = undefined;
+            curArdu = undefined;
         });
     }
 
@@ -186,15 +200,15 @@ raspiImg.onload = function () { //вызывается при загрузке �
                     strokeWidth: 2,
                 });
                 //TODO здесь сделать запись о соединении порта малины с ардуино, чтоб потом передавать на сервер для сохранения в БД
-                if (objMap.get(curImage)!=null){ //если текущая картинка уже соединена с малиной
-                    let tempLine = objMap.get(curImage); //находим соединительную линию
+                if (objMap.get(curArdu)!=null){ //если текущая картинка уже соединена с малиной
+                    let tempLine = objMap.get(curArdu); //находим соединительную линию
                     tempLine.destroy() //удаляем ее
                     layer.draw();
                     stage.add(layer);
                     console.log("!!2 lines!!")
                 }
-                objMap.set(curImage, newLine); //добавляем набор картинка-линия
-                connMap.set(curImage, portNum); //добавляем набор картинка-порт
+                objMap.set(curArdu, newLine); //добавляем набор картинка-линия
+                connMap.set(curArdu, portNum); //добавляем набор картинка-порт
                 layer.add(newLine);
                 layer.batchDraw();
             }
@@ -266,7 +280,12 @@ container.addEventListener('keydown', function (e) {
         box1=stage.find('.redBox'); //находим предудущую синюю рамку
         // console.log("box = ", box);
         box1.destroy();
-    }  else {
+        let delBtn = document.getElementById("btnRemove");
+        delBtn.disabled = true;
+        curDevice = undefined;
+        curArdu = undefined;
+    } else if (e.keyCode === 46) removeDevice();
+    else {
         return;
     }
     e.preventDefault();
@@ -287,4 +306,37 @@ function addDevice(){
         });
     }
     deviceImg.src = ""+device.value+".jpg"
+}
+
+function removeDevice(){
+    let box1=stage.find('.blueBox'); //находим предудущую синюю рамку - устройство
+    // console.log("box = ", box);
+    if (box1 !== undefined) {
+        let tempLine = objMap2.get(curDevice); //находим соединительную линию
+        if (tempLine!==undefined) tempLine.destroy() //удаляем ее
+
+        if (curDevice!=undefined) curDevice.destroy();
+        box1.destroy();  //убираем ее
+    }
+    let box2=stage.find('.redBox'); //находим предудущую красную рамку - ардуино
+    // console.log("box = ", box2);
+    if (box2 != undefined) {
+        if (curArdu!=null) {
+            curArdu.destroy();
+            let tempLine = objMap.get(curArdu); //находим соединительную линию
+            if (tempLine!==undefined) tempLine.destroy() //удаляем ее
+
+            tempLine = objMap2.get(curArdu); //находим соединительную линию
+            if (tempLine!==undefined) tempLine.destroy() //удаляем ее
+            objMap.delete(curArdu)
+            connMap.delete(curArdu)
+            const dev = connMapArduDev.get(curArdu);
+            tempLine = objMap2.get(dev); //находим соединительную линию
+            if (tempLine!==undefined) tempLine.destroy() //удаляем ее
+
+        }
+        box2.destroy();
+    }
+    layer.batchDraw();
+
 }
