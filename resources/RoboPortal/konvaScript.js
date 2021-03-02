@@ -61,7 +61,7 @@ function drawDevice(imageObj){ //для отрисовки девайса
                 strokeWidth: 2,
             });
             //TODO здесь сделать запись о соединении девайса с ардуиной и портом малины и отправить на сервер для записи в БД
-            if (objMap2.get(img) != null) { //если текущая картинка уже соединена с малиной
+            if (objMap2.get(img) != null) { //если текущая картинка уже соединена с ардуино
                 let tempLine = objMap2.get(img); //находим соединительную линию
                 tempLine.destroy() //удаляем ее
                 layer.draw();
@@ -316,6 +316,7 @@ function removeDevice(){
         if (tempLine!==undefined) tempLine.destroy() //удаляем ее
 
         if (curDevice!=undefined) curDevice.destroy();
+        objMap2.delete(curDevice)
         box1.destroy();  //убираем ее
     }
     let box2=stage.find('.redBox'); //находим предудущую красную рамку - ардуино
@@ -341,5 +342,12 @@ function removeDevice(){
 }
 
 function saveKanva(){
+    console.log("connMap : \n")
+    connMap2.forEach(function(value,key){
+        console.log("key=", key, "  value=",value);
+    });
+}
 
+function logMapElements(value, key, map) {
+    console.log(`m[${key}] = ${value}`);
 }
