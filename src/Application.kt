@@ -42,6 +42,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module() {
     val serialPort = setComPort()
+//todo сделать автоопределение подключенных ардуино по юсб
     serialPort!!.openPort() //открываем порт
     serialPort!!.setParams(
         9600,

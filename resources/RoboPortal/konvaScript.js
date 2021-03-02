@@ -27,6 +27,10 @@ let j = 0;
 let curArdu = null;
 let curDevice = null;
 function drawDevice(imageObj){ //для отрисовки девайса
+    let imgId = imageObj.src;
+    const slashN = imgId.lastIndexOf("/");
+    imgId = imgId.substring(slashN+1,(imgId.length-4))+j;
+    console.log("added img id = ", imgId);
     var img = new Konva.Image({ //сам девайс
         image: imageObj,
         x: 220+20+(j++)*5,
@@ -34,6 +38,7 @@ function drawDevice(imageObj){ //для отрисовки девайса
         // width: 100,
         // height: 137,
         draggable: true,
+        id: imgId
     });
     img.on('click', function(){ //для добавления синей рамки девайса при клике на нем
         const box1=stage.find('.blueBox'); //находим предудущую синюю рамку
@@ -94,6 +99,7 @@ function drawImage(imageObj) { //создание Konva.Image с нужным и
         // draggable: true,
     });
     if (i>0) { //если выбрали ардуино
+        img.id = "ardu"+i;
         img.setDraggable(true);
         console.log("2nd image");
         img.on('click', function(){ //для добавления красной рамки ардуино
@@ -341,13 +347,35 @@ function removeDevice(){
     layer.batchDraw();
 }
 
-function saveKanva(){
-    console.log("connMap : \n")
-    connMap2.forEach(function(value,key){
-        console.log("key=", key, "  value=",value);
-    });
-}
+function saveKanva(){ //для сохранения канваса
+    let jsonObj = {
+        "objects":[
+            // {"type":"ardu", "name":"ardu1", "x":"", "y":""},
+            // {"type":"device", "name":"DC_motor0", "x":"", "y":""}
+        ],
+        "lines":[
 
-function logMapElements(value, key, map) {
-    console.log(`m[${key}] = ${value}`);
+        ]
+    };
+    console.log("objMap2 for devices: \n")
+    objMap2.forEach(function(value,key){
+        console.log("key=", key, "  value=",value);
+        console.log("imgId = ", key.id())
+        jsonObj.objects.push({"type": "device", "name": key.id(), "x":key.x(), "y":key.y()})
+    });
+    console.log("objMap for arduinos: \n");
+    objMap.forEach(function(value,key){
+        console.log("key=", key, "  value=",value);
+        console.log("imgId = ", key.id)
+        jsonObj.objects.push({"type": "ardu", "name": key.id, "x":key.x(), "y":key.y()})
+
+        // if (jsonObj.objects.find(el => el.name === key.id)) {
+        //     console.log(key.id," in jsonObj", "key.x = ",key.x());
+        //
+        // }
+    });
+    console.log("jsonObj = ", jsonObj)
+    //todo сделать дерево объектов для сохранения в json и передачи на сервер
+
+
 }
