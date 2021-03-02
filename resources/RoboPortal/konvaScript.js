@@ -338,5 +338,8 @@ function removeDevice(){
         box2.destroy();
     }
     layer.batchDraw();
+}
+
+function saveKanva(){
 
 }
