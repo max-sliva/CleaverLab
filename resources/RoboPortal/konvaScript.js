@@ -368,11 +368,6 @@ function saveKanva(){ //для сохранения канваса
         console.log("key=", key, "  value=",value);
         console.log("imgId = ", key.id)
         jsonObj.objects.push({"type": "ardu", "name": key.id, "x":key.x(), "y":key.y()})
-
-        // if (jsonObj.objects.find(el => el.name === key.id)) {
-        //     console.log(key.id," in jsonObj", "key.x = ",key.x());
-        //
-        // }
     });
     console.log("jsonObj = ", jsonObj)
     //todo сделать дерево объектов для сохранения в json и передачи на сервер
