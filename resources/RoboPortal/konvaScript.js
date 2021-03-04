@@ -379,3 +379,7 @@ function saveKanva(){ //для сохранения канваса
 
 
 }
+
+function loadKanva(){
+
+}
