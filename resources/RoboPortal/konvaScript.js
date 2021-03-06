@@ -103,6 +103,8 @@ function drawDevice(imageObj, x = 0, y = 0) { //для отрисовки дев
 }
 
 function drawImage(imageObj, x = 0, y = 0, ardu_number = -1) { //создание Konva.Image с нужным изображением
+    //-1 - для создания объекта в режиме редактирования
+    //иначе объекты загружаются из сохранения
     let x1 = 0, y1 = 0;
     if (ardu_number > 0) { //при загрузке ардуино из сохранения
         i = ardu_number;
@@ -112,7 +114,7 @@ function drawImage(imageObj, x = 0, y = 0, ardu_number = -1) { //создани�
         x1 = i == 0 ? 20 : 220 + i * 2;
         y1 = 0;
     }
-    imgId = (i > 0)?"ardu" + "#" + i:"rasPi";
+    imgId = (i > 0)?"ardu" + "#" + i:"rasPi"; //выбор между ардуино и малиной
     console.log("imgId = ", imgId);
     let img = new Konva.Image({
         image: imageObj,
@@ -181,14 +183,14 @@ function drawImage(imageObj, x = 0, y = 0, ardu_number = -1) { //создани�
     return img;
 }
 
-var raspiImg = new Image();
-var usbPorts = [];
+const raspiImg = new Image();
+let usbPorts = [];
 let portNum = -1;
 raspiImg.onload = function () { //вызывается при загрузке изображения малины
     const img = drawImage(this); //добавляем на канвас
     group.add(img); //добавляем в группу
     // objTargets.push(group);
-    for (var i = 0; i < 4; i++) { //цикл для юсб-портов
+    for (let i = 0; i < 4; i++) { //цикл для юсб-портов
         let box = new Konva.Rect({ //рамка вокруг надписи
             x: img.width() - 25,
             y: img.y() + 5 + (i) * 20,
@@ -200,7 +202,7 @@ raspiImg.onload = function () { //вызывается при загрузке �
             strokeWidth: 2,
         });
         group.add(box);
-        var usb = new Konva.Text({ //надписи USB
+        const usb = new Konva.Text({ //надписи USB
             text: 'USB' + i,
             x: img.width() - 24,
             y: img.y() + 6 + (i) * 20,
@@ -253,7 +255,7 @@ raspiImg.onload = function () { //вызывается при загрузке �
     stage.add(layer);
 };
 raspiImg.src = 'RaspberryPi_3B.png';
-var arduImg = new Image();
+const arduImg = new Image();
 arduImg.onload = function () {
     drawImage(this);
     // layer.add(line);
@@ -301,7 +303,7 @@ function updateLine2() { //обновление положения концов 
     layer.batchDraw();
 }
 
-var container = stage.container();
+const container = stage.container();
 container.tabIndex = 1;// make it focusable
 container.focus();
 const DELTA = 4;
@@ -367,12 +369,23 @@ function removeDevice() {
         if (tempLine !== undefined) tempLine.destroy() //удаляем ее
         objMap.delete(curArdu)
         connMap.delete(curArdu)
-        const dev = connMapArduDev.get(curArdu);
-        tempLine = objMap2.get(dev); //находим соединительную линию
-        if (tempLine !== undefined) tempLine.destroy() //удаляем ее
+
+        // console.log("connMapArduDev=", connMapArduDev);
+        // console.log("objMap2=", objMap2);
+
+        connMap2.forEach(function (value, key) { //для всех соединений ардуино с девайсом
+            if (curArdu == value) {  //если это текущее удаляемое ардуино
+                const dev = key; //берем девайс
+                tempLine = objMap2.get(dev); //находим соединительную линию с этим девайсом
+                if (tempLine !== undefined) tempLine.destroy() //удаляем ее
+            }
+        });
+
+        // const dev = connMapArduDev.get(curArdu);
+        // tempLine = objMap2.get(dev); //находим соединительную линию
+        // if (tempLine !== undefined) tempLine.destroy() //удаляем ее
         if (curArdu != undefined) {
             curArdu.destroy();
-
         }
         box2.destroy();
     }
@@ -388,32 +401,53 @@ function saveKanva() { //для сохранения канваса
         "lines": []
     };
     console.log("objMap2 for devices: \n")
-    objMap2.forEach(function (value, key) {
-        console.log("key=", key, "  value=", value);
-        console.log("imgId = ", key.id())
+    objMap2.forEach(function (value, key) { //для всех девайсов
+        // console.log("key=", key, "  value=", value);
+        // console.log("imgId = ", key.id())
         jsonObj.objects.push({"type": "device", "name": key.id(), "x": key.x(), "y": key.y()})
     });
-    console.log("objMap for arduinos: \n");
-    objMap.forEach(function (value, key) {
-        console.log("key=", key, "  value=", value);
-        console.log("imgId = ", key.id())
+    // console.log("objMap for arduinos: \n");
+    let lineN = 0;
+    objMap.forEach(function (value, key) { //для всех ардуино
+        // console.log("key=", key, "  value=", value);
+        // console.log("imgId = ", key.id())
         jsonObj.objects.push({"type": "ardu", "name": key.id(), "x": key.x(), "y": key.y()})
+        //для линий
+        lineN++;
+        console.log("line.points = ", value.points());
+        jsonObj.lines.push({"points": value.points()});
+        let curArdu = key;
+        // const dev = connMapArduDev.get(key);
+        //todo добавить удаление занятого ЮСБ из массива портов
+        connMap2.forEach(function (value, key) { //для всех соединений ардуино с девайсом
+            if (curArdu == value) {  //если это текущая  ардуино
+                const dev = key; //берем девайс
+                let tempLine = objMap2.get(dev); //находим соединительную линию с этим девайсом
+                if (tempLine !== undefined) {
+                    lineN++;
+                    console.log("lineTodev.points = ", tempLine.points());
+                    jsonObj.lines.push({"points": tempLine.points()});
+                }
+            }
+        });
     });
-    console.log("jsonObj = ", jsonObj)
-    //todo сделать сохранение линий между объектами
-    //todo сделать дерево объектов для сохранения в json и передачи на сервер
-
-
+    console.log("jsonObj = ", jsonObj);
+    console.log("lineN = ", lineN);
+    //todo сделать передачу на сервер
 }
 
 function loadKanva() { //загрузка объектов из сохранения
     let jsonObj = {
         "objects": [
-            {"type": "ardu", "name": "ardu#1", "x": 314, "y": 21},
+            {"type": "ardu", "name": "ardu#1", "x": 314, "y": 21, "usb": 0},
             {"type": "device", "name": "dc_motor#0", "x": 644, "y": 38},
             {"type": "device", "name": "servo#1", "x": 626, "y": 198}
         ],
-        "lines": []
+        "lines": [
+            {"points": [240, 12, 314, 61]},
+            {"points": [514, 89.5, 644, 102]},
+            {"points": [514, 89.5, 626, 262]}
+        ]
     };
     jsonObj.objects.forEach(function (item) {
         console.log(item);
@@ -442,8 +476,28 @@ function loadKanva() { //загрузка объектов из сохранен
             }
         }
     });
-    //todo сделать загрузку линий между объектами
+
+    //todo сделать добавление связей между объектами и линиями
     // 0: {type: "device", name: "dc_motor0", x: 644, y: 38}
     // 1: {type: "device", name: "servo1", x: 626, y: 198}
     // 2: {type: "ardu", name: "ardu1", x: 314, y: 21}
+    // let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса
+    //     points: [curArdu.x() + curArdu.width(), curArdu.y() + curArdu.height() / 2, img.x(), img.y() + img.height() / 2],
+    //     stroke: 'green',
+    //     strokeWidth: 2,
+    // });
+    jsonObj.lines.forEach(function (item) {
+        drawLine(item);
+    });
+}
+
+function drawLine(line){
+    let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса
+        points: line.points,
+        stroke: 'green',
+        strokeWidth: 2,
+    });
+    layer.add(newLine);
+    layer.batchDraw();
+
 }
