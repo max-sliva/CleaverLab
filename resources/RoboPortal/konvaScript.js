@@ -9,7 +9,7 @@ const stage = new Konva.Stage({
 });
 const layer = new Konva.Layer();
 
-const objTargets = [];
+let objTargets = [];
 stage.add(layer);
 const group = new Konva.Group({ //группа для объектов Konva, чтоб двигать объекты (RasPi+usb)
     x: 20,
@@ -186,75 +186,79 @@ function drawImage(imageObj, x = 0, y = 0, ardu_number = -1) { //создани�
 const raspiImg = new Image();
 let usbPorts = [];
 let portNum = -1;
-raspiImg.onload = function () { //вызывается при загрузке изображения малины
-    const img = drawImage(this); //добавляем на канвас
-    group.add(img); //добавляем в группу
-    // objTargets.push(group);
-    for (let i = 0; i < 4; i++) { //цикл для юсб-портов
-        let box = new Konva.Rect({ //рамка вокруг надписи
-            x: img.width() - 25,
-            y: img.y() + 5 + (i) * 20,
-            width: 40,
-            height: 15,
-            name: 'USB' + i,
-            fill: 'white',
-            stroke: 'black',
-            strokeWidth: 2,
-        });
-        group.add(box);
-        const usb = new Konva.Text({ //надписи USB
-            text: 'USB' + i,
-            x: img.width() - 24,
-            y: img.y() + 6 + (i) * 20,
-            fontSize: 14,
-            width: 200,
-        });
-        usbPorts.push(usb);
-        usb.on('click', function () { //при клике на юсб-порт
-            conStart = this;
-            console.log('selected ', conStart.text());
-            portNum = usbPorts.indexOf(conStart); //получаем номер порта в массиве
-            console.log("i = ", portNum);
-            // line.points([group.x()+objTargets[0].width()+20, group.y()+(portNum*box.height())+(portNum+1)*(box.height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
-            let box2 = layer.find('.redBox'); //находим объект с красной рамкой
-            // console.log("box=", box2[0].name());
-            let usbAr = connMap.values(); //массив из мапов
-            // console.log('!usb in map = ',usbAr);
-            let usbInUse = false;
-            for (let value of usbAr) { //цикл по массиву юсб
-                // console.log("usb = ",value);
-                if (value == portNum) usbInUse = true; //если выбранный порт уже занят
-            }
-            console.log('usbInUse = ', usbInUse);
-            //условие для корректной отрисовки линии от малины до ардуино
-            if (box2[0] !== undefined && !objMap.has(box2[0]) && !usbInUse) {
-                let newLine = new Konva.Line({ //создаем новую линию от малины до ардуины
-                    // points: [group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2],
-                    points: [group.x() + objTargets[0].width() + 20, 5 + group.y() + (portNum * usbPorts[0].height()) + (portNum + 1) * (usbPorts[0].height() / 2), box2[0].x(), box2[0].y() + 40],
-                    stroke: 'green',
-                    strokeWidth: 2,
-                });
-                //TODO здесь сделать запись о соединении порта малины с ардуино, чтоб потом передавать на сервер для сохранения в БД
-                if (objMap.get(curArdu) != null) { //если текущая картинка уже соединена с малиной
-                    let tempLine = objMap.get(curArdu); //находим соединительную линию
-                    tempLine.destroy() //удаляем ее
-                    layer.draw();
-                    stage.add(layer);
-                    console.log("!!2 lines!!")
+function makeRasPi() {
+    raspiImg.onload = function () { //вызывается при загрузке изображения малины
+        const img = drawImage(this); //добавляем на канвас
+        group.add(img); //добавляем в группу
+        // objTargets.push(group);
+        for (let i = 0; i < 4; i++) { //цикл для юсб-портов
+            let box = new Konva.Rect({ //рамка вокруг надписи
+                x: img.width() - 25,
+                y: img.y() + 5 + (i) * 20,
+                width: 40,
+                height: 15,
+                name: 'USB' + i,
+                fill: 'white',
+                stroke: 'black',
+                strokeWidth: 2,
+            });
+            group.add(box);
+            const usb = new Konva.Text({ //надписи USB
+                text: 'USB' + i,
+                x: img.width() - 24,
+                y: img.y() + 6 + (i) * 20,
+                fontSize: 14,
+                width: 200,
+            });
+            usbPorts.push(usb);
+            usb.on('click', function () { //при клике на юсб-порт
+                conStart = this;
+                console.log('selected ', conStart.text());
+                portNum = usbPorts.indexOf(conStart); //получаем номер порта в массиве
+                console.log("i = ", portNum);
+                // line.points([group.x()+objTargets[0].width()+20, group.y()+(portNum*box.height())+(portNum+1)*(box.height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
+                let box2 = layer.find('.redBox'); //находим объект с красной рамкой
+                // console.log("box=", box2[0].name());
+                let usbAr = connMap.values(); //массив из мапов
+                // console.log('!usb in map = ',usbAr);
+                let usbInUse = false;
+                for (let value of usbAr) { //цикл по массиву юсб
+                    // console.log("usb = ",value);
+                    if (value == portNum) usbInUse = true; //если выбранный порт уже занят
                 }
-                objMap.set(curArdu, newLine); //добавляем набор картинка-линия
-                connMap.set(curArdu, portNum); //добавляем набор картинка-порт
-                layer.add(newLine);
-                layer.batchDraw();
-            }
-        });
-        group.add(usb);
-    }
-    // group.add(usb);
-    layer.add(group);
-    stage.add(layer);
-};
-raspiImg.src = 'RaspberryPi_3B.png';
+                console.log('usbInUse = ', usbInUse);
+                //условие для корректной отрисовки линии от малины до ардуино
+                if (box2[0] !== undefined && !objMap.has(box2[0]) && !usbInUse) {
+                    let newLine = new Konva.Line({ //создаем новую линию от малины до ардуины
+                        // points: [group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2],
+                        points: [group.x() + objTargets[0].width() + 20, 5 + group.y() + (portNum * usbPorts[0].height()) + (portNum + 1) * (usbPorts[0].height() / 2), box2[0].x(), box2[0].y() + 40],
+                        stroke: 'green',
+                        strokeWidth: 2,
+                    });
+                    //TODO здесь сделать запись о соединении порта малины с ардуино, чтоб потом передавать на сервер для сохранения в БД
+                    if (objMap.get(curArdu) != null) { //если текущая картинка уже соединена с малиной
+                        let tempLine = objMap.get(curArdu); //находим соединительную линию
+                        tempLine.destroy() //удаляем ее
+                        layer.draw();
+                        stage.add(layer);
+                        console.log("!!2 lines!!")
+                    }
+                    objMap.set(curArdu, newLine); //добавляем набор картинка-линия
+                    connMap.set(curArdu, portNum); //добавляем набор картинка-порт
+                    layer.add(newLine);
+                    layer.batchDraw();
+                }
+            });
+            group.add(usb);
+        }
+        // group.add(usb);
+        layer.add(group);
+        stage.add(layer);
+    };
+    raspiImg.src = 'RaspberryPi_3B.png';
+}
+
+makeRasPi();
 const arduImg = new Image();
 arduImg.onload = function () {
     drawImage(this);
@@ -437,6 +441,20 @@ function saveKanva() { //для сохранения канваса
 }
 
 function loadKanva() { //загрузка объектов из сохранения
+    layer.destroyChildren(); //удаляем все с канваса
+    i = 0;
+    objTargets = [];  //обнуляем все массивы и мапы
+    objMap = new Map();
+    connMap = new Map();
+    objMap2 = new Map();
+    connMap2 = new Map();
+    connMapArduDev = new Map();
+
+    j = 0;
+    curArdu = null;
+    curDevice = null;
+    makeRasPi(); //вставляем малину
+
     let jsonObj = {
         "objects": [
             {"type": "ardu", "name": "ardu#1", "x": 314, "y": 21, "usb": 0},
