@@ -191,22 +191,22 @@ function makeRasPi() {
         const img = drawImage(this); //добавляем на канвас
         group.add(img); //добавляем в группу
         // objTargets.push(group);
-        for (let i = 0; i < 4; i++) { //цикл для юсб-портов
+        for (let _port = 0; _port < 4; _port++) { //цикл для юсб-портов
             let box = new Konva.Rect({ //рамка вокруг надписи
                 x: img.width() - 25,
-                y: img.y() + 5 + (i) * 20,
+                y: img.y() + 5 + (_port) * 20,
                 width: 40,
                 height: 15,
-                name: 'USB' + i,
+                name: 'USB' + _port,
                 fill: 'white',
                 stroke: 'black',
                 strokeWidth: 2,
             });
             group.add(box);
             const usb = new Konva.Text({ //надписи USB
-                text: 'USB' + i,
+                text: 'USB' + _port,
                 x: img.width() - 24,
-                y: img.y() + 6 + (i) * 20,
+                y: img.y() + 6 + (_port) * 20,
                 fontSize: 14,
                 width: 200,
             });
@@ -441,20 +441,7 @@ function saveKanva() { //для сохранения канваса
 }
 
 function loadKanva() { //загрузка объектов из сохранения
-    layer.destroyChildren(); //удаляем все с канваса
-    i = 0;
-    objTargets = [];  //обнуляем все массивы и мапы
-    objMap = new Map();
-    connMap = new Map();
-    objMap2 = new Map();
-    connMap2 = new Map();
-    connMapArduDev = new Map();
-
-    j = 0;
-    curArdu = null;
-    curDevice = null;
-    makeRasPi(); //вставляем малину
-
+    clearKonva();
     let jsonObj = {
         "objects": [
             {"type": "ardu", "name": "ardu#1", "x": 314, "y": 21, "usb": 0},
@@ -518,4 +505,23 @@ function drawLine(line){
     layer.add(newLine);
     layer.batchDraw();
 
+}
+
+function clearKonva(){
+    layer.destroyChildren();
+    i = 0;
+    usbPorts = [];
+    objTargets = [];  //обнуляем все массивы и мапы
+    objMap = new Map();
+    connMap = new Map();
+    objMap2 = new Map();
+    connMap2 = new Map();
+    connMapArduDev = new Map();
+
+    j = 0;
+    curArdu = null;
+    curDevice = null;
+
+    makeRasPi();
+    layer.batchDraw();
 }
