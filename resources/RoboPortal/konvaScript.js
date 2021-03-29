@@ -106,15 +106,16 @@ function drawImage(imageObj, x = 0, y = 0, ardu_number = -1) { //создани�
     //-1 - для создания объекта в режиме редактирования
     //иначе объекты загружаются из сохранения
     let x1 = 0, y1 = 0;
+    let i_ardu = i;
     if (ardu_number > 0) { //при загрузке ардуино из сохранения
-        i = ardu_number;
+        i_ardu = ardu_number;
         x1 = x;
         y1 = y;
     } else {
-        x1 = i == 0 ? 20 : 220 + i * 2;
+        x1 = i_ardu == 0 ? 20 : 220 + i_ardu * 2; //расположение по оси ОХ на канвасе
         y1 = 0;
     }
-    imgId = (i > 0)?"ardu" + "#" + i:"rasPi"; //выбор между ардуино и малиной
+    imgId = (i_ardu > 0)?"ardu" + "#" + i_ardu:"rasPi"; //выбор между ардуино и малиной
     console.log("imgId = ", imgId);
     let img = new Konva.Image({
         image: imageObj,
@@ -127,7 +128,7 @@ function drawImage(imageObj, x = 0, y = 0, ardu_number = -1) { //создани�
         id: imgId
         // draggable: true,
     });
-    if (i > 0) { //если выбрали ардуино
+    if (i_ardu > 0) { //если выбрали ардуино
         // img.id = "ardu" + "#" + i;
         img.setDraggable(true);
         console.log("2nd image");
@@ -150,7 +151,7 @@ function drawImage(imageObj, x = 0, y = 0, ardu_number = -1) { //создани�
 
             // group.add(box);
             curArdu = img; //текущая выбранная ардуино
-            console.log("click! x=", curArdu.x(), "i=", i);
+            console.log("click! x=", curArdu.x(), "i=", i_ardu);
             layer.add(box);
         });
     } else { //если выбрали малину
@@ -216,6 +217,8 @@ function makeRasPi() {
                 console.log('selected ', conStart.text());
                 portNum = usbPorts.indexOf(conStart); //получаем номер порта в массиве
                 console.log("i = ", portNum);
+                console.log("portsSize = ", usbPorts.length);
+
                 // line.points([group.x()+objTargets[0].width()+20, group.y()+(portNum*box.height())+(portNum+1)*(box.height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
                 let box2 = layer.find('.redBox'); //находим объект с красной рамкой
                 // console.log("box=", box2[0].name());
@@ -517,7 +520,7 @@ function clearKonva(){
     objMap2 = new Map();
     connMap2 = new Map();
     connMapArduDev = new Map();
-
+    portNum = 0;
     j = 0;
     curArdu = null;
     curDevice = null;
