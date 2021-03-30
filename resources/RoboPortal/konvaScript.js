@@ -5,18 +5,19 @@ const height = window.innerHeight;
 const stage = new Konva.Stage({
     container: 'container',
     width: width,
-    height: height - 300,
+    height: height - 250
 });
 const layer = new Konva.Layer();
 
 let objTargets = [];
 stage.add(layer);
-const group = new Konva.Group({ //группа для объектов Konva, чтоб двигать объекты (RasPi+usb)
+let group = new Konva.Group({ //группа для объектов Konva, чтоб двигать объекты (RasPi+usb)
     x: 20,
     y: 0,
     draggable: true,
 });
 let i = 0;
+let arduStringName = new Map();
 let objMap = new Map();
 let connMap = new Map();
 let objMap2 = new Map();
@@ -100,6 +101,12 @@ function drawDevice(imageObj, x = 0, y = 0) { //для отрисовки дев
     objTargets.push(img);
     layer.add(img);
     stage.add(layer);
+    console.log("objTargets size = ", objTargets.length)
+    objTargets.forEach((target) => { //цикл для обновления линий
+        target.on('dragmove', updateLine2);
+    });
+
+    return img;
 }
 
 function drawImage(imageObj, x = 0, y = 0, ardu_number = -1) { //создание Konva.Image с нужным изображением
@@ -128,6 +135,10 @@ function drawImage(imageObj, x = 0, y = 0, ardu_number = -1) { //создани�
         id: imgId
         // draggable: true,
     });
+    console.log("img.x = ",img.x());
+    console.log("img.y = ",img.y());
+    console.log("img.width = ",img.width());
+    // console.log("img.y = ",img.y());
     if (i_ardu > 0) { //если выбрали ардуино
         // img.id = "ardu" + "#" + i;
         img.setDraggable(true);
@@ -184,10 +195,15 @@ function drawImage(imageObj, x = 0, y = 0, ardu_number = -1) { //создани�
     return img;
 }
 
-const raspiImg = new Image();
 let usbPorts = [];
 let portNum = -1;
 function makeRasPi() {
+    group = new Konva.Group({ //группа для объектов Konva, чтоб двигать объекты (RasPi+usb)
+        x: 20,
+        y: 0,
+        draggable: true,
+    });
+    let raspiImg = new Image();
     raspiImg.onload = function () { //вызывается при загрузке изображения малины
         const img = drawImage(this); //добавляем на канвас
         group.add(img); //добавляем в группу
@@ -257,6 +273,7 @@ function makeRasPi() {
         // group.add(usb);
         layer.add(group);
         stage.add(layer);
+        group.on('dragmove', updateLine);
     };
     raspiImg.src = 'RaspberryPi_3B.png';
 }
@@ -452,26 +469,37 @@ function loadKanva() { //загрузка объектов из сохранен
             {"type": "device", "name": "servo#1", "x": 626, "y": 198}
         ],
         "lines": [
-            {"points": [240, 12, 314, 61]},
-            {"points": [514, 89.5, 644, 102]},
-            {"points": [514, 89.5, 626, 262]}
+            {"points": [240, 12, 314, 61], "from": "usb0", "to": "ardu#1" },
+            {"points": [514, 89.5, 644, 102], "from": "ardu#1", "to": "dc_motor#0"},
+            {"points": [514, 89.5, 626, 262], "from": "ardu#1", "to": "servo#1"}
         ]
     };
     jsonObj.objects.forEach(function (item) {
         console.log(item);
         switch (item.type) {
             case "device": {
+                let curImg; //текущимй объект с картинкой
                 let imgName = item.name.substring(0, item.name.lastIndexOf("#"));
                 console.log("imgName = ", imgName);
                 let deviceImg = new Image();
                 deviceImg.src = imgName + ".jpg";
                 deviceImg.onload = function () {
-                    drawDevice(this, item.x, item.y);
+                    curImg = drawDevice(this, item.x, item.y);
+                    //objTargets.push(curImg);
                 }
                 j++;
+                jsonObj.lines.forEach(function (itemLine) {
+                    if (item.name===itemLine.to) {
+                        curArdu = arduStringName.get(itemLine.from);
+                        drawLine(itemLine, curImg, curArdu);
+                        console.log("line added");
+                    }
+                });
+
                 break;
             }
             case "ardu": {
+                let curImg;
                 let imgName = item.name.substring(0, item.name.lastIndexOf("#"));
                 const ardu_number = item.name.substring(item.name.lastIndexOf("#") + 1, item.name.length);
                 console.log("imgName = ", imgName);
@@ -479,8 +507,17 @@ function loadKanva() { //загрузка объектов из сохранен
                 let deviceImg = new Image();
                 deviceImg.src = 'iskra2.jpg';
                 deviceImg.onload = function () {
-                    drawImage(this, item.x, item.y, ardu_number);
+                    curImg = drawImage(this, item.x, item.y, ardu_number);
+                    //objTargets.push(curImg);
+                    arduStringName.set(item.name, curImg);
                 }
+
+                // jsonObj.lines.forEach(function (itemLine) {
+                //     if (item.name===itemLine.to) {
+                //         drawLine(itemLine);
+                //         console.log("line added");
+                //     }
+                // });
             }
         }
     });
@@ -494,17 +531,21 @@ function loadKanva() { //загрузка объектов из сохранен
     //     stroke: 'green',
     //     strokeWidth: 2,
     // });
-    jsonObj.lines.forEach(function (item) {
-        drawLine(item);
-    });
+    // jsonObj.lines.forEach(function (item) {
+    //     drawLine(item);
+    // });
 }
 
-function drawLine(line){
+function drawLine(line, deviceImg, curArdu){
     let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса
         points: line.points,
         stroke: 'green',
         strokeWidth: 2,
     });
+    objMap2.set(deviceImg, newLine); //добавляем набор девайс-линия
+    connMap2.set(deviceImg, curArdu); //добавляем набор девайс-ардуино
+    connMapArduDev.set(curArdu, deviceImg);
+
     layer.add(newLine);
     layer.batchDraw();
 
@@ -520,6 +561,7 @@ function clearKonva(){
     objMap2 = new Map();
     connMap2 = new Map();
     connMapArduDev = new Map();
+    arduStringName = new Map();
     portNum = 0;
     j = 0;
     curArdu = null;
