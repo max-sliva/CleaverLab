@@ -460,22 +460,45 @@ function saveKanva() { //для сохранения канваса
     //todo сделать передачу на сервер
 }
 
-function loadKanva() { //загрузка объектов из сохранения
-    clearKonva();
-    let jsonObj = {
-        "objects": [
-            {"type": "ardu", "name": "ardu#1", "x": 314, "y": 21, "usb": 0},
-            {"type": "device", "name": "dc_motor#0", "x": 644, "y": 38},
-            {"type": "device", "name": "servo#1", "x": 626, "y": 198}
-        ],
-        "lines": [
-            {"points": [240, 12, 314, 61], "from": "usb0", "to": "ardu#1" },
-            {"points": [514, 89.5, 644, 102], "from": "ardu#1", "to": "dc_motor#0"},
-            {"points": [514, 89.5, 626, 262], "from": "ardu#1", "to": "servo#1"}
-        ]
-    };
+// function deviceLoad(deviceImg){
+//     deviceImg.onload = function () {
+//         curImg = drawImage(this, item.x, item.y, ardu_number);
+//         //objTargets.push(curImg);
+//         console.log("item.name = ", item.name);
+//         arduStringName.set(item.name, curImg);
+//     }
+// }
+
+function loadArduinos(jsonObj){  //для загрузкт ардуин
+     jsonObj.objects.forEach(async function (item) {  //цикл по json-массиву
+        // console.log(item);
+        switch (item.type) {
+            case "ardu": {  //если объект - ардуино
+                let curImg;
+                let imgName = item.name.substring(0, item.name.lastIndexOf("#"));
+                const ardu_number = item.name.substring(item.name.lastIndexOf("#") + 1, item.name.length);
+                console.log("imgName = ", imgName);
+                console.log("ardu_number = ", ardu_number);
+                let deviceImg = new Image();
+                deviceImg.src = 'iskra2.jpg';
+                // deviceLoad(deviceImg);
+                deviceImg.onload = async function () {
+                    curImg = await drawImage(this, item.x, item.y, ardu_number);
+                    //objTargets.push(curImg);
+                    console.log("item.name = ", item.name);
+                    arduStringName.set(item.name, curImg);
+                    loadDevices(jsonObj);
+                }
+            }
+            break;
+        }
+    });
+
+}
+
+function loadDevices(jsonObj){
     jsonObj.objects.forEach(function (item) {
-        console.log(item);
+        // console.log(item);
         switch (item.type) {
             case "device": {
                 let curImg; //текущимй объект с картинкой
@@ -486,43 +509,43 @@ function loadKanva() { //загрузка объектов из сохранен
                 deviceImg.onload = function () {
                     curImg = drawDevice(this, item.x, item.y);
                     //objTargets.push(curImg);
+                    jsonObj.lines.forEach(function (itemLine) {
+                        if (item.name===itemLine.to) {
+                            console.log("itemLine.from = ",itemLine.from);
+                            curArdu = arduStringName.get(itemLine.from);
+                            console.log("curArdu from device = ", curArdu);
+                            drawLine(itemLine, curImg, curArdu);
+                            console.log("line added");
+                        }
+                    });
                 }
-                j++;
-                jsonObj.lines.forEach(function (itemLine) {
-                    if (item.name===itemLine.to) {
-                        curArdu = arduStringName.get(itemLine.from);
-                        drawLine(itemLine, curImg, curArdu);
-                        console.log("line added");
-                    }
-                });
-
+                //j++;
                 break;
-            }
-            case "ardu": {
-                let curImg;
-                let imgName = item.name.substring(0, item.name.lastIndexOf("#"));
-                const ardu_number = item.name.substring(item.name.lastIndexOf("#") + 1, item.name.length);
-                console.log("imgName = ", imgName);
-                console.log("ardu_number = ", ardu_number);
-                let deviceImg = new Image();
-                deviceImg.src = 'iskra2.jpg';
-                deviceImg.onload = function () {
-                    curImg = drawImage(this, item.x, item.y, ardu_number);
-                    //objTargets.push(curImg);
-                    arduStringName.set(item.name, curImg);
-                }
-
-                // jsonObj.lines.forEach(function (itemLine) {
-                //     if (item.name===itemLine.to) {
-                //         drawLine(itemLine);
-                //         console.log("line added");
-                //     }
-                // });
             }
         }
     });
+}
 
-    //todo сделать добавление связей между объектами и линиями
+async function loadKanva() { //загрузка объектов из сохранения
+    clearKonva();
+    let jsonObj = {
+        "objects": [
+            {"type": "ardu", "name": "ardu#1", "x": 314, "y": 21, "usb": 0},
+            // {"type": "ardu", "name": "ardu#2", "x": 294, "y": 140, "usb": 3},
+            {"type": "device", "name": "dc_motor#0", "x": 644, "y": 38},
+            {"type": "device", "name": "servo#1", "x": 626, "y": 198},
+            {"type": "device", "name": "rgb_matrix#3", "x": 515, "y": 424}
+        ],
+        "lines": [
+            {"points": [240, 12, 314, 61], "from": "usb0", "to": "ardu#1" },
+            {"points": [240, 75, 283, 271], "from": "usb3", "to": "ardu#2"},
+            {"points": [514, 89.5, 644, 102], "from": "ardu#1", "to": "dc_motor#0"},
+            {"points": [514, 89.5, 626, 262], "from": "ardu#1", "to": "servo#1"},
+            {"points": [483, 299.5, 584, 410.5], "from": "ardu#2", "to": "rgb_matrix#3"}
+        ]
+    };
+
+    await loadArduinos(jsonObj); //загружаем ардуины
     // 0: {type: "device", name: "dc_motor0", x: 644, y: 38}
     // 1: {type: "device", name: "servo1", x: 626, y: 198}
     // 2: {type: "ardu", name: "ardu1", x: 314, y: 21}
@@ -548,7 +571,6 @@ function drawLine(line, deviceImg, curArdu){
 
     layer.add(newLine);
     layer.batchDraw();
-
 }
 
 function clearKonva(){
