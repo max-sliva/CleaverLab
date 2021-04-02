@@ -487,7 +487,7 @@ function loadArduinos(jsonObj){  //для загрузкт ардуин
                     //objTargets.push(curImg);
                     console.log("item.name = ", item.name);
                     arduStringName.set(item.name, curImg);
-                    loadDevices(jsonObj);
+                    loadDevices(jsonObj, item.name);
                 }
             }
             break;
@@ -496,31 +496,33 @@ function loadArduinos(jsonObj){  //для загрузкт ардуин
 
 }
 
-function loadDevices(jsonObj){
+function loadDevices(jsonObj, arduName){
     jsonObj.objects.forEach(function (item) {
         // console.log(item);
         switch (item.type) {
             case "device": {
-                let curImg; //текущимй объект с картинкой
-                let imgName = item.name.substring(0, item.name.lastIndexOf("#"));
-                console.log("imgName = ", imgName);
-                let deviceImg = new Image();
-                deviceImg.src = imgName + ".jpg";
-                deviceImg.onload = function () {
-                    curImg = drawDevice(this, item.x, item.y);
-                    //objTargets.push(curImg);
-                    jsonObj.lines.forEach(function (itemLine) {
-                        if (item.name===itemLine.to) {
-                            console.log("itemLine.from = ",itemLine.from);
-                            curArdu = arduStringName.get(itemLine.from);
-                            console.log("curArdu from device = ", curArdu);
-                            drawLine(itemLine, curImg, curArdu);
-                            console.log("line added");
-                        }
-                    });
+                if (item.ardu_name===arduName){
+                    let curImg; //текущимй объект с картинкой
+                    let imgName = item.name.substring(0, item.name.lastIndexOf("#"));
+                    console.log("imgName = ", imgName);
+                    let deviceImg = new Image();
+                    deviceImg.src = imgName + ".jpg";
+                    deviceImg.onload = function () {
+                        curImg = drawDevice(this, item.x, item.y);
+                        //objTargets.push(curImg);
+                        jsonObj.lines.forEach(function (itemLine) {
+                            if (item.name === itemLine.to) {
+                                console.log("itemLine.from = ", itemLine.from);
+                                curArdu = arduStringName.get(itemLine.from);
+                                console.log("curArdu from device = ", curArdu);
+                                drawLine(itemLine, curImg, curArdu);
+                                console.log("line added");
+                            }
+                        });
+                    }
+                    //j++;
+                    break;
                 }
-                //j++;
-                break;
             }
         }
     });
@@ -531,17 +533,17 @@ async function loadKanva() { //загрузка объектов из сохра
     let jsonObj = {
         "objects": [
             {"type": "ardu", "name": "ardu#1", "x": 314, "y": 21, "usb": 0},
-            // {"type": "ardu", "name": "ardu#2", "x": 294, "y": 140, "usb": 3},
-            {"type": "device", "name": "dc_motor#0", "x": 644, "y": 38},
-            {"type": "device", "name": "servo#1", "x": 626, "y": 198},
-            {"type": "device", "name": "rgb_matrix#3", "x": 515, "y": 424}
+            {"type": "ardu", "name": "ardu#2", "x": 264, "y": 188, "usb": 3},
+            {"type": "device", "name": "dc_motor#0", "x": 644, "y": 38, "ardu_name":"ardu#1"},
+            {"type": "device", "name": "servo#1", "x": 626, "y": 198, "ardu_name":"ardu#1"},
+            {"type": "device", "name": "rgb_matrix#3", "x": 489, "y": 291, "ardu_name":"ardu#2"}
         ],
         "lines": [
             {"points": [240, 12, 314, 61], "from": "usb0", "to": "ardu#1" },
             {"points": [240, 75, 283, 271], "from": "usb3", "to": "ardu#2"},
             {"points": [514, 89.5, 644, 102], "from": "ardu#1", "to": "dc_motor#0"},
             {"points": [514, 89.5, 626, 262], "from": "ardu#1", "to": "servo#1"},
-            {"points": [483, 299.5, 584, 410.5], "from": "ardu#2", "to": "rgb_matrix#3"}
+            {"points": [464, 256.5, 489, 351.5], "from": "ardu#2", "to": "rgb_matrix#3"}
         ]
     };
 
