@@ -469,7 +469,7 @@ function saveKanva() { //для сохранения канваса
 //     }
 // }
 
-function loadArduinos(jsonObj){  //для загрузкт ардуин
+function loadArduinos(jsonObj){  //для загрузки ардуин
      jsonObj.objects.forEach(async function (item) {  //цикл по json-массиву
         // console.log(item);
         switch (item.type) {
@@ -487,7 +487,7 @@ function loadArduinos(jsonObj){  //для загрузкт ардуин
                     //objTargets.push(curImg);
                     console.log("item.name = ", item.name);
                     arduStringName.set(item.name, curImg);
-                    loadDevices(jsonObj, item.name);
+                    loadDevices(jsonObj, item.name); //загружаем девайсы для этой ардуино
                 }
             }
             break;
@@ -496,12 +496,12 @@ function loadArduinos(jsonObj){  //для загрузкт ардуин
 
 }
 
-function loadDevices(jsonObj, arduName){
+function loadDevices(jsonObj, arduName){  //для загрузки устройств
     jsonObj.objects.forEach(function (item) {
         // console.log(item);
         switch (item.type) {
-            case "device": {
-                if (item.ardu_name===arduName){
+            case "device": {   //если устройство
+                if (item.ardu_name===arduName){ //и строки с указанной ардуино совпадают
                     let curImg; //текущимй объект с картинкой
                     let imgName = item.name.substring(0, item.name.lastIndexOf("#"));
                     console.log("imgName = ", imgName);
@@ -510,7 +510,7 @@ function loadDevices(jsonObj, arduName){
                     deviceImg.onload = function () {
                         curImg = drawDevice(this, item.x, item.y);
                         //objTargets.push(curImg);
-                        jsonObj.lines.forEach(function (itemLine) {
+                        jsonObj.lines.forEach(function (itemLine) { //цикл по линиям
                             if (item.name === itemLine.to) {
                                 console.log("itemLine.from = ", itemLine.from);
                                 curArdu = arduStringName.get(itemLine.from);
@@ -561,7 +561,7 @@ async function loadKanva() { //загрузка объектов из сохра
     // });
 }
 
-function drawLine(line, deviceImg, curArdu){
+function drawLine(line, deviceImg, curArdu){ //для рисования линии из сохранения
     let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса
         points: line.points,
         stroke: 'green',
