@@ -419,10 +419,12 @@ function removeDevice() {
 function saveKanva() { //для сохранения канваса
     let jsonObj = {
         "objects": [
-            // {"type":"ardu", "name":"ardu#1", "x":"", "y":""},
-            // {"type":"device", "name":"dc_motor#0", "x":"", "y":""}
+            // {"type":"ardu", "name":"ardu#1", "x":"", "y":""},  //todo добавить usb
+            // {"type":"device", "name":"dc_motor#0", "x":"", "y":""} //todo добавить ardu_name
         ],
         "lines": []
+        // {"points": [240, 75, 283, 271], "from": "usb3", "to": "ardu#2"},
+        // {"points": [514, 89.5, 644, 102], "from": "ardu#1", "to": "dc_motor#0"},
     };
     console.log("objMap2 for devices: \n")
     objMap2.forEach(function (value, key) { //для всех девайсов
@@ -488,6 +490,16 @@ function loadArduinos(jsonObj){  //для загрузки ардуин
                     console.log("item.name = ", item.name);
                     arduStringName.set(item.name, curImg);
                     loadDevices(jsonObj, item.name); //загружаем девайсы для этой ардуино
+                    jsonObj.lines.forEach(function (itemLine) { //цикл по линиям
+                        if (item.name === itemLine.to) {
+                            console.log("itemLine.from = ", itemLine.from);
+                            // curArdu = arduStringName.get(itemLine.from);
+                            // console.log("curArdu from device = ", curArdu);
+                            drawLine(itemLine,null, curImg, item.usb);
+                            console.log("line added");
+                        }
+                    });
+
                 }
             }
             break;
@@ -515,7 +527,7 @@ function loadDevices(jsonObj, arduName){  //для загрузки устрой
                                 console.log("itemLine.from = ", itemLine.from);
                                 curArdu = arduStringName.get(itemLine.from);
                                 console.log("curArdu from device = ", curArdu);
-                                drawLine(itemLine, curImg, curArdu);
+                                drawLine(itemLine, curImg, curArdu, null);
                                 console.log("line added");
                             }
                         });
@@ -561,16 +573,20 @@ async function loadKanva() { //загрузка объектов из сохра
     // });
 }
 
-function drawLine(line, deviceImg, curArdu){ //для рисования линии из сохранения
+function drawLine(line, deviceImg = null, curArdu, portNum){ //для рисования линии из сохранения
     let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса
         points: line.points,
         stroke: 'green',
         strokeWidth: 2,
     });
-    objMap2.set(deviceImg, newLine); //добавляем набор девайс-линия
-    connMap2.set(deviceImg, curArdu); //добавляем набор девайс-ардуино
-    connMapArduDev.set(curArdu, deviceImg);
-
+    if (deviceImg!=null){ //если рисуем линию от ардуино к устройству
+        objMap2.set(deviceImg, newLine); //добавляем набор девайс-линия
+        connMap2.set(deviceImg, curArdu); //добавляем набор девайс-ардуино
+        connMapArduDev.set(curArdu, deviceImg);
+    } else {  //если рисуем линию от малины к ардуино
+        objMap.set(curArdu, newLine); //добавляем набор картинка-линия
+        connMap.set(curArdu, portNum); //добавляем набор картинка-порт
+    }
     layer.add(newLine);
     layer.batchDraw();
 }
