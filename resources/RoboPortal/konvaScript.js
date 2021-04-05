@@ -419,25 +419,30 @@ function removeDevice() {
 function saveKanva() { //для сохранения канваса
     let jsonObj = {
         "objects": [
-            // {"type":"ardu", "name":"ardu#1", "x":"", "y":""},  //todo добавить usb
-            // {"type":"device", "name":"dc_motor#0", "x":"", "y":""} //todo добавить ardu_name
+            // {"type":"ardu", "name":"ardu#1", "x":"", "y":""},
+            // {"type":"device", "name":"dc_motor#0", "x":"", "y":""}
         ],
         "lines": []
         // {"points": [240, 75, 283, 271], "from": "usb3", "to": "ardu#2"},
         // {"points": [514, 89.5, 644, 102], "from": "ardu#1", "to": "dc_motor#0"},
     };
-    console.log("objMap2 for devices: \n")
+    console.log("connMap2 = \n")
+    connMap2.forEach(function (value, key) {
+        console.log("key=", key, "  value=", value);
+    });
+    console.log("connMap2 end")
+    // console.log("objMap2 for devices: \n")
     objMap2.forEach(function (value, key) { //для всех девайсов
         // console.log("key=", key, "  value=", value);
         // console.log("imgId = ", key.id())
-        jsonObj.objects.push({"type": "device", "name": key.id(), "x": key.x(), "y": key.y()})
+        jsonObj.objects.push({"type": "device", "name": key.id(), "x": key.x(), "y": key.y(), "ardu_name": connMap2.get(key).id()})
     });
     // console.log("objMap for arduinos: \n");
     let lineN = 0;
     objMap.forEach(function (value, key) { //для всех ардуино
         // console.log("key=", key, "  value=", value);
         // console.log("imgId = ", key.id())
-        jsonObj.objects.push({"type": "ardu", "name": key.id(), "x": key.x(), "y": key.y()})
+        jsonObj.objects.push({"type": "ardu", "name": key.id(), "x": key.x(), "y": key.y(), "usb": connMap.get(key)})
         //для линий
         lineN++;
         console.log("line.points = ", value.points());
@@ -445,6 +450,7 @@ function saveKanva() { //для сохранения канваса
         let curArdu = key;
         // const dev = connMapArduDev.get(key);
         //todo добавить удаление занятого ЮСБ из массива портов
+        //todo добавить from и to
         connMap2.forEach(function (value, key) { //для всех соединений ардуино с девайсом
             if (curArdu == value) {  //если это текущая  ардуино
                 const dev = key; //берем девайс
@@ -560,9 +566,6 @@ async function loadKanva() { //загрузка объектов из сохра
     };
 
     await loadArduinos(jsonObj); //загружаем ардуины
-    // 0: {type: "device", name: "dc_motor0", x: 644, y: 38}
-    // 1: {type: "device", name: "servo1", x: 626, y: 198}
-    // 2: {type: "ardu", name: "ardu1", x: 314, y: 21}
     // let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса
     //     points: [curArdu.x() + curArdu.width(), curArdu.y() + curArdu.height() / 2, img.x(), img.y() + img.height() / 2],
     //     stroke: 'green',
