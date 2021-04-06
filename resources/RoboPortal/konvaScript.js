@@ -415,22 +415,22 @@ function removeDevice() {
     }
     layer.batchDraw();
 }
-
+let jsonObj = {
+    "objects": [
+        // {"type":"ardu", "name":"ardu#1", "x":"", "y":""},
+        // {"type":"device", "name":"dc_motor#0", "x":"", "y":""}
+    ],
+    "lines": []
+    // {"points": [240, 75, 283, 271], "from": "usb3", "to": "ardu#2"},
+    // {"points": [514, 89.5, 644, 102], "from": "ardu#1", "to": "dc_motor#0"},
+};
 function saveKanva() { //для сохранения канваса
-    let jsonObj = {
-        "objects": [
-            // {"type":"ardu", "name":"ardu#1", "x":"", "y":""},
-            // {"type":"device", "name":"dc_motor#0", "x":"", "y":""}
-        ],
-        "lines": []
-        // {"points": [240, 75, 283, 271], "from": "usb3", "to": "ardu#2"},
-        // {"points": [514, 89.5, 644, 102], "from": "ardu#1", "to": "dc_motor#0"},
-    };
-    console.log("connMap2 = \n")
-    connMap2.forEach(function (value, key) {
-        console.log("key=", key, "  value=", value);
-    });
-    console.log("connMap2 end")
+
+    // console.log("connMap2 = \n")
+    // connMap2.forEach(function (value, key) {
+    //     console.log("key=", key, "  value=", value);
+    // });
+    // console.log("connMap2 end")
     // console.log("objMap2 for devices: \n")
     objMap2.forEach(function (value, key) { //для всех девайсов
         // console.log("key=", key, "  value=", value);
@@ -446,7 +446,7 @@ function saveKanva() { //для сохранения канваса
         //для линий
         lineN++;
         console.log("line.points = ", value.points());
-        jsonObj.lines.push({"points": value.points()});
+        jsonObj.lines.push({"points": value.points(), "from": "usb"+connMap.get(key), "to": key.id()});
         let curArdu = key;
         // const dev = connMapArduDev.get(key);
         //todo добавить удаление занятого ЮСБ из массива портов
@@ -454,11 +454,12 @@ function saveKanva() { //для сохранения канваса
         connMap2.forEach(function (value, key) { //для всех соединений ардуино с девайсом
             if (curArdu == value) {  //если это текущая  ардуино
                 const dev = key; //берем девайс
+                console.log("ardu = ", curArdu, " dev = ", dev)
                 let tempLine = objMap2.get(dev); //находим соединительную линию с этим девайсом
                 if (tempLine !== undefined) {
                     lineN++;
                     console.log("lineTodev.points = ", tempLine.points());
-                    jsonObj.lines.push({"points": tempLine.points()});
+                    jsonObj.lines.push({"points": tempLine.points(), "from": curArdu.id(), "to":dev.id()});
                 }
             }
         });
@@ -548,22 +549,22 @@ function loadDevices(jsonObj, arduName){  //для загрузки устрой
 
 async function loadKanva() { //загрузка объектов из сохранения
     clearKonva();
-    let jsonObj = {
-        "objects": [
-            {"type": "ardu", "name": "ardu#1", "x": 314, "y": 21, "usb": 0},
-            {"type": "ardu", "name": "ardu#2", "x": 264, "y": 188, "usb": 3},
-            {"type": "device", "name": "dc_motor#0", "x": 644, "y": 38, "ardu_name":"ardu#1"},
-            {"type": "device", "name": "servo#1", "x": 626, "y": 198, "ardu_name":"ardu#1"},
-            {"type": "device", "name": "rgb_matrix#3", "x": 489, "y": 291, "ardu_name":"ardu#2"}
-        ],
-        "lines": [
-            {"points": [240, 12, 314, 61], "from": "usb0", "to": "ardu#1" },
-            {"points": [240, 75, 283, 271], "from": "usb3", "to": "ardu#2"},
-            {"points": [514, 89.5, 644, 102], "from": "ardu#1", "to": "dc_motor#0"},
-            {"points": [514, 89.5, 626, 262], "from": "ardu#1", "to": "servo#1"},
-            {"points": [464, 256.5, 489, 351.5], "from": "ardu#2", "to": "rgb_matrix#3"}
-        ]
-    };
+    // let jsonObj = {
+    //     "objects": [
+    //         {"type": "ardu", "name": "ardu#1", "x": 314, "y": 21, "usb": 0},
+    //         {"type": "ardu", "name": "ardu#2", "x": 264, "y": 188, "usb": 3},
+    //         {"type": "device", "name": "dc_motor#0", "x": 644, "y": 38, "ardu_name":"ardu#1"},
+    //         {"type": "device", "name": "servo#1", "x": 626, "y": 198, "ardu_name":"ardu#1"},
+    //         {"type": "device", "name": "rgb_matrix#3", "x": 489, "y": 291, "ardu_name":"ardu#2"}
+    //     ],
+    //     "lines": [
+    //         {"points": [240, 12, 314, 61], "from": "usb0", "to": "ardu#1" },
+    //         {"points": [240, 75, 283, 271], "from": "usb3", "to": "ardu#2"},
+    //         {"points": [514, 89.5, 644, 102], "from": "ardu#1", "to": "dc_motor#0"},
+    //         {"points": [514, 89.5, 626, 262], "from": "ardu#1", "to": "servo#1"},
+    //         {"points": [464, 256.5, 489, 351.5], "from": "ardu#2", "to": "rgb_matrix#3"}
+    //     ]
+    // };
 
     await loadArduinos(jsonObj); //загружаем ардуины
     // let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса
