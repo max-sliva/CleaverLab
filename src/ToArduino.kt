@@ -13,6 +13,7 @@ import javax.swing.JFrame
 
 
 fun main(){
+    setComPort2()
 //    val e: Enumeration<*> = NetworkInterface.getNetworkInterfaces()
 //    while (e.hasMoreElements()) {
 //        val n = e.nextElement() as NetworkInterface
@@ -77,8 +78,8 @@ fun setComPort2(){
                     0
                 ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
                 //остальные параметры стандартные для работы с портом
-                serialPort!!.addEventListener({ event ->   //слушатель порта для приема сообщений от ардуино
-                    if (event.isRXCHAR()) { // если есть данные для приема
+                serialPort!!.addEventListener { event ->   //слушатель порта для приема сообщений от ардуино
+                    if (event.isRXCHAR) { // если есть данные для приема
                         try {  //тут секция с try...catch для работы с портом
                             var str: String = serialPort!!.readString() //считываем данные из порта в строку
                             str =
@@ -90,7 +91,7 @@ fun setComPort2(){
                             println(ex)
                         }
                     }
-                })
+                }
             } catch (e: SerialPortException) { //для обработки возможных ошибок
                 e.printStackTrace()
             }
