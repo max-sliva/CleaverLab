@@ -27,6 +27,7 @@ import io.ktor.sessions.sessions
 import io.ktor.sessions.set
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
+import jssc.SerialPortException
 //import org.bson.Document
 import org.json.JSONArray
 import org.json.JSONObject
@@ -42,7 +43,6 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module() {
     val serialPort = setComPort()
-//todo сделать автоопределение подключенных ардуино по юсб
     serialPort!!.openPort() //открываем порт
     serialPort!!.setParams(
         9600,
@@ -50,7 +50,21 @@ fun Application.module() {
         1,
         0
     ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
-    serialPort.writeString("{'device' : 'matrix', 'clear': 'clear' }")
+        //todo сделать автоопределение подключенных устройств к ардуино
+        serialPort!!.addEventListener { event ->   //слушатель порта для приема сообщений от ардуино
+            if (event.isRXCHAR) { // если есть данные для приема
+                try {  //тут секция с try...catch для работы с портом
+                    var str: String = serialPort!!.readString() //считываем данные из порта в строку
+                    str = str.trim { it <= ' ' } //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
+                    println(str) //выводим принятую строку
+
+                } catch (ex: SerialPortException) { //для обработки возможных ошибок
+                    println(ex)
+                }
+            }
+        }
+
+        serialPort.writeString("{'device' : 'matrix', 'clear': 'clear' }")
     val curIP = getCurrentIp()
 //    val mongoUrl = "localhost";
 //    val mongoClient = MongoClient(mongoUrl, 27017)

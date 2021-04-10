@@ -5,7 +5,11 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB
   }
+  Serial.println("Devices:");
   Serial.println("Servo");
+  Serial.println("DCMotor");
+  Serial.println("end devList");
+
   while (initVal != '1') {
     if (Serial.available())
       initVal = Serial.read();
