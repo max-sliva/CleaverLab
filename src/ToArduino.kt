@@ -3,7 +3,11 @@ package com.example
 import jssc.SerialPort
 import jssc.SerialPortException
 import jssc.SerialPortList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import java.awt.BorderLayout
+import java.awt.Dimension
+import java.awt.TextArea
 import java.awt.event.ActionEvent
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -14,7 +18,8 @@ import javax.swing.JFrame
 
 fun main(){
 //    setComPort2()
-    val portList = getUSBports()
+//    val portList = getUSBports()
+    portsWithThread()
 //    val e: Enumeration<*> = NetworkInterface.getNetworkInterfaces()
 //    while (e.hasMoreElements()) {
 //        val n = e.nextElement() as NetworkInterface
@@ -52,6 +57,29 @@ fun setComPort(par: Int=0): SerialPort?{
     return serialPort
 }
 
+fun getUSBportsCorutine(textArea: TextArea){
+    var portsArray = ArrayList<SerialPort>()
+    var portsStrings = ArrayList<String>()
+    var portNames = SerialPortList.getPortNames() // получаем список портов
+    runBlocking { // создаем корутин
+        while (true) {
+            portNames = SerialPortList.getPortNames()
+            portNames.forEach {
+                if (!portsStrings.contains(it)) {
+                    portsArray.add(SerialPort(it))
+                    portsStrings.add(it)
+                    textArea.append("${portsArray.size - 1}: ${portsArray[portsArray.size - 1].portName}\n")
+                }
+                println(it)
+            }
+            Thread.sleep(1000)
+            println("a")
+//            textArea.append("a")
+        }
+    }
+
+}
+
 fun getUSBports() : ArrayList<SerialPort>{
     var portsArray = ArrayList<SerialPort>()
     val portNames = SerialPortList.getPortNames() // получаем список портов
@@ -59,19 +87,33 @@ fun getUSBports() : ArrayList<SerialPort>{
 //    var i = 0
 //    portNames.forEach { println("${i++}: $it") }
     portNames.forEach { portsArray.add(SerialPort(it))}
-    println("Available Serial ports 2: ")
-    var i = 0
-    portsArray.forEach{
-        println("${i++}: ${it.portName}")
-//        it.openPort()
-//        it.setParams(
-//            9600,
-//            8,
-//            1,
-//            0
-//        )
-    }
+//    println("Available Serial ports 2: ")
+//    var i = 0
+//    portsArray.forEach{
+//        println("${i++}: ${it.portName}")
+//    }
     return portsArray
+}
+
+fun portsWithThread(){
+    val myFrame = JFrame("ArduinoControl")
+    myFrame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+    var textArea = TextArea()
+
+    myFrame.add(textArea, BorderLayout.CENTER)
+    myFrame.size = Dimension(300,300)
+    myFrame.setLocationRelativeTo(null)
+    //myFrame.pack()
+    myFrame.isVisible = true
+    getUSBportsCorutine(textArea)
+//    runBlocking { // создаем корутин
+////       async { //создаем блок для асинхронного запуска вычислений, тоже корутин
+//           while (true) {
+//               Thread.sleep(1000)
+//               textArea.append("a")
+//           }
+////       }
+//    }
 }
 
 fun setComPort2(){
