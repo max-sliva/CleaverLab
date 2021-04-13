@@ -42,7 +42,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module() {
-    val serialPort = setComPort()
+    val serialPort = getUSBports()[0]
     serialPort!!.openPort() //открываем порт
     serialPort!!.setParams(
         9600,
@@ -50,21 +50,22 @@ fun Application.module() {
         1,
         0
     ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
-        //todo сделать автоопределение подключенных устройств к ардуино
-        serialPort!!.addEventListener { event ->   //слушатель порта для приема сообщений от ардуино
-            if (event.isRXCHAR) { // если есть данные для приема
-                try {  //тут секция с try...catch для работы с портом
-                    var str: String = serialPort!!.readString() //считываем данные из порта в строку
-                    str = str.trim { it <= ' ' } //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
-                    println(str) //выводим принятую строку
+    //todo сделать в цикле проход по всем портам в массиве и сформировать json-объект с устройствами
+    //todo сделать отдельный поток для определения подключения нового ардуино
+    serialPort!!.addEventListener { event ->   //слушатель порта для приема сообщений от ардуино
+       if (event.isRXCHAR) { // если есть данные для приема
+           try {  //тут секция с try...catch для работы с портом
+               var str: String = serialPort!!.readString() //считываем данные из порта в строку
+               str = str.trim { it <= ' ' } //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
+               println(str) //выводим принятую строку
 
-                } catch (ex: SerialPortException) { //для обработки возможных ошибок
-                    println(ex)
-                }
-            }
-        }
+           } catch (ex: SerialPortException) { //для обработки возможных ошибок
+               println(ex)
+           }
+       }
+    }
 
-        serialPort.writeString("{'device' : 'matrix', 'clear': 'clear' }")
+    serialPort.writeString("{'device' : 'matrix', 'clear': 'clear' }")
     val curIP = getCurrentIp()
 //    val mongoUrl = "localhost";
 //    val mongoClient = MongoClient(mongoUrl, 27017)

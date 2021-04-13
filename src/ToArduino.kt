@@ -13,7 +13,8 @@ import javax.swing.JFrame
 
 
 fun main(){
-    setComPort2()
+//    setComPort2()
+    val portList = getUSBports()
 //    val e: Enumeration<*> = NetworkInterface.getNetworkInterfaces()
 //    while (e.hasMoreElements()) {
 //        val n = e.nextElement() as NetworkInterface
@@ -49,6 +50,28 @@ fun setComPort(par: Int=0): SerialPort?{
         println("Chosen port = $serialPort")
 //    }
     return serialPort
+}
+
+fun getUSBports() : ArrayList<SerialPort>{
+    var portsArray = ArrayList<SerialPort>()
+    val portNames = SerialPortList.getPortNames() // получаем список портов
+//    println("Available Serial ports: ")
+//    var i = 0
+//    portNames.forEach { println("${i++}: $it") }
+    portNames.forEach { portsArray.add(SerialPort(it))}
+    println("Available Serial ports 2: ")
+    var i = 0
+    portsArray.forEach{
+        println("${i++}: ${it.portName}")
+//        it.openPort()
+//        it.setParams(
+//            9600,
+//            8,
+//            1,
+//            0
+//        )
+    }
+    return portsArray
 }
 
 fun setComPort2(){
