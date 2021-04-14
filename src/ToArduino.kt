@@ -57,23 +57,43 @@ fun setComPort(par: Int=0): SerialPort?{
     return serialPort
 }
 
-fun getUSBportsCorutine(textArea: TextArea){
-    var portsArray = ArrayList<SerialPort>()
-    var portsStrings = ArrayList<String>()
+fun getUSBportsCorutine(textArea: TextArea){ //функция с корутином для автоопределения подключенных ардуин
+    var portsArray = ArrayList<SerialPort>() //массив портов
+    var portsStrings = ArrayList<String>()  //массив названий портов
     var portNames = SerialPortList.getPortNames() // получаем список портов
+    var flag = false
+    var timePassed = 0
     runBlocking { // создаем корутин
-        while (true) {
-            portNames = SerialPortList.getPortNames()
-            portNames.forEach {
-                if (!portsStrings.contains(it)) {
-                    portsArray.add(SerialPort(it))
-                    portsStrings.add(it)
-                    textArea.append("${portsArray.size - 1}: ${portsArray[portsArray.size - 1].portName}\n")
+        while (true) { //в бесконечном цикле будем раз в 2 сек сканировать порты
+            portNames = SerialPortList.getPortNames() //получаем список активных портов
+            portNames.forEach {             //цикл по портам
+                if (!portsStrings.contains(it)) { //если еще не было такого порта
+                    if (!flag) { //это для плат типа Leonardo - они по 2 раза определяются
+                        val tempPort = SerialPort(it)
+                        portsArray.add(tempPort)
+                        portsStrings.add(it)
+                        textArea.append("${portsArray.size - 1}: ${portsArray[portsArray.size - 1].portName}\n")
+                        flag = true
+                        timePassed = 0
+                    }
+                    else if (flag && timePassed<7) { //если вторая плата подключается менее чем через 7 секунд
+                        val tempPort = SerialPort(it)
+                        portsArray.set(portsArray.size - 1, tempPort) //заменяем последний порт
+                        portsStrings.set(portsStrings.size - 1, it)  //и его название
+                        textArea.append("${portsArray.size - 1}: ${portsArray[portsArray.size - 1].portName}\n")
+                        flag = false  //сбрасываем  флаг и счетчик
+                        timePassed = 0
+                    }
                 }
                 println(it)
             }
-            Thread.sleep(1000)
-            println("a")
+            Thread.sleep(2000)
+            if (flag) timePassed++
+            if (timePassed>10) { //сбрасываем счетчик и флаг
+                timePassed = 0
+                flag = false
+            }
+            println("a $timePassed")
 //            textArea.append("a")
         }
     }
