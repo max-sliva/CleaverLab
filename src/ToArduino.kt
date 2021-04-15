@@ -60,6 +60,7 @@ fun setComPort(par: Int=0): SerialPort?{
 }
 
 fun sendDatoToCLient (socket: SendChannel<Frame>? = null, deviceMap: JSONObject? = null){ //для отпарвки клиенту json-объекта с данными об ардуинах и девайсах
+    println("Start coroutine for scanning ports")
     var portNames = SerialPortList.getPortNames() // получаем список портов
     var portNames2 = SerialPortList.getPortNames() // получаем список портов
     portNames.forEach {
