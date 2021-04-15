@@ -4,8 +4,6 @@ import io.ktor.http.cio.websocket.*
 import jssc.SerialPort
 import jssc.SerialPortException
 import jssc.SerialPortList
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
@@ -13,51 +11,53 @@ import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.TextArea
 import java.awt.event.ActionEvent
-import java.util.ArrayList
+import java.util.*
 import javax.swing.JCheckBox
 import javax.swing.JComboBox
 import javax.swing.JFrame
 
-fun main(){ //= runBlocking<Unit>
-    println("Hello")
+
+fun main(){
+//    setComPort2()
+//    val portList = getUSBports()
+//    portsWithThread()
     sendDatoToCLient()
+//    val e: Enumeration<*> = NetworkInterface.getNetworkInterfaces()
+//    while (e.hasMoreElements()) {
+//        val n = e.nextElement() as NetworkInterface
+//        val ee: Enumeration<*> = n.inetAddresses
+//        while (ee.hasMoreElements()) {
+//            val i = ee.nextElement() as InetAddress
+//            println(i.hostAddress)
+//        }
+//    }
+
+//    var serialPort = setComPort()
+//    serialPort!!.openPort() //открываем порт
+//    serialPort!!.setParams(
+//        9600,
+//        8,
+//        1,
+//        0
+//    ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
+//    serialPort?.writeString("0")
 }
+
 
 fun setComPort(par: Int=0): SerialPort?{
     var serialPort: SerialPort? = null
 //    if (par!=0) {
-    val portNames = SerialPortList.getPortNames() // получаем список портов
-    println("Available Serial ports: ")
-    var i = 0
-    portNames.forEach { println("${i++}: $it") }
-    print("Input port number: ")
-    val portIndex = readLine()!!.toInt()
-    serialPort = SerialPort(portNames[portIndex])
-    println("Chosen port = $serialPort")
+        val portNames = SerialPortList.getPortNames() // получаем список портов
+        println("Available Serial ports: ")
+        var i = 0
+        portNames.forEach { println("${i++}: $it") }
+        print("Input port number: ")
+        val portIndex = readLine()!!.toInt()
+        serialPort = SerialPort(portNames[portIndex])
+        println("Chosen port = $serialPort")
 //    }
     return serialPort
 }
-
-fun printPorts(portNames: Array<String>) {
-    println("Ports changed")
-    portNames.forEach {
-        println(it)
-    }
-}
-
-//    serialPort!!.addEventListener { event ->   //слушатель порта для приема сообщений от ардуино
-//       if (event.isRXCHAR) { // если есть данные для приема
-//           try {  //тут секция с try...catch для работы с портом
-//               var str: String = serialPort!!.readString() //считываем данные из порта в строку
-//               str = str.trim { it <= ' ' } //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
-//               println(str) //выводим принятую строку
-//
-//           } catch (ex: SerialPortException) { //для обработки возможных ошибок
-//               println(ex)
-//           }
-//       }
-//    }
-
 
 fun sendDatoToCLient (socket: SendChannel<Frame>? = null, deviceMap: JSONObject? = null){ //для отпарвки клиенту json-объекта с данными об ардуинах и девайсах
     println("Start coroutine for scanning ports")
@@ -66,30 +66,19 @@ fun sendDatoToCLient (socket: SendChannel<Frame>? = null, deviceMap: JSONObject?
     portNames.forEach {
         println(it)
     }
-    GlobalScope.async { // создаем корутин
+    runBlocking { // создаем корутин
         while (true) { //в бесконечном цикле будем раз в 2 сек сканировать порты
-            var num = 0;
             portNames = SerialPortList.getPortNames() //получаем список активных портов
             if (portNames.size!=portNames2.size) {
-                println("Ports changed")
-                printPorts(portNames)
+                portNames.forEach {
+                    println(it)
+                }
                 portNames2 = portNames
             }
             else {
                 //todo сделать сравнение портов в portNames и portNames2 в цикле
-                num = 0;
-
                 portNames.forEach{
-                    val tempPort = it
-                    portNames2.forEach { it2->
-                        if (it2.equals(tempPort)) num++
-                    }
-                }
-                if (num!=portNames.size) {
-                    num = 0;
-                    println("Ports changed 2")
-                    portNames2 = portNames
-                    printPorts(portNames)
+
                 }
             }
             Thread.sleep(2000)
@@ -153,9 +142,9 @@ fun getUSBportsCorutineWithTextArea(textArea: TextArea){ //функция с к�
 //                        println("time = ${currentDate.time - time}")
 
 //                        if (str.contains("Device")){
-                        portsArray.add(tempPort)
-                        portsStrings.add(it)
-                        textArea.append("${portsArray.size - 1}: ${portsArray[portsArray.size - 1].portName}\n")
+                            portsArray.add(tempPort)
+                            portsStrings.add(it)
+                            textArea.append("${portsArray.size - 1}: ${portsArray[portsArray.size - 1].portName}\n")
 //                        }
 //                        tempPort.closePort()
                     }
@@ -175,7 +164,7 @@ fun getUSBportsCorutineWithTextArea(textArea: TextArea){ //функция с к�
 
 }
 
-fun getUSBports() : ArrayList<SerialPort> {
+fun getUSBports() : ArrayList<SerialPort>{
     var portsArray = ArrayList<SerialPort>()
     val portNames = SerialPortList.getPortNames() // получаем список портов
 //    println("Available Serial ports: ")
