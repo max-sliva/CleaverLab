@@ -59,7 +59,7 @@ fun printPortsArray(portNames: Array<String>) { //вывод списка пор
 //    }
 
 
-fun sendDatoToCLient (socket: SendChannel<Frame>? = null, deviceMap: JSONObject? = null){ //для отпарвки клиенту json-объекта с данными об ардуинах и девайсах
+fun sendDatoToCLient (socket: SendChannel<Frame>? = null){ //для отпарвки клиенту json-объекта с данными об ардуинах и девайсах
     println("Start coroutine for scanning ports")
     var portNames = SerialPortList.getPortNames() // получаем список портов
     var portNames2 = SerialPortList.getPortNames() // получаем список портов, с ним будем потом сравнивать новый список
@@ -70,6 +70,7 @@ fun sendDatoToCLient (socket: SendChannel<Frame>? = null, deviceMap: JSONObject?
         while (true) { //в бесконечном цикле будем раз в 2 сек сканировать порты
             var num = 0;
             portNames = SerialPortList.getPortNames() //получаем список активных портов
+            var deviceMap: JSONObject? = createDeviceMap(portNames)
             if (portNames.size!=portNames2.size) { //если размер прошлого списка и нового разные
                 printPortsArray(portNames)
                 portNames2 = portNames //приравниваем старый и новый список портов
@@ -92,6 +93,11 @@ fun sendDatoToCLient (socket: SendChannel<Frame>? = null, deviceMap: JSONObject?
             Thread.sleep(2000)
         }
     }
+}
+
+fun createDeviceMap(portNames: Array<String>?): JSONObject? { //метод для формирования json-объекта с девайсами для отправки клиенту
+    var deviceMap: JSONObject? = null
+    return deviceMap
 }
 
 fun getUSBportsCorutineWithTextArea(textArea: TextArea){ //функция с корутином для автоопределения подключенных ардуин
