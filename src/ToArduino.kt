@@ -38,7 +38,7 @@ fun setComPort(par: Int=0): SerialPort?{
     return serialPort
 }
 
-fun printPorts(portNames: Array<String>) {
+fun printPortsArray(portNames: Array<String>) { //вывод списка портов
     println("Ports changed")
     portNames.forEach {
         println(it)
@@ -62,7 +62,7 @@ fun printPorts(portNames: Array<String>) {
 fun sendDatoToCLient (socket: SendChannel<Frame>? = null, deviceMap: JSONObject? = null){ //для отпарвки клиенту json-объекта с данными об ардуинах и девайсах
     println("Start coroutine for scanning ports")
     var portNames = SerialPortList.getPortNames() // получаем список портов
-    var portNames2 = SerialPortList.getPortNames() // получаем список портов
+    var portNames2 = SerialPortList.getPortNames() // получаем список портов, с ним будем потом сравнивать новый список
     portNames.forEach {
         println(it)
     }
@@ -70,26 +70,23 @@ fun sendDatoToCLient (socket: SendChannel<Frame>? = null, deviceMap: JSONObject?
         while (true) { //в бесконечном цикле будем раз в 2 сек сканировать порты
             var num = 0;
             portNames = SerialPortList.getPortNames() //получаем список активных портов
-            if (portNames.size!=portNames2.size) {
-                println("Ports changed")
-                printPorts(portNames)
-                portNames2 = portNames
+            if (portNames.size!=portNames2.size) { //если размер прошлого списка и нового разные
+                printPortsArray(portNames)
+                portNames2 = portNames //приравниваем старый и новый список портов
             }
-            else {
-                //todo сделать сравнение портов в portNames и portNames2 в цикле
-                num = 0;
-
+            else { //если списки равны по размеру
+                num = 0; //то будем сравнивать названия портов
                 portNames.forEach{
                     val tempPort = it
                     portNames2.forEach { it2->
                         if (it2.equals(tempPort)) num++
                     }
                 }
-                if (num!=portNames.size) {
+                if (num!=portNames.size) {  //если кол-во одинаковых портов меньше кол-ва портов
                     num = 0;
                     println("Ports changed 2")
                     portNames2 = portNames
-                    printPorts(portNames)
+                    printPortsArray(portNames)
                 }
             }
             Thread.sleep(2000)

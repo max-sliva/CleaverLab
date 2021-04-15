@@ -38,7 +38,6 @@ import java.io.File
 //data class MatrixLed(val device: String, val cellNumber: Int, val cellColor1:String, val normalCurCellNumber: Int, val red: Int, val green:Int, val blue:Int)
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
-    //TODO add device mapping via html
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module() {
