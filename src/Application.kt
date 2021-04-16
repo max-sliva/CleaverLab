@@ -41,7 +41,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module() {
-    sendDatoToCLient()
+    startUSBscanner()
 //    portsWithThread()
     val serialPort = getUSBports()[0]
     serialPort!!.openPort() //открываем порт

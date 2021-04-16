@@ -13,17 +13,17 @@ import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.TextArea
 import java.awt.event.ActionEvent
-import java.util.ArrayList
 import javax.swing.JCheckBox
 import javax.swing.JComboBox
 import javax.swing.JFrame
 
-fun main(){ //= runBlocking<Unit>
+fun main() { //= runBlocking<Unit>
     println("Hello")
-    sendDatoToCLient()
+    startUSBscanner()
+    while (true);
 }
 
-fun setComPort(par: Int=0): SerialPort?{
+fun setComPort(par: Int = 0): SerialPort? {
     var serialPort: SerialPort? = null
 //    if (par!=0) {
     val portNames = SerialPortList.getPortNames() // получаем список портов
@@ -37,6 +37,13 @@ fun setComPort(par: Int=0): SerialPort?{
 //    }
     return serialPort
 }
+
+//fun printPortsArray(portNames: Array<String>) { //вывод списка портов
+//    println("Ports changed")
+//    portNames.forEach {
+//        println(it)
+//    }
+//}
 
 fun printPortsArray(portNames: Array<String>) { //вывод списка портов
     println("Ports changed")
@@ -58,34 +65,51 @@ fun printPortsArray(portNames: Array<String>) { //вывод списка пор
 //       }
 //    }
 
+fun sendArduDevicesToClient(socket: SendChannel<Frame>? = null){
 
-fun sendDatoToCLient (socket: SendChannel<Frame>? = null){ //для отпарвки клиенту json-объекта с данными об ардуинах и девайсах
+}
+
+fun startUSBscanner() { //для старта сканера юсб
     println("Start coroutine for scanning ports")
     var portNames = SerialPortList.getPortNames() // получаем список портов
     var portNames2 = SerialPortList.getPortNames() // получаем список портов, с ним будем потом сравнивать новый список
+//    portNames.forEach {
+//        println(it)
+//    }
+    printPortsArray(portNames)
+//    var deviceMap: JSONObject? = createDeviceMap(portNames)
     portNames.forEach {
-        println(it)
+        setListnerForArdu(it)
     }
     GlobalScope.async { // создаем корутин
+        println("in coroutine")
         while (true) { //в бесконечном цикле будем раз в 2 сек сканировать порты
             var num = 0;
             portNames = SerialPortList.getPortNames() //получаем список активных портов
-            var deviceMap: JSONObject? = createDeviceMap(portNames)
-            if (portNames.size!=portNames2.size) { //если размер прошлого списка и нового разные
+            if (portNames.size != portNames2.size) { //если размер прошлого списка и нового разные
                 printPortsArray(portNames)
+                portNames.forEach {
+                    if (it !in portNames2) println("!$it - new!")
+//                    setListnerForArdu(it)
+                }
+
                 portNames2 = portNames //приравниваем старый и новый список портов
-            }
-            else { //если списки равны по размеру
+//                var deviceMap: JSONObject? = createDeviceMap(portNames)
+            } else { //если списки равны по размеру
                 num = 0; //то будем сравнивать названия портов
-                portNames.forEach{
+                portNames.forEach {
                     val tempPort = it
-                    portNames2.forEach { it2->
+                    portNames2.forEach { it2 ->
                         if (it2.equals(tempPort)) num++
                     }
                 }
-                if (num!=portNames.size) {  //если кол-во одинаковых портов меньше кол-ва портов
+                if (num != portNames.size) {  //если кол-во одинаковых портов меньше кол-ва портов
                     num = 0;
                     println("Ports changed 2")
+                    portNames.forEach {
+                        if (it !in portNames2) println("!$it - new!")
+//                        setListnerForArdu(it)
+                    }
                     portNames2 = portNames
                     printPortsArray(portNames)
                 }
@@ -95,12 +119,74 @@ fun sendDatoToCLient (socket: SendChannel<Frame>? = null){ //для отпарв
     }
 }
 
-fun createDeviceMap(portNames: Array<String>?): JSONObject? { //метод для формирования json-объекта с девайсами для отправки клиенту
+fun setListnerForArdu(port: String) {
+    val tempPort = SerialPort(port)
+//    if (tempPort.isOpened) tempPort.closePort()
+    tempPort.openPort() //открываем порт
+    tempPort.setParams(
+        9600,
+        8,
+        1,
+        0
+    ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
+
+    var str: String = ""
+    tempPort!!.addEventListener { event ->   //слушатель порта для приема сообщений от ардуино
+        if (event.isRXCHAR) { // если есть данные для приема
+            try {  //тут секция с try...catch для работы с портом
+                val temp = tempPort!!.readString()
+                if (temp!= null) {
+                    str += temp //считываем данные из порта в строку
+                    //str = str.trim { it <= ' ' } //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
+                    if (str.contains("end devList")) {
+                        println("str = $str")
+                        tempPort.writeString("1");
+                    } //выводим принятую строку
+                }
+                else println("received null from $port")
+            } catch (ex: SerialPortException) { //для обработки возможных ошибок
+                println(ex)
+            }
+        }
+    }
+}
+
+fun createDeviceMap(portNames: Array<String>): JSONObject? { //метод для формирования json-объекта с девайсами для отправки клиенту
+    println("in device map")
     var deviceMap: JSONObject? = null
+    portNames.forEach {
+        val tempPort = SerialPort(it)
+        if (tempPort.isOpened) tempPort.closePort()
+        tempPort.openPort() //открываем порт
+        tempPort.setParams(
+            9600,
+            8,
+            1,
+            0
+        ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
+
+        var str: String = "!"
+        tempPort!!.addEventListener { event ->   //слушатель порта для приема сообщений от ардуино
+            if (event.isRXCHAR) { // если есть данные для приема
+                try {  //тут секция с try...catch для работы с портом
+                    val temp = tempPort!!.readString()
+                    if (temp!= null) {
+                        str += temp //считываем данные из порта в строку
+                        //str = str.trim { it <= ' ' } //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
+                        println("str = $str !") //выводим принятую строку
+                    }
+                } catch (ex: SerialPortException) { //для обработки возможных ошибок
+                    println(ex)
+                }
+            }
+        }
+
+    }
+    println("!end device map")
     return deviceMap
 }
 
-fun getUSBportsCorutineWithTextArea(textArea: TextArea){ //функция с корутином для автоопределения подключенных ардуин
+fun getUSBportsCorutineWithTextArea(textArea: TextArea) { //функция с корутином для автоопределения подключенных ардуин
     var portsArray = ArrayList<SerialPort>() //массив портов
     var portsStrings = ArrayList<String>()  //массив названий портов
     var portNames = SerialPortList.getPortNames() // получаем список портов
@@ -115,76 +201,26 @@ fun getUSBportsCorutineWithTextArea(textArea: TextArea){ //функция с к�
                 if (!portsStrings.contains(it)) { //если еще не было такого порта
                     if (!flag) { //это для плат типа Leonardo - они по 2 раза определяются
                         val tempPort = SerialPort(it)
-//                        tempPort.openPort() //открываем порт
-//                        tempPort.setParams(
-//                            9600,
-//                            8,
-//                            1,
-//                            0
-//                        ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
-
-//                        var str: String = ""
-//                        tempPort!!.addEventListener { event ->   //слушатель порта для приема сообщений от ардуино
-//                            if (event.isRXCHAR) { // если есть данные для приема
-//                                try {  //тут секция с try...catch для работы с портом
-//                                    str += tempPort!!.readString() //считываем данные из порта в строку
-//                                    str = str.trim { it <= ' ' } //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
-//                                    println("str = $str") //выводим принятую строку
-//
-//                                } catch (ex: SerialPortException) { //для обработки возможных ошибок
-//                                    println(ex)
-//                                }
-//                            }
-//                        }
-//                        var currentDate = Date()
-//                        var time = currentDate.time
-//                        var i = 0
-//                        var x : Long = 0
-//                        currentDate = Date()
-//                        var time2 = currentDate.time
-//                        println("time = $time")
-//                        while(currentDate.time - time < 8000){
-//                            currentDate = Date()
-////                            time2 = currentDate.time
-//                            x = currentDate.time - time2
-//                            if (x>=1000)  {
-//                                println("x = $x")
-//                                println("i = ${i++}")
-//                                time2 = currentDate.time
-//                            }
-//                        }
-//                        println("time = ${currentDate.time - time}")
-
-//                        if (str.contains("Device")){
                         portsArray.add(tempPort)
                         portsStrings.add(it)
                         textArea.append("${portsArray.size - 1}: ${portsArray[portsArray.size - 1].portName}\n")
-//                        }
-//                        tempPort.closePort()
                     }
                 }
                 println(it)
             }
             Thread.sleep(2000)
-//            if (flag) timePassed++
-//            if (timePassed>10) { //сбрасываем счетчик и флаг
-//                timePassed = 0
-//                flag = false
-//            }
             println("a $timePassed")
-//            textArea.append("a")
         }
     }
-
 }
 
-fun getUSBports() : ArrayList<SerialPort> {
+fun getUSBports(): ArrayList<SerialPort> {
     var portsArray = ArrayList<SerialPort>()
     val portNames = SerialPortList.getPortNames() // получаем список портов
 //    println("Available Serial ports: ")
 //    var i = 0
 //    portNames.forEach { println("${i++}: $it") }
-    portNames.forEach { portsArray.add(SerialPort(it))}
+    portNames.forEach { portsArray.add(SerialPort(it)) }
 //    println("Available Serial ports 2: ")
 //    var i = 0
 //    portsArray.forEach{
@@ -193,13 +229,13 @@ fun getUSBports() : ArrayList<SerialPort> {
     return portsArray
 }
 
-fun portsWithThread(){
+fun portsWithThread() {
     val myFrame = JFrame("ArduinoControl")
     myFrame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
     var textArea = TextArea()
 
     myFrame.add(textArea, BorderLayout.CENTER)
-    myFrame.size = Dimension(300,300)
+    myFrame.size = Dimension(300, 300)
     myFrame.setLocationRelativeTo(null)
     //myFrame.pack()
     myFrame.isVisible = true
@@ -214,7 +250,7 @@ fun portsWithThread(){
 //    }
 }
 
-fun setComPort2(){
+fun setComPort2() {
     var serialPort: SerialPort? = null
     val myFrame = JFrame("ArduinoControl")
     myFrame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
