@@ -89,8 +89,10 @@ fun startUSBscanner() { //для старта сканера юсб
             if (portNames.size != portNames2.size) { //если размер прошлого списка и нового разные
                 printPortsArray(portNames)
                 portNames.forEach {
-                    if (it !in portNames2) println("!$it - new!")
-//                    setListnerForArdu(it)
+                    if (it !in portNames2) {
+                        println("!$it - new!")
+                        setListnerForArdu(it)
+                    }
                 }
 
                 portNames2 = portNames //приравниваем старый и новый список портов
@@ -107,8 +109,9 @@ fun startUSBscanner() { //для старта сканера юсб
                     num = 0;
                     println("Ports changed 2")
                     portNames.forEach {
-                        if (it !in portNames2) println("!$it - new!")
-//                        setListnerForArdu(it)
+                        if (it !in portNames2) {
+                            println("!$it - new!")
+                            setListnerForArdu(it)}
                     }
                     portNames2 = portNames
                     printPortsArray(portNames)
@@ -137,18 +140,25 @@ fun setListnerForArdu(port: String) {
                 val temp = tempPort!!.readString()
                 if (temp!= null) {
                     str += temp //считываем данные из порта в строку
-                    //str = str.trim { it <= ' ' } //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
+                    str = str.trim { it <= ' ' } //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
                     if (str.contains("end devList")) {
                         println("str = $str")
                         tempPort.writeString("1");
+                        val jsonStr = createJSONfromStr(str);
                     } //выводим принятую строку
                 }
-                else println("received null from $port")
+//                else println("received null from $port")
             } catch (ex: SerialPortException) { //для обработки возможных ошибок
                 println(ex)
             }
         }
     }
+}
+
+fun createJSONfromStr(str: String): String { //для формирования json из строки
+    var jsonStr = ""
+
+    return jsonStr
 }
 
 fun createDeviceMap(portNames: Array<String>): JSONObject? { //метод для формирования json-объекта с девайсами для отправки клиенту
