@@ -80,10 +80,11 @@ fun startUSBscanner() { //для старта сканера юсб
 //    var deviceMap: JSONObject? = createDeviceMap(portNames)
     portNames.forEach {
         setListnerForArdu(it)
+        //todo сделать получение от ардуино номера, и если он = -1, то отправить на ардуино его номер с учетом текущего массива
     }
     GlobalScope.async { // создаем корутин
         println("in coroutine")
-        while (true) { //в бесконечном цикле будем раз в 2 сек сканировать порты
+        while (true) { //в бесконечном цикле будем раз в 3 сек сканировать порты
             var num = 0;
             portNames = SerialPortList.getPortNames() //получаем список активных портов
             if (portNames.size != portNames2.size) { //если размер прошлого списка и нового разные
@@ -117,8 +118,9 @@ fun startUSBscanner() { //для старта сканера юсб
                     printPortsArray(portNames)
                 }
             }
-            Thread.sleep(2000)
+            Thread.sleep(3000)
         }
+        println("End coroutine")
     }
 }
 
