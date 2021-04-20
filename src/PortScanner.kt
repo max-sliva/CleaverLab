@@ -1,0 +1,163 @@
+package com.example
+
+import jssc.SerialPort
+import jssc.SerialPortException
+import jssc.SerialPortList
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import java.awt.BorderLayout
+import java.awt.Dimension
+import javax.swing.*
+
+fun main(){
+//    val usbScanner = PortScanner()
+//    usbScanner.startUSBscanner()
+//    while (true){}
+    guiForScanner()
+}
+
+fun guiForScanner() {
+    val myFrame = JFrame("ArduinoControl")
+    myFrame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+    val usbScanner = PortScanner()
+    usbScanner.startUSBscanner()
+    val comPorts = JComboBox(usbScanner.getPortNames()) // создаем комбобокс с этим списком
+    comPorts.selectedIndex = -1 // чтоб не было выбрано ничего в комбобоксе
+
+
+    val text = JTextField(15)
+    val sendButton = JButton("Send")
+    sendButton.isEnabled = false
+    sendButton.addActionListener{e->
+        val choosenPort = comPorts.getItemAt(comPorts.selectedIndex)
+        val serialPort = SerialPort(choosenPort)
+        serialPort?.writeString(text.text)
+    }
+    val northPanel = JPanel()
+    northPanel.add(comPorts)
+    northPanel.add(text)
+    northPanel.add(sendButton)
+    comPorts.addActionListener { arg ->
+        println("index = ${comPorts.selectedIndex}")
+        if (comPorts.selectedIndex != -1) sendButton.isEnabled = true
+    }
+    myFrame.add(northPanel, BorderLayout.NORTH)
+//    myFrame.add(text, BorderLayout.CENTER)
+    myFrame.size = Dimension(500, 200)
+    myFrame.setLocationRelativeTo(null)
+    //myFrame.pack()
+    myFrame.isVisible = true
+}
+
+
+class PortScanner {
+    private lateinit var portNames : Array<String>
+
+    fun getPortNames(): Array<String>{
+        return portNames
+    }
+
+    fun getJSONfromPorts(): String { //для формирования json из строки
+        var jsonStr = ""
+
+        return jsonStr
+    }
+
+    fun printPortsArray() { //вывод списка портов
+        println("Ports changed")
+        if (portNames.size == 0) println("No arduinos")
+        else portNames.forEach {
+            println(it)
+        }
+    }
+
+    fun startUSBscanner() { //для старта сканера юсб
+        println("Start coroutine for scanning ports")
+        portNames = SerialPortList.getPortNames() // получаем список портов
+        var portNames2 = SerialPortList.getPortNames() // получаем список портов, с ним будем потом сравнивать новый список
+//    portNames.forEach {
+//        println(it)
+//    }
+        printPortsArray()
+//    var deviceMap: JSONObject? = createDeviceMap(portNames)
+        portNames.forEach {
+            setListnerForArdu(it)
+            //todo сделать получение от ардуино номера, и если он = -1, то отправить на ардуино его номер с учетом текущего массива
+        }
+        GlobalScope.async { // создаем корутин
+            println("in coroutine")
+            while (true) { //в бесконечном цикле будем раз в 3 сек сканировать порты
+                var num = 0;
+                portNames = SerialPortList.getPortNames() //получаем список активных портов
+                if (portNames.size != portNames2.size) { //если размер прошлого списка и нового разные
+                    printPortsArray()
+                    portNames.forEach {
+                        if (it !in portNames2) {
+                            println("!$it - new!")
+                            setListnerForArdu(it)
+                        }
+                    }
+
+                    portNames2 = portNames //приравниваем старый и новый список портов
+//                var deviceMap: JSONObject? = createDeviceMap(portNames)
+                } else { //если списки равны по размеру
+                    num = 0; //то будем сравнивать названия портов
+                    portNames.forEach {
+                        val tempPort = it
+                        portNames2.forEach { it2 ->
+                            if (it2.equals(tempPort)) num++
+                        }
+                    }
+                    if (num != portNames.size) {  //если кол-во одинаковых портов меньше кол-ва портов
+                        num = 0;
+                        println("Ports changed 2")
+                        portNames.forEach {
+                            if (it !in portNames2) {
+                                println("!$it - new!")
+                                setListnerForArdu(it)}
+                        }
+                        portNames2 = portNames
+                        printPortsArray(portNames)
+                    }
+                }
+                Thread.sleep(3000)
+            }
+            println("End coroutine")
+        }
+    }
+
+    fun setListnerForArdu(port: String) {
+        val tempPort = SerialPort(port)
+//    if (tempPort.isOpened) tempPort.closePort()
+        tempPort.openPort() //открываем порт
+        tempPort.setParams(
+            9600,
+            8,
+            1,
+            0
+        ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
+
+        var str: String = ""
+        tempPort!!.addEventListener { event ->   //слушатель порта для приема сообщений от ардуино
+            if (event.isRXCHAR) { // если есть данные для приема
+                try {  //тут секция с try...catch для работы с портом
+                    var temp = tempPort!!.readString()
+                    if (temp!= null) {
+                        temp = temp.trim { it <= ' ' }
+                        str += temp //считываем данные из порта в строку
+                        str = str.trim { it <= ' ' } //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
+                        if (str.contains("end devList")) {
+                            println("str = $str")
+                            tempPort.writeString("1");
+//                            val jsonStr = createJSONfromStr(str);
+                        } //выводим принятую строку
+                    }
+//                else println("received null from $port")
+                } catch (ex: SerialPortException) { //для обработки возможных ошибок
+                    println(ex)
+                }
+            }
+        }
+    }
+
+}
