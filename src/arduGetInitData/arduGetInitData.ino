@@ -17,10 +17,10 @@ void setup() {
 }
 
 void sendDeviceInfo() {
-  Serial.println("Ardu 3 Devices:");
+  Serial.println("Ardu 2 Devices:");
 //  Serial.println("Servo");
-  Serial.println("DCMotor");
-//  Serial.println("RGB_Matrix");
+//  Serial.println("DCMotor");
+  Serial.println("RGB_Matrix");
   Serial.println("end devList");
 }
 
@@ -39,6 +39,7 @@ void loop() {
     if (str.indexOf("-info-")!=-1) {
       sendDeviceInfo();
       blinkLed(2);
+      str = "";
     }
   }
   digitalWrite(13, HIGH);

@@ -30,7 +30,7 @@ fun guiForScanner() {
     sendButton.isEnabled = false
     sendButton.addActionListener{e->
         val choosenPort = comPorts.getItemAt(comPorts.selectedIndex)
-        val serialPort = SerialPort(choosenPort)
+        val serialPort = usbScanner.getSerialPortByName(choosenPort)
         serialPort?.writeString(text.text)
     }
     val northPanel = JPanel()
@@ -52,10 +52,13 @@ fun guiForScanner() {
 
 class PortScanner {
     private lateinit var portNames : Array<String>
+    private lateinit var portsHashMap: HashMap<String, SerialPort>
 
     fun getPortNames(): Array<String>{
         return portNames
     }
+
+    fun getSerialPortByName(str: String) = portsHashMap.get(str)
 
     fun getJSONfromPorts(): String { //для формирования json из строки
         var jsonStr = ""
@@ -74,6 +77,7 @@ class PortScanner {
     fun startUSBscanner() { //для старта сканера юсб
         println("Start coroutine for scanning ports")
         portNames = SerialPortList.getPortNames() // получаем список портов
+        portsHashMap = HashMap<String, SerialPort>()
         var portNames2 = SerialPortList.getPortNames() // получаем список портов, с ним будем потом сравнивать новый список
 //    portNames.forEach {
 //        println(it)
@@ -82,6 +86,7 @@ class PortScanner {
 //    var deviceMap: JSONObject? = createDeviceMap(portNames)
         portNames.forEach {
             setListnerForArdu(it)
+            Thread.sleep(2000)
             //todo сделать получение от ардуино номера, и если он = -1, то отправить на ардуино его номер с учетом текущего массива
         }
         GlobalScope.async { // создаем корутин
@@ -128,6 +133,8 @@ class PortScanner {
 
     fun setListnerForArdu(port: String) {
         val tempPort = SerialPort(port)
+        portsHashMap.set(port, tempPort)
+        println("Set listner for $port")
 //    if (tempPort.isOpened) tempPort.closePort()
         tempPort.openPort() //открываем порт
         tempPort.setParams(
@@ -136,23 +143,28 @@ class PortScanner {
             1,
             0
         ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
-
+        var first = true
         var str: String = ""
         tempPort!!.addEventListener { event ->   //слушатель порта для приема сообщений от ардуино
             if (event.isRXCHAR) { // если есть данные для приема
                 try {  //тут секция с try...catch для работы с портом
-                    var temp = tempPort!!.readString()
+                    val temp = tempPort!!.readString()
                     if (temp!= null) {
-                        temp = temp.trim { it <= ' ' }
-                        str += temp //считываем данные из порта в строку
-                        str = str.trim { it <= ' ' } //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
+//                        temp = temp.trim { it <= ' ' }
+                        if (temp.contains("\n")) str += temp
+                        else str += temp.trim { it < ' ' } //считываем данные из порта в строку
+                        str = str.trim { it < ' ' } //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
                         if (str.contains("end devList")) {
                             println("str = $str")
-                            tempPort.writeString("1");
+                            str = ""
+                            if (first) {
+                                tempPort.writeString("1")
+                                first = false
+                            }
 //                            val jsonStr = createJSONfromStr(str);
                         } //выводим принятую строку
                     }
-//                else println("received null from $port")
+                    else println("received null from $port")
                 } catch (ex: SerialPortException) { //для обработки возможных ошибок
                     println(ex)
                 }
