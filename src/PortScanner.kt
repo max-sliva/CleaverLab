@@ -6,8 +6,11 @@ import jssc.SerialPortList
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import java.awt.BorderLayout
+import java.awt.Component
+import java.awt.Container
 import java.awt.Dimension
 import javax.swing.*
+
 
 fun main(){
 //    val usbScanner = PortScanner()
@@ -23,7 +26,18 @@ fun guiForScanner() {
     usbScanner.startUSBscanner()
     val comPorts = JComboBox(usbScanner.getPortNames()) // создаем комбобокс с этим списком
     comPorts.selectedIndex = -1 // чтоб не было выбрано ничего в комбобоксе
-
+    val arrowBtn = getButtonSubComponent(comPorts)
+    arrowBtn?.addActionListener {
+        println("arrow button pressed")
+        val comArray = usbScanner.getPortNames()
+        comArray.forEach {
+            val model = comPorts.model as DefaultComboBoxModel
+            if(model.getIndexOf(it) == -1 ) {
+                comPorts.addItem(it)
+            }
+//            if (comPorts.model)
+        }
+    }
 
     val text = JTextField(15)
     val sendButton = JButton("Send")
@@ -49,6 +63,19 @@ fun guiForScanner() {
     myFrame.isVisible = true
 }
 
+private fun getButtonSubComponent(container: Container): JButton? { //для получения кнопки-стрелки в комбобоксе
+    if (container is JButton) {
+        return container
+    } else {
+        val components: Array<Component> = container.getComponents()
+        for (component in components) {
+            if (component is Container) {
+                return getButtonSubComponent(component as Container)
+            }
+        }
+    }
+    return null
+}
 
 class PortScanner {
     private lateinit var portNames : Array<String>
@@ -152,8 +179,8 @@ class PortScanner {
                     if (temp!= null) {
 //                        temp = temp.trim { it <= ' ' }
                         if (temp.contains("\n")) str += temp
-                        else str += temp.trim { it < ' ' } //считываем данные из порта в строку
-                        str = str.trim { it < ' ' } //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
+                        else str += temp.trim { it < ' ' && it !='\n'} //считываем данные из порта в строку
+                        str = str.trim { it < ' ' && it !='\n'} //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
                         if (str.contains("end devList")) {
                             println("str = $str")
                             str = ""
