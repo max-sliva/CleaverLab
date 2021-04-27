@@ -418,7 +418,7 @@ function removeDevice() {
 let jsonObj = {
     "objects": [
         // {"type":"ardu", "name":"ardu#1", "x":"", "y":""},
-        // {"type":"device", "name":"dc_motor#0", "x":"", "y":""}
+        // {"type":"device", "name":"dc_motor#0", "ardu": "ardu#1", "x":"", "y":""} //todo проверить с новым параметром "ardu"
     ],
     "lines": []
     // {"points": [240, 75, 283, 271], "from": "usb3", "to": "ardu#2"},

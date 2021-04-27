@@ -80,6 +80,7 @@ private fun getButtonSubComponent(container: Container): JButton? { //для п�
 class PortScanner {
     private lateinit var portNames : Array<String>
     private lateinit var portsHashMap: HashMap<String, SerialPort>
+    private var portInfoJSON = """[""";
 
     fun getPortNames(): Array<String>{
         return portNames
@@ -87,10 +88,37 @@ class PortScanner {
 
     fun getSerialPortByName(str: String) = portsHashMap.get(str)
 
-    fun getJSONfromPorts(): String { //для формирования json из строки
-        var jsonStr = ""
+    private fun convertPortInfoToJSON(str: String){ //для преобразования строки в JSON-объект
+        var counter = 0
+        println("Converting str = \n$str")
+        val devPos = str.indexOf("Devices")
+        println("devPos = $devPos")
+        var arduNum = 0
+        if (devPos != -1) {
+            val x = str.subSequence(devPos-2, devPos).toString() //получаем номер ардуино
+            arduNum = Integer.parseInt(x.trim())
+            println("arduNum = $arduNum")
+            val arduName = "ardu#"+arduNum
+            var jsonStr = """{"type":"ardu", "name":"$arduName"},"""
+//            var i = devPos + "Devices:".length+1
+            var i = str.indexOf("\n")
+            var devStr = ""
+            while (++i!=str.length){
+                devStr+=str[i]
+                if(str[i] == '\n' && !devStr.contains("end devList")) {
+                    devStr=devStr.trim()
+                    println("devStr = $devStr")
+                    jsonStr+="""{"type":"device", "name": "${devStr+counter++}", "ardu": "$arduName"},"""
+                    devStr = ""
+                }
+            }
+            if (!portInfoJSON.contains(jsonStr)) portInfoJSON += jsonStr
+            println("portInfoJSON = \n$portInfoJSON")
+        }
+    }
 
-        return jsonStr
+    fun getJSONfromPorts(): String { //для возврата json с объектами
+        return "$portInfoJSON]"
     }
 
     fun printPortsArray() { //вывод списка портов
@@ -183,6 +211,7 @@ class PortScanner {
                         str = str.trim { it < ' ' && it !='\n'} //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
                         if (str.contains("end devList")) {
                             println("str = $str")
+                            convertPortInfoToJSON(str)
                             str = ""
                             if (first) {
                                 tempPort.writeString("1")
