@@ -27,6 +27,7 @@ import io.ktor.sessions.sessions
 import io.ktor.sessions.set
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
+import jssc.SerialPort
 import jssc.SerialPortException
 //import org.bson.Document
 import org.json.JSONArray
@@ -41,18 +42,21 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module() {
-    startUSBscanner()
+//    startUSBscanner()
 //    portsWithThread()
-    val serialPort = getUSBports()[0]
-    serialPort!!.openPort() //открываем порт
-    serialPort!!.setParams(
-        9600,
-        8,
-        1,
-        0
-    ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
+    val usbScanner = PortScanner()
+    usbScanner.startUSBscanner()
 
-    serialPort.writeString("{'device' : 'matrix', 'clear': 'clear' }")
+    val serialPort = SerialPort(usbScanner.getPortNames()[0])
+//    serialPort!!.openPort() //открываем порт
+//    serialPort!!.setParams(
+//        9600,
+//        8,
+//        1,
+//        0
+   // ) //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
+
+//    serialPort.writeString("{'device' : 'matrix', 'clear': 'clear' }")
     val curIP = getCurrentIp()
 //    val mongoUrl = "localhost";
 //    val mongoClient = MongoClient(mongoUrl, 27017)
@@ -125,8 +129,12 @@ fun Application.module() {
 //                                    val deviceCaps = arrayListOf("type", "name", "active")
 //                                    outgoing.send(Frame.Text(arrayListToJSON(devices, deviceCaps, "devices")))
                                     val deviceData = fromFileToJSON("deviceData.json")["device"]
-                                    println("devices=$deviceData")
-                                    val deviceJson = """{"type": "devices", "devices": $deviceData}"""
+                                    println("devicesFromFile=$deviceData")
+//                                    val deviceJson = """{"type": "devices", "devices": $deviceData}"""
+                                    val infoFromComPorts = usbScanner.getJSONfromPorts()
+                                    val deviceJson = """{"type": "devices", "devices": $infoFromComPorts}"""
+
+                                    println("devicesFromComPorts = $deviceJson" )
                                     outgoing.send(Frame.Text(deviceJson))
                                 } else {
                                     println("From Admin: $text")

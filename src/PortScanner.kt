@@ -80,7 +80,7 @@ private fun getButtonSubComponent(container: Container): JButton? { //для п�
 class PortScanner {
     private lateinit var portNames : Array<String>
     private lateinit var portsHashMap: HashMap<String, SerialPort>
-    private var portInfoJSON = """[""";
+    private var portInfoJSON = """[]""";
 
     fun getPortNames(): Array<String>{
         return portNames
@@ -99,7 +99,7 @@ class PortScanner {
             arduNum = Integer.parseInt(x.trim())
             println("arduNum = $arduNum")
             val arduName = "ardu#"+arduNum
-            var jsonStr = """{"type":"ardu", "name":"$arduName"},"""
+            var jsonStr = """{"type":"ardu", "name":"$arduName"},""" //сама ардуино
 //            var i = devPos + "Devices:".length+1
             var i = str.indexOf("\n")
             var devStr = ""
@@ -112,13 +112,18 @@ class PortScanner {
                     devStr = ""
                 }
             }
-            if (!portInfoJSON.contains(jsonStr)) portInfoJSON += jsonStr
-            println("portInfoJSON = \n$portInfoJSON")
+            if (!portInfoJSON.contains(jsonStr)) {
+                portInfoJSON=portInfoJSON.replace("]"," ")
+                portInfoJSON += jsonStr
+                portInfoJSON += "]"
+            }
+            println("portInfoJSON = \n${portInfoJSON}")
+            println("getJSONfromPorts = \n${getJSONfromPorts()}")
         }
     }
 
     fun getJSONfromPorts(): String { //для возврата json с объектами
-        return "$portInfoJSON]"
+        return "${portInfoJSON.replace(",]","]")}"
     }
 
     fun printPortsArray() { //вывод списка портов
