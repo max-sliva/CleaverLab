@@ -36,6 +36,23 @@ repositories {
     maven { url 'https://kotlin.bintray.com/kotlin-js-wrappers' }
 }
 
+
+jar {
+    from {
+        configurations.runtime.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    manifest {
+        attributes 'Main-Class': 'com.example.PortScannerKt'
+    }
+
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+}
+
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "io.ktor:ktor-server-netty:$ktor_version"
@@ -61,5 +78,6 @@ dependencies {
     implementation "io.ktor:ktor-websockets:$ktor_version"
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation files('jssc-2.9.2.jar')
+    compile files('jssc-2.9.2.jar')
     implementation files('json-20190722.jar')
 }

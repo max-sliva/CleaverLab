@@ -1,6 +1,5 @@
 package com.example
 
-import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import com.google.gson.Gson
 import io.ktor.application.*
@@ -8,18 +7,14 @@ import io.ktor.response.*
 import io.ktor.request.*
 import io.ktor.routing.*
 import io.ktor.http.*
-import io.ktor.html.*
 import kotlinx.html.*
 import kotlinx.css.*
-import io.ktor.client.*
-import io.ktor.client.engine.apache.*
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.WebSocketSession
 import io.ktor.http.cio.websocket.readText
 import io.ktor.http.content.defaultResource
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
-import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.sessions.Sessions
 import io.ktor.sessions.cookie
@@ -28,7 +23,6 @@ import io.ktor.sessions.set
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
 import jssc.SerialPort
-import jssc.SerialPortException
 //import org.bson.Document
 import org.json.JSONArray
 import org.json.JSONObject
@@ -136,6 +130,7 @@ fun Application.module() {
 
                                     println("devicesFromComPorts = $deviceJson" )
                                     outgoing.send(Frame.Text(deviceJson))
+//                                    usbScanner.setUpdaterForPorts(outgoing)
                                 } else {
                                     println("From Admin: $text")
                                 }
