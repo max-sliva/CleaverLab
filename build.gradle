@@ -77,7 +77,9 @@ dependencies {
     implementation "io.ktor:ktor-client-okhttp:$ktor_version"
     implementation "io.ktor:ktor-websockets:$ktor_version"
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation files('jssc-2.9.2.jar')
-    compile files('jssc-2.9.2.jar')
+    implementation 'io.github.java-native:jssc:2.9.2'
+    compile 'io.github.java-native:jssc:2.9.2'
+   // implementation files('jssc-2.9.2.jar')
+   // compile files('jssc-2.9.2.jar')
     implementation files('json-20190722.jar')
 }

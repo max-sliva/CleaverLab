@@ -40,6 +40,7 @@ fun guiForScanner() {
     }
 
     val text = JTextField(15)
+    text.text = "-info-"
     val sendButton = JButton("Send")
     sendButton.isEnabled = false
     sendButton.addActionListener{e->
@@ -105,7 +106,7 @@ class PortScanner {
             var devStr = ""
             while (++i!=str.length){
                 devStr+=str[i]
-                if(str[i] == '\n' && !devStr.contains("end devList")) {
+                if(str[i] == '\n' && !devStr.contains("end devList")  && !devStr.contains("Devices")) {
                     devStr=devStr.trim()
                     println("devStr = $devStr")
                     jsonStr+="""{"type":"device", "name": "${devStr+counter++}", "ardu": "$arduName"},"""
@@ -186,6 +187,7 @@ class PortScanner {
                     }
                 }
                 Thread.sleep(3000)
+//                println("ports size = ${portNames.size}")
             }
             println("End coroutine")
         }
