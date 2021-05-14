@@ -616,5 +616,10 @@ function clearKonva(){
 }
 
 function setDevicesFromServer(devices){
-
+    clearKonva()
+    console.log("devices from server: ", devices)
+    devices.forEach(function (item) {
+        console.log(item.name)
+        //todo сделать создание json-массива для передачи в функции loadArduinos и loadDevices
+    })
 }

@@ -40,8 +40,12 @@ fun Application.module() {
 //    portsWithThread()
     val usbScanner = PortScanner()
     usbScanner.startUSBscanner()
+    val serialPort: SerialPort? = null
+    try {
+        val serialPort = SerialPort(usbScanner.getPortNames()[0])
+    } catch (ex: ArrayIndexOutOfBoundsException) {
 
-    val serialPort = SerialPort(usbScanner.getPortNames()[0])
+    }
 //    serialPort!!.openPort() //открываем порт
 //    serialPort!!.setParams(
 //        9600,
