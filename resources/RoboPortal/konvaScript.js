@@ -614,3 +614,7 @@ function clearKonva(){
     makeRasPi();
     layer.batchDraw();
 }
+
+function setDevicesFromServer(devices){
+
+}

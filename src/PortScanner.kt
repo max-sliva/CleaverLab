@@ -1,10 +1,12 @@
 package com.example
 
+import io.ktor.http.cio.websocket.*
 import jssc.SerialPort
 import jssc.SerialPortException
 import jssc.SerialPortList
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.SendChannel
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Container
@@ -82,7 +84,7 @@ class PortScanner {
     private lateinit var portNames : Array<String>
     private lateinit var portsHashMap: HashMap<String, SerialPort>
     private var portInfoJSON = """[]""";
-
+    private lateinit var channelForSockets: SendChannel<Frame>
     fun getPortNames(): Array<String>{
         return portNames
     }
@@ -120,6 +122,11 @@ class PortScanner {
             }
             println("portInfoJSON = \n${portInfoJSON}")
             println("getJSONfromPorts = \n${getJSONfromPorts()}")
+//            val deviceJson = """{"type": "devices", "devices": ${getJSONfromPorts()}}"""
+//            println("devicesFromComPorts = $deviceJson" )
+//            channelForSockets.send(Frame.Text(deviceJson))
+
+
         }
     }
 
@@ -219,6 +226,12 @@ class PortScanner {
                         if (str.contains("end devList")) {
                             println("str = $str")
                             convertPortInfoToJSON(str)
+                            val deviceJson = """{"type": "devices", "devices": ${getJSONfromPorts()}}"""
+                            println("devicesFromComPorts = $deviceJson" )
+                            GlobalScope.async {
+                                println("data to client was sent ")
+                                channelForSockets.send(Frame.Text(deviceJson))
+                            }
                             str = ""
                             if (first) {
                                 tempPort.writeString("1")
@@ -233,6 +246,10 @@ class PortScanner {
                 }
             }
         }
+    }
+
+    fun setUpdaterForPorts(outgoing: SendChannel<Frame>) {
+        channelForSockets = outgoing
     }
 
 }

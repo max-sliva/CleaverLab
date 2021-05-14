@@ -122,15 +122,15 @@ fun Application.module() {
 //                                    println("devices=$devices")
 //                                    val deviceCaps = arrayListOf("type", "name", "active")
 //                                    outgoing.send(Frame.Text(arrayListToJSON(devices, deviceCaps, "devices")))
-                                    val deviceData = fromFileToJSON("deviceData.json")["device"]
-                                    println("devicesFromFile=$deviceData")
+//                                    val deviceData = fromFileToJSON("deviceData.json")["device"]
+//                                    println("devicesFromFile=$deviceData")
 //                                    val deviceJson = """{"type": "devices", "devices": $deviceData}"""
                                     val infoFromComPorts = usbScanner.getJSONfromPorts()
                                     val deviceJson = """{"type": "devices", "devices": $infoFromComPorts}"""
-
+//
                                     println("devicesFromComPorts = $deviceJson" )
                                     outgoing.send(Frame.Text(deviceJson))
-//                                    usbScanner.setUpdaterForPorts(outgoing)
+                                    usbScanner.setUpdaterForPorts(outgoing)
                                 } else {
                                     println("From Admin: $text")
                                 }
