@@ -8,8 +8,8 @@ const stage = new Konva.Stage({
     height: height - 250
 });
 const layer = new Konva.Layer();
-
-let objTargets = [];
+let devHeight = 64;
+let arduHeght = 110;let objTargets = [];
 stage.add(layer);
 let group = new Konva.Group({ //группа для объектов Konva, чтоб двигать объекты (RasPi+usb)
     x: 20,
@@ -53,6 +53,14 @@ function drawDevice(imageObj, x = 0, y = 0) { //для отрисовки дев
         draggable: true,
         id: imgId
     });
+    console.log("img wigth1 = ", img.width())
+    img.size({
+        width: img.width()*0.5,
+        height: img.height()*0.5,
+    });
+    // img.width = img.width()*0.5;
+    // img.height = img.height()*0.5;
+    console.log("img wigth2 = ", img.width())
     img.on('click', function () { //для добавления синей рамки девайса при клике на нем
         const box1 = stage.find('.blueBox'); //находим предудущую синюю рамку
         // console.log("box = ", box);
@@ -135,6 +143,11 @@ function drawImage(imageObj, x = 0, y = 0, ardu_number = -1) { //создани�
         id: imgId
         // draggable: true,
     });
+    if (i_ardu > 0)
+        img.size({
+            width: img.width()*0.8,
+            height: img.height()*0.8,
+        });
     console.log("img.x = ",img.x());
     console.log("img.y = ",img.y());
     console.log("img.width = ",img.width());
@@ -615,11 +628,53 @@ function clearKonva(){
     layer.batchDraw();
 }
 
-function setDevicesFromServer(devices){
+function setDevicesFromServer(devices){ //для показа устройств, полученных с сервера
     clearKonva()
-    console.log("devices from server: ", devices)
+    let objFromServer = {"objects": [], "lines": []};
+    // console.log("devices from server: ", devices)
+    let i_ardu = 0;
+    let boundRectPrev = 0; //границы для вывода ардуин
     devices.forEach(function (item) {
-        console.log(item.name)
+        console.log(item.name);
         //todo сделать создание json-массива для передачи в функции loadArduinos и loadDevices
+        let tempItem = item;
+        if (tempItem.type==="ardu") {
+            tempItem.x = 260;
+            const count = devices.filter((obj) => obj.ardu_name === tempItem.name).length;
+            console.log("devices for ",tempItem.name," = ", count );
+            const countChet = Math.floor(count / 2) * 2;
+            console.log("devices for ",tempItem.name," chetn = ", countChet );
+            const boundRect =  (devHeight+5) * countChet+10; //границы для текущей ардуино
+            tempItem.y = boundRectPrev + boundRect / 2 - arduHeght / 2;  //у-координата для текущей ардуино
+            objFromServer.objects.push(tempItem);
+            const devsForArdu = devices.filter((obj) => obj.ardu_name === tempItem.name);
+            console.log("devs for ", tempItem.name, ": ", devsForArdu);
+            let i_dev = 0;
+            devsForArdu.forEach(function (item2) {
+                let tempItem2 = item2;
+                tempItem2.name = tempItem2.name.toLowerCase();
+                tempItem2.x = 470 + (i_dev % 2)*100;
+                tempItem2.y = (i_dev %2) ? (boundRectPrev + devHeight/2+(devHeight+5)*(i_dev-1)): boundRectPrev + (devHeight+5)* (i_dev/2) ;
+                objFromServer.objects.push(tempItem2);
+                i_dev++;
+            })
+            boundRectPrev += boundRect;
+            i_ardu++;
+        } else {
+
+        }
+        //i++
     })
+    console.log("objFromServer: ", objFromServer);
+    loadArduinos(objFromServer);
+    // loadDevices(objFromServer);
 }
+
+/*
+c сервера
+{type: "ardu", name: "ardu#4"}
+{type: "device", name: "DCMotor#0", ardu_name: "ardu#4"}
+на канвас
+{"type": "ardu", "name": "ardu#2", "x": 264, "y": 188, "usb": 3},
+{"type": "device", "name": "dc_motor#0", "x": 644, "y": 38, "ardu_name":"ardu#1"},
+ */

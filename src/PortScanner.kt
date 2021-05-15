@@ -111,7 +111,7 @@ class PortScanner {
                 if(str[i] == '\n' && !devStr.contains("end devList")  && !devStr.contains("Devices")) {
                     devStr=devStr.trim()
                     println("devStr = $devStr")
-                    jsonStr+="""{"type":"device", "name": "${devStr+counter++}", "ardu": "$arduName"},"""
+                    jsonStr+="""{"type":"device", "name": "${devStr+'#'+counter++}", "ardu_name": "$arduName"},"""
                     devStr = ""
                 }
             }

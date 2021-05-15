@@ -17,9 +17,9 @@ void setup() {
 }
 
 void sendDeviceInfo() {
-  Serial.println("Ardu 4 Devices:");
-//  Serial.println("Servo");
-  Serial.println("DCMotor");
+  Serial.println("Ardu 2 Devices:");
+  Serial.println("Servo");
+  Serial.println("DC_Motor");
   Serial.println("RGB_Matrix");
   Serial.println("end devList");
 }
