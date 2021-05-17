@@ -9,7 +9,8 @@ const stage = new Konva.Stage({
 });
 const layer = new Konva.Layer();
 let devHeight = 64;
-let arduHeght = 110;let objTargets = [];
+let arduHeght = 110;
+let objTargets = [];
 stage.add(layer);
 let group = new Konva.Group({ //группа для объектов Konva, чтоб двигать объекты (RasPi+usb)
     x: 20,
@@ -53,14 +54,14 @@ function drawDevice(imageObj, x = 0, y = 0) { //для отрисовки дев
         draggable: true,
         id: imgId
     });
-    console.log("img wigth1 = ", img.width())
+    // console.log("img width1 = ", img.width())
     img.size({
         width: img.width()*0.5,
         height: img.height()*0.5,
     });
     // img.width = img.width()*0.5;
     // img.height = img.height()*0.5;
-    console.log("img wigth2 = ", img.width())
+    // console.log("img width2 = ", img.width())
     img.on('click', function () { //для добавления синей рамки девайса при клике на нем
         const box1 = stage.find('.blueBox'); //находим предудущую синюю рамку
         // console.log("box = ", box);
@@ -78,7 +79,7 @@ function drawDevice(imageObj, x = 0, y = 0) { //для отрисовки дев
         box.on('click', blueBoxClick);
         let delBtn = document.getElementById("btnRemove");
         delBtn.disabled = false;
-        console.log("btn text = ", delBtn);
+        // console.log("btn text = ", delBtn);
         curDevice = img;
         let box2 = layer.find('.redBox');
         if (box2[0] !== undefined && !objMap.has(box2[0])) {
@@ -180,7 +181,7 @@ function drawImage(imageObj, x = 0, y = 0, ardu_number = -1) { //создани�
         });
     } else { //если выбрали малину
         img.on('click', function () { //для удаления красной рамки ардуино
-            console.log("raspi click!");
+            // console.log("raspi click!");
             const redBox = stage.find('.redBox');
             // console.log("box = ", box);
             redBox.destroy();
@@ -246,7 +247,7 @@ function makeRasPi() {
                 console.log('selected ', conStart.text());
                 portNum = usbPorts.indexOf(conStart); //получаем номер порта в массиве
                 console.log("i = ", portNum);
-                console.log("portsSize = ", usbPorts.length);
+                // console.log("portsSize = ", usbPorts.length);
 
                 // line.points([group.x()+objTargets[0].width()+20, group.y()+(portNum*box.height())+(portNum+1)*(box.height()/2), objTargets[1].x(), objTargets[1].y()+objTargets[1].height()/2]);
                 let box2 = layer.find('.redBox'); //находим объект с красной рамкой
@@ -463,7 +464,6 @@ function saveKanva() { //для сохранения канваса
         let curArdu = key;
         // const dev = connMapArduDev.get(key);
         //todo добавить удаление занятого ЮСБ из массива портов
-        //todo добавить from и to
         connMap2.forEach(function (value, key) { //для всех соединений ардуино с девайсом
             if (curArdu == value) {  //если это текущая  ардуино
                 const dev = key; //берем девайс
@@ -636,7 +636,6 @@ function setDevicesFromServer(devices){ //для показа устройств
     let boundRectPrev = 0; //границы для вывода ардуин
     devices.forEach(function (item) {
         console.log(item.name);
-        //todo сделать создание json-массива для передачи в функции loadArduinos и loadDevices
         let tempItem = item;
         if (tempItem.type==="ardu") {
             tempItem.x = 260;
@@ -677,4 +676,11 @@ c сервера
 на канвас
 {"type": "ardu", "name": "ardu#2", "x": 264, "y": 188, "usb": 3},
 {"type": "device", "name": "dc_motor#0", "x": 644, "y": 38, "ardu_name":"ardu#1"},
- */
+    "lines": [
+        {"points": [240, 12, 314, 61], "from": "usb0", "to": "ardu#1" },
+        {"points": [240, 75, 283, 271], "from": "usb3", "to": "ardu#2"},
+        {"points": [514, 89.5, 644, 102], "from": "ardu#1", "to": "dc_motor#0"},
+        {"points": [514, 89.5, 626, 262], "from": "ardu#1", "to": "servo#1"},
+        {"points": [464, 256.5, 489, 351.5], "from": "ardu#2", "to": "rgb_matrix#3"}
+    ]
+*/
