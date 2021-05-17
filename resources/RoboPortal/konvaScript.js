@@ -24,6 +24,7 @@ let connMap = new Map();
 let objMap2 = new Map();
 let connMap2 = new Map();
 let connMapArduDev = new Map();
+let raspiImg = new Image();
 
 let j = 0;
 let curArdu = null;
@@ -217,7 +218,7 @@ function makeRasPi() {
         y: 0,
         draggable: true,
     });
-    let raspiImg = new Image();
+    raspiImg = new Image();
     raspiImg.onload = function () { //вызывается при загрузке изображения малины
         const img = drawImage(this); //добавляем на канвас
         group.add(img); //добавляем в группу
@@ -439,7 +440,13 @@ let jsonObj = {
     // {"points": [514, 89.5, 644, 102], "from": "ardu#1", "to": "dc_motor#0"},
 };
 function saveKanva() { //для сохранения канваса
-
+    jsonObj = {
+        "objects": [
+            // {"type":"ardu", "name":"ardu#1", "x":"", "y":""},
+            // {"type":"device", "name":"dc_motor#0", "ardu": "ardu#1", "x":"", "y":""} //todo проверить с новым параметром "ardu"
+        ],
+        "lines": []
+    };
     // console.log("connMap2 = \n")
     // connMap2.forEach(function (value, key) {
     //     console.log("key=", key, "  value=", value);
@@ -516,7 +523,7 @@ function loadArduinos(jsonObj){  //для загрузки ардуин
                             // curArdu = arduStringName.get(itemLine.from);
                             // console.log("curArdu from device = ", curArdu);
                             drawLine(itemLine,null, curImg, item.usb);
-                            console.log("line added");
+                            console.log("--!! line to Raspi added !!--");
                         }
                     });
 
@@ -544,11 +551,11 @@ function loadDevices(jsonObj, arduName){  //для загрузки устрой
                         //objTargets.push(curImg);
                         jsonObj.lines.forEach(function (itemLine) { //цикл по линиям
                             if (item.name === itemLine.to) {
-                                console.log("itemLine.from = ", itemLine.from);
+                                // console.log("itemLine.from = ", itemLine.from);
                                 curArdu = arduStringName.get(itemLine.from);
-                                console.log("curArdu from device = ", curArdu);
+                                // console.log("curArdu from device = ", curArdu);
                                 drawLine(itemLine, curImg, curArdu, null);
-                                console.log("line added");
+                                // console.log("line added");
                             }
                         });
                     }
@@ -626,15 +633,16 @@ function clearKonva(){
 
     makeRasPi();
     layer.batchDraw();
+    // console.log("objTargets[0] from clear = ", objTargets[0].name)
 }
 
-function setDevicesFromServer(devices){ //для показа устройств, полученных с сервера
-    clearKonva()
+async function setDevicesFromServer(devices){ //для показа устройств, полученных с сервера
+    // await clearKonva();
     let objFromServer = {"objects": [], "lines": []};
     // console.log("devices from server: ", devices)
     let i_ardu = 0;
     let boundRectPrev = 0; //границы для вывода ардуин
-    devices.forEach(function (item) {
+    await devices.forEach(function (item) {
         console.log(item.name);
         let tempItem = item;
         if (tempItem.type==="ardu") {
@@ -646,6 +654,20 @@ function setDevicesFromServer(devices){ //для показа устройств
             const boundRect =  (devHeight+5) * countChet+10; //границы для текущей ардуино
             tempItem.y = boundRectPrev + boundRect / 2 - arduHeght / 2;  //у-координата для текущей ардуино
             objFromServer.objects.push(tempItem);
+            // console.log("raspiImg = ", raspiImg.width)
+            //todo разобраться, почему не рисует эту линию
+            let lineToRaspi = new Konva.Line({ //создаем новую линию от малины до ардуины
+                // points: [group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2],
+                points: [group.x() + raspiImg.width + 20, 5 + group.y() + (i_ardu * usbPorts[0].height()) + (i_ardu + 1) * (usbPorts[0].height() / 2), tempItem.x, tempItem.y + 40],
+                stroke: 'green',
+                strokeWidth: 2,
+            });
+            lineToRaspi.from = "usb"+i_ardu;
+            lineToRaspi.to = tempItem.name;
+            objFromServer.lines.push(lineToRaspi);
+            console.log("lineToRaspi.x = ", lineToRaspi.x);
+            console.log("lineToRaspi.y = ", lineToRaspi.y);
+
             const devsForArdu = devices.filter((obj) => obj.ardu_name === tempItem.name);
             console.log("devs for ", tempItem.name, ": ", devsForArdu);
             let i_dev = 0;
@@ -655,7 +677,19 @@ function setDevicesFromServer(devices){ //для показа устройств
                 tempItem2.x = 470 + (i_dev % 2)*100;
                 tempItem2.y = (i_dev %2) ? (boundRectPrev + devHeight/2+(devHeight+5)*(i_dev-1)): boundRectPrev + (devHeight+5)* (i_dev/2) ;
                 objFromServer.objects.push(tempItem2);
+                let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса
+                    points: [tempItem.x + tempItem.width, tempItem.y + tempItem.height / 2, tempItem2.x, tempItem2.y + tempItem2.height / 2],
+                    stroke: 'green',
+                    strokeWidth: 2,
+                });
+                newLine.from = tempItem.name
+                newLine.to = tempItem2.name
+                // objMap2.set(tempItem2, newLine); //добавляем набор девайс-линия
+                // connMap2.set(tempItem2, tempItem); //добавляем набор девайс-ардуино
+                // connMapArduDev.set(tempItem, tempItem2);
+                objFromServer.lines.push(newLine)
                 i_dev++;
+                // objTargets.push(tempItem2);
             })
             boundRectPrev += boundRect;
             i_ardu++;
