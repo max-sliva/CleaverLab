@@ -636,13 +636,14 @@ function clearKonva(){
     // console.log("objTargets[0] from clear = ", objTargets[0].name)
 }
 
-async function setDevicesFromServer(devices){ //для показа устройств, полученных с сервера
-    // await clearKonva();
+function setDevicesFromServer(devices){ //для показа устройств, полученных с сервера
+    //clearKonva();
     let objFromServer = {"objects": [], "lines": []};
     // console.log("devices from server: ", devices)
     let i_ardu = 0;
     let boundRectPrev = 0; //границы для вывода ардуин
-    await devices.forEach(function (item) {
+    // await devices.forEach(function (item) {
+    devices.forEach(function (item) {
         console.log(item.name);
         let tempItem = item;
         if (tempItem.type==="ardu") {
@@ -655,18 +656,24 @@ async function setDevicesFromServer(devices){ //для показа устрой
             tempItem.y = boundRectPrev + boundRect / 2 - arduHeght / 2;  //у-координата для текущей ардуино
             objFromServer.objects.push(tempItem);
             // console.log("raspiImg = ", raspiImg.width)
-            //todo разобраться, почему не рисует эту линию
             let lineToRaspi = new Konva.Line({ //создаем новую линию от малины до ардуины
                 // points: [group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2],
-                points: [group.x() + raspiImg.width + 20, 5 + group.y() + (i_ardu * usbPorts[0].height()) + (i_ardu + 1) * (usbPorts[0].height() / 2), tempItem.x, tempItem.y + 40],
+                // points: [group.x() + raspiImg.width + 20, 5 + group.y() + (i_ardu * usbPorts[0].height()) + (i_ardu + 1) * (usbPorts[0].height() / 2), tempItem.x, tempItem.y + 40],
+                points: [group.x() + 220, 5 + group.y() + (i_ardu * usbPorts[0].height()) + (i_ardu + 1) * (usbPorts[0].height() / 2), tempItem.x, tempItem.y + 40],
                 stroke: 'green',
                 strokeWidth: 2,
             });
             lineToRaspi.from = "usb"+i_ardu;
             lineToRaspi.to = tempItem.name;
             objFromServer.lines.push(lineToRaspi);
-            console.log("lineToRaspi.x = ", lineToRaspi.x);
-            console.log("lineToRaspi.y = ", lineToRaspi.y);
+            console.log("lineToRaspi.points = ", lineToRaspi.points());
+            // console.log("lineToRaspi.y = ", lineToRaspi.y);
+            //todo сделать обновление линии от малины до ардуины
+            // objMap.set(tempItem, lineToRaspi); //добавляем набор картинка-линия
+            // connMap.set(tempItem, i_ardu); //добавляем набор картинка-порт
+
+            layer.add(lineToRaspi);
+            layer.batchDraw();
 
             const devsForArdu = devices.filter((obj) => obj.ardu_name === tempItem.name);
             console.log("devs for ", tempItem.name, ": ", devsForArdu);
