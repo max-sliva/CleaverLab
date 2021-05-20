@@ -15,7 +15,7 @@ stage.add(layer);
 let group = new Konva.Group({ //группа для объектов Konva, чтоб двигать объекты (RasPi+usb)
     x: 20,
     y: 0,
-    draggable: true,
+    // draggable: true,
 });
 let i = 0;
 let arduStringName = new Map();
@@ -32,6 +32,7 @@ let curDevice = null;
 
 function blueBoxClick() { //клик по устройству с синей рамкой
     console.log("!device dblclick!")
+    //todo сделать вывод названия девайса и его ардуины
 }
 
 
@@ -156,7 +157,7 @@ function drawImage(imageObj, x = 0, y = 0, ardu_number = -1) { //создани�
     // console.log("img.y = ",img.y());
     if (i_ardu > 0) { //если выбрали ардуино
         // img.id = "ardu" + "#" + i;
-        img.setDraggable(true);
+        // img.setDraggable(true);
         console.log("2nd image");
         img.on('click', function () { //для добавления красной рамки ардуино
             const box1 = stage.find('.redBox'); //находим предудущую красную рамку
@@ -216,7 +217,7 @@ function makeRasPi() {
     group = new Konva.Group({ //группа для объектов Konva, чтоб двигать объекты (RasPi+usb)
         x: 20,
         y: 0,
-        draggable: true,
+        // draggable: true,
     });
     raspiImg = new Image();
     raspiImg.onload = function () { //вызывается при загрузке изображения малины
@@ -294,17 +295,17 @@ function makeRasPi() {
 }
 
 makeRasPi();
-const arduImg = new Image();
-arduImg.onload = function () {
-    drawImage(this);
-    // layer.add(line);
-    // stage.add(layer);
-    objTargets.forEach((target) => { //цикл для обновления линий
-        target.on('dragmove', updateLine);
-    });
-    group.on('dragmove', updateLine);
-};
-arduImg.src = 'iskra2.jpg';
+// const arduImg = new Image();
+// arduImg.onload = function () {
+//     drawImage(this);
+//     // layer.add(line);
+//     // stage.add(layer);
+//     objTargets.forEach((target) => { //цикл для обновления линий
+//         target.on('dragmove', updateLine);
+//     });
+//     group.on('dragmove', updateLine);
+// };
+// arduImg.src = 'iskra2.jpg';
 
 function updateLine() { //обновление положения концов линии от малины к ардуино
     // console.log("raspiImage x = ", group.x(), " arduImage x = ", arduImg.x);
@@ -368,7 +369,18 @@ container.addEventListener('keydown', function (e) {
 });
 
 function addArdu() {
-    drawImage(arduImg);
+    const arduImg = new Image();
+    arduImg.onload = function () {
+        drawImage(this);
+        // layer.add(line);
+        // stage.add(layer);
+        objTargets.forEach((target) => { //цикл для обновления линий
+            target.on('dragmove', updateLine);
+        });
+        group.on('dragmove', updateLine);
+        };
+    arduImg.src = 'iskra2.jpg';
+    //drawImage(arduImg);
 }
 
 function addDevice() {
@@ -613,9 +625,10 @@ function drawLine(line, deviceImg = null, curArdu, portNum){ //для рисов
     }
     layer.add(newLine);
     layer.batchDraw();
+    layer.draw();
 }
 
-function clearKonva(){
+async function clearKonva(){
     layer.destroyChildren();
     i = 0;
     usbPorts = [];
@@ -636,8 +649,8 @@ function clearKonva(){
     // console.log("objTargets[0] from clear = ", objTargets[0].name)
 }
 
-function setDevicesFromServer(devices){ //для показа устройств, полученных с сервера
-    //clearKonva();
+async function loadDevicesFromServer(devices){
+    // await clearKonva();
     let objFromServer = {"objects": [], "lines": []};
     // console.log("devices from server: ", devices)
     let i_ardu = 0;
@@ -646,32 +659,26 @@ function setDevicesFromServer(devices){ //для показа устройств
     devices.forEach(function (item) {
         console.log(item.name);
         let tempItem = item;
-        if (tempItem.type==="ardu") {
+        if (tempItem.type === "ardu") {
             tempItem.x = 260;
             const count = devices.filter((obj) => obj.ardu_name === tempItem.name).length;
-            console.log("devices for ",tempItem.name," = ", count );
+            console.log("devices for ", tempItem.name, " = ", count);
             const countChet = Math.floor(count / 2) * 2;
-            console.log("devices for ",tempItem.name," chetn = ", countChet );
-            const boundRect =  (devHeight+5) * countChet+10; //границы для текущей ардуино
+            console.log("devices for ", tempItem.name, " chetn = ", countChet);
+            const boundRect = (devHeight + 5) * countChet + 10; //границы для текущей ардуино
             tempItem.y = boundRectPrev + boundRect / 2 - arduHeght / 2;  //у-координата для текущей ардуино
             objFromServer.objects.push(tempItem);
             // console.log("raspiImg = ", raspiImg.width)
             let lineToRaspi = new Konva.Line({ //создаем новую линию от малины до ардуины
-                // points: [group.x()+objTargets[0].width()+20, 5+group.y()+(portNum*usbPorts[0].height())+(portNum+1)*(usbPorts[0].height()/2), box2[0].x(), box2[0].y()+box2[0].height()/2],
-                // points: [group.x() + raspiImg.width + 20, 5 + group.y() + (i_ardu * usbPorts[0].height()) + (i_ardu + 1) * (usbPorts[0].height() / 2), tempItem.x, tempItem.y + 40],
                 points: [group.x() + 220, 5 + group.y() + (i_ardu * usbPorts[0].height()) + (i_ardu + 1) * (usbPorts[0].height() / 2), tempItem.x, tempItem.y + 40],
                 stroke: 'green',
                 strokeWidth: 2,
             });
-            lineToRaspi.from = "usb"+i_ardu;
+            lineToRaspi.from = "usb" + i_ardu;
             lineToRaspi.to = tempItem.name;
             objFromServer.lines.push(lineToRaspi);
             console.log("lineToRaspi.points = ", lineToRaspi.points());
             // console.log("lineToRaspi.y = ", lineToRaspi.y);
-            //todo сделать обновление линии от малины до ардуины
-            // objMap.set(tempItem, lineToRaspi); //добавляем набор картинка-линия
-            // connMap.set(tempItem, i_ardu); //добавляем набор картинка-порт
-
             layer.add(lineToRaspi);
             layer.batchDraw();
 
@@ -681,8 +688,8 @@ function setDevicesFromServer(devices){ //для показа устройств
             devsForArdu.forEach(function (item2) {
                 let tempItem2 = item2;
                 tempItem2.name = tempItem2.name.toLowerCase();
-                tempItem2.x = 470 + (i_dev % 2)*100;
-                tempItem2.y = (i_dev %2) ? (boundRectPrev + devHeight/2+(devHeight+5)*(i_dev-1)): boundRectPrev + (devHeight+5)* (i_dev/2) ;
+                tempItem2.x = 470 + (i_dev % 2) * 100;
+                tempItem2.y = (i_dev % 2) ? (boundRectPrev + devHeight / 2 + (devHeight + 5) * (i_dev - 1)) : boundRectPrev + (devHeight + 5) * (i_dev / 2);
                 objFromServer.objects.push(tempItem2);
                 let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса
                     points: [tempItem.x + tempItem.width, tempItem.y + tempItem.height / 2, tempItem2.x, tempItem2.y + tempItem2.height / 2],
@@ -706,9 +713,15 @@ function setDevicesFromServer(devices){ //для показа устройств
         //i++
     })
     console.log("objFromServer: ", objFromServer);
-    loadArduinos(objFromServer);
+    await loadArduinos(objFromServer);
+    updateLine2();
     // loadDevices(objFromServer);
 }
+
+// async function setDevicesFromServer(devices) { //для показа устройств, полученных с сервера
+//     //clearKonva();
+//     await loadDevicesFromServer(devices);
+// }
 
 /*
 c сервера
