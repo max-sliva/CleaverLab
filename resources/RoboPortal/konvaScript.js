@@ -11,6 +11,7 @@ const layer = new Konva.Layer();
 let devHeight = 64;
 let arduHeght = 110;
 let objTargets = [];
+let socketToServer = null;
 stage.add(layer);
 let group = new Konva.Group({ //группа для объектов Konva, чтоб двигать объекты (RasPi+usb)
     x: 20,
@@ -28,15 +29,17 @@ let raspiImg = new Image();
 
 let j = 0;
 let curArdu = null;
+let curArduForDevice = null;
 let curDevice = null;
 
 function blueBoxClick() { //клик по устройству с синей рамкой
-    console.log("!device dblclick!")
+    console.log("!device dblclick!  img.ardu = ", curArduForDevice)
     //todo сделать вывод названия девайса и его ардуины
+    //todo сделать отправку текущего ардуино на сервер через  socketToServer.send
 }
 
 
-function drawDevice(imageObj, x = 0, y = 0) { //для отрисовки девайса
+function drawDevice(imageObj, x = 0, y = 0, arduName) { //для отрисовки девайса
     let imgId = imageObj.src;
     let x1 = x;
     let y1 = y;
@@ -57,6 +60,7 @@ function drawDevice(imageObj, x = 0, y = 0) { //для отрисовки дев
         id: imgId
     });
     // console.log("img width1 = ", img.width())
+    img.ardu = arduName
     img.size({
         width: img.width()*0.5,
         height: img.height()*0.5,
@@ -77,12 +81,14 @@ function drawDevice(imageObj, x = 0, y = 0) { //для отрисовки дев
             // fill: 'white',
             stroke: 'blue',
             strokeWidth: 2,
+            ardu: img.ardu
         });
         box.on('click', blueBoxClick);
         let delBtn = document.getElementById("btnRemove");
         delBtn.disabled = false;
         // console.log("btn text = ", delBtn);
         curDevice = img;
+        curArduForDevice = arduName
         let box2 = layer.find('.redBox');
         if (box2[0] !== undefined && !objMap.has(box2[0])) {
             let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса
@@ -106,7 +112,7 @@ function drawDevice(imageObj, x = 0, y = 0) { //для отрисовки дев
         }
         // group.add(box);
         // curImage = img;
-        console.log("click! x=", img.x(), "i=", i);
+        console.log("click! x=", img.x(), "i=", i, "ardu = ",img.ardu);
         layer.add(box);
     });
     objTargets.push(img);
@@ -559,7 +565,7 @@ function loadDevices(jsonObj, arduName){  //для загрузки устрой
                     let deviceImg = new Image();
                     deviceImg.src = imgName + ".jpg";
                     deviceImg.onload = function () {
-                        curImg = drawDevice(this, item.x, item.y);
+                        curImg = drawDevice(this, item.x, item.y, arduName);
                         //objTargets.push(curImg);
                         jsonObj.lines.forEach(function (itemLine) { //цикл по линиям
                             if (item.name === itemLine.to) {
@@ -649,8 +655,10 @@ async function clearKonva(){
     // console.log("objTargets[0] from clear = ", objTargets[0].name)
 }
 
-async function loadDevicesFromServer(devices){
+async function loadDevicesFromServer(devices, ws){
     // await clearKonva();
+    socketToServer = ws;
+    ws.send("GetDevicesToKonva");
     let objFromServer = {"objects": [], "lines": []};
     // console.log("devices from server: ", devices)
     let i_ardu = 0;

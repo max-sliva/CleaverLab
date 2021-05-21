@@ -54,10 +54,9 @@ void setup()
 }
 
 void sendDeviceInfo() {
-  Serial.println("Ardu 1 Devices:");
+  Serial.println("Ardu 2 Devices:");
   Serial.println("Servo");
   Serial.println("DC_Motor");
-  Serial.println("RGB_Matrix");
   Serial.println("end devList");
 }
 
@@ -75,7 +74,6 @@ void loop()
   //  Serial.println("Hello");
   if (Serial.available() > 0)
   {
-
     const size_t bufferSize = JSON_OBJECT_SIZE(4) + 10;
     DynamicJsonBuffer jsonBuffer1(bufferSize);
     JsonObject& root = jsonBuffer1.parse(Serial);
@@ -85,6 +83,7 @@ void loop()
       const char* pos1 = root["angle1"];
       const char* motor1 = root["motor1"];
       const char* info = root["info"];
+      const char* blinkLed= root["blinkLed"];
       //       const char* motor1Slider = root["motor1Slider"];
       if (myN)
       {
