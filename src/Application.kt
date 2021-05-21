@@ -40,9 +40,9 @@ fun Application.module() {
 //    portsWithThread()
     val usbScanner = PortScanner()
     usbScanner.startUSBscanner()
-    val serialPort: SerialPort? = null
+    var serialPort: SerialPort? = null
     try {
-        val serialPort = SerialPort(usbScanner.getPortNames()[0])
+        serialPort = SerialPort(usbScanner.getPortNames()[0])
     } catch (ex: ArrayIndexOutOfBoundsException) {
 
     }

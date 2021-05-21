@@ -42,7 +42,7 @@ fun guiForScanner() {
     }
 
     val text = JTextField(15)
-    text.text = "-info-"
+    text.text = """{'info':'-info-'}"""
     val sendButton = JButton("Send")
     sendButton.isEnabled = false
     sendButton.addActionListener{e->
@@ -58,8 +58,19 @@ fun guiForScanner() {
         println("index = ${comPorts.selectedIndex}")
         if (comPorts.selectedIndex != -1) sendButton.isEnabled = true
     }
+    val centerPane = JPanel()
+    val slider = JSlider(1, 179, 1)
+    centerPane.add(slider)
+    slider.addChangeListener { arg ->
+        println("${slider.value}")
+        val textToArdu = "{'device' : 'servo1Angle',  'angle1': ${slider.value}}"
+        val choosenPort = comPorts.getItemAt(comPorts.selectedIndex)
+        val serialPort = usbScanner.getSerialPortByName(choosenPort)
+        serialPort?.writeString(textToArdu)
+    }
     myFrame.add(northPanel, BorderLayout.NORTH)
 //    myFrame.add(text, BorderLayout.CENTER)
+    myFrame.add(centerPane, BorderLayout.CENTER)
     myFrame.size = Dimension(500, 200)
     myFrame.setLocationRelativeTo(null)
     //myFrame.pack()
