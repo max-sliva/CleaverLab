@@ -59,7 +59,7 @@ fun guiForScanner() {
         if (comPorts.selectedIndex != -1) sendButton.isEnabled = true
     }
     val centerPane = JPanel()
-    val slider = JSlider(1, 179, 1)
+    val slider = JSlider(1, 170, 1)
     centerPane.add(slider)
     slider.addChangeListener { arg ->
         println("${slider.value}")
