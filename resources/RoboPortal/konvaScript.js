@@ -31,15 +31,18 @@ let j = 0;
 let curArdu = null;
 let curArduForDevice = null;
 let curDevice = null;
+let curItemName = null
 
 function blueBoxClick() { //клик по устройству с синей рамкой
-    console.log("!device dblclick!  img.ardu = ", curArduForDevice)
+    console.log("!device dblclick!  img.ardu = ", curArduForDevice);
+    console.log("itemName = ", curItemName);
     //todo сделать вывод названия девайса и его ардуины
     //todo сделать отправку текущего ардуино на сервер через  socketToServer.send
+    socketToServer.send("{'ardu_name': '"+curArduForDevice+"'}");
 }
 
 
-function drawDevice(imageObj, x = 0, y = 0, arduName) { //для отрисовки девайса
+function drawDevice(imageObj, x = 0, y = 0, arduName, itemName) { //для отрисовки девайса
     let imgId = imageObj.src;
     let x1 = x;
     let y1 = y;
@@ -89,6 +92,7 @@ function drawDevice(imageObj, x = 0, y = 0, arduName) { //для отрисов�
         // console.log("btn text = ", delBtn);
         curDevice = img;
         curArduForDevice = arduName
+        curItemName = itemName
         let box2 = layer.find('.redBox');
         if (box2[0] !== undefined && !objMap.has(box2[0])) {
             let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса
@@ -565,7 +569,7 @@ function loadDevices(jsonObj, arduName){  //для загрузки устрой
                     let deviceImg = new Image();
                     deviceImg.src = imgName + ".jpg";
                     deviceImg.onload = function () {
-                        curImg = drawDevice(this, item.x, item.y, arduName);
+                        curImg = drawDevice(this, item.x, item.y, arduName, item.name);
                         //objTargets.push(curImg);
                         jsonObj.lines.forEach(function (itemLine) { //цикл по линиям
                             if (item.name === itemLine.to) {

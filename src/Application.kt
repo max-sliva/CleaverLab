@@ -175,6 +175,9 @@ fun Application.module() {
                                                 if (socket != thisSession) socket.send(Frame.Text("""{"device" : "matrix", "clear": "clear" }"""))
                                             }
                                     }
+                                    if (text.contains("'ardu_name:'")){
+                                        println("ardu_name = $text")
+                                    }
                                 }
 
                             }
