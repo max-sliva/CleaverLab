@@ -31,14 +31,20 @@ let j = 0;
 let curArdu = null;
 let curArduForDevice = null;
 let curDevice = null;
-let curItemName = null
+let curItemName = null;
+let devHTML = null;
+
+function off() {
+    document.getElementById("overlay").style.display = "none";
+}
 
 function blueBoxClick() { //клик по устройству с синей рамкой
     console.log("!device dblclick!  img.ardu = ", curArduForDevice);
     console.log("itemName = ", curItemName);
-    //todo сделать вывод названия девайса и его ардуины
-    //todo сделать отправку текущего ардуино на сервер через  socketToServer.send
+    console.log("devHTML = ", devHTML);
     socketToServer.send("{'ardu_name': '"+curArduForDevice+"'}");
+    document.getElementById("overlay").style.display = "block";
+    $('#overlay').load(devHTML);
 }
 
 
@@ -93,6 +99,8 @@ function drawDevice(imageObj, x = 0, y = 0, arduName, itemName) { //для от�
         curDevice = img;
         curArduForDevice = arduName
         curItemName = itemName
+        devHTML = curItemName.substring(0, curItemName.lastIndexOf("#"))+".html";
+
         let box2 = layer.find('.redBox');
         if (box2[0] !== undefined && !objMap.has(box2[0])) {
             let newLine = new Konva.Line({ //создаем новую линию от ардуины до девайса

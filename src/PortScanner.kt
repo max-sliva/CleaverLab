@@ -92,6 +92,8 @@ private fun getButtonSubComponent(container: Container): JButton? { //для п�
 }
 
 class PortScanner {
+    //todo сделать map с именами ардуин и портов
+    //и метод для отправки в порт данных
     private lateinit var portNames : Array<String>
     private lateinit var portsHashMap: HashMap<String, SerialPort>
     private var portInfoJSON = """[]""";
