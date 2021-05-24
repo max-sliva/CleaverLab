@@ -148,6 +148,10 @@ fun Application.module() {
                                 }
                                 if (text.contains("'device'") && curArdu!=null){
                                 //todo сделать передачу данных в нужный порт
+                                    val serPort = usbScanner.getSerialPortByArdu(curArdu)
+                                    if (serPort != null) {
+                                        serPort.writeString(text)
+                                    }
                                 }
                             } else {
                                 println("Not Admin")
