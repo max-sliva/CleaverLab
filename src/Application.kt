@@ -39,6 +39,7 @@ fun Application.module() {
 //    startUSBscanner()
 //    portsWithThread()
     val usbScanner = PortScanner()
+    var curArdu = ""
     usbScanner.startUSBscanner()
     var serialPort: SerialPort? = null
     try {
@@ -138,6 +139,16 @@ fun Application.module() {
                                 } else {
                                     println("From Admin: $text")
                                 }
+                                if (text.contains("'ardu_name'")){
+//                                    println("ardu_name = $text")
+                                    val arduJSON = JSONObject(text)
+                                    println("ardu_name = ${arduJSON["ardu_name"]}")
+                                    curArdu = arduJSON["ardu_name"].toString()
+//                                        curArdu = text.ardu_name
+                                }
+                                if (text.contains("'device'") && curArdu!=null){
+                                //todo сделать передачу данных в нужный порт
+                                }
                             } else {
                                 println("Not Admin")
                                 if (text == "NeedDevices") { //if from site came request for devices
@@ -177,6 +188,7 @@ fun Application.module() {
                                     }
                                     if (text.contains("'ardu_name:'")){
                                         println("ardu_name = $text")
+//                                        curArdu = text.ardu_name
                                     }
                                 }
 

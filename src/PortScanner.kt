@@ -59,14 +59,37 @@ fun guiForScanner() {
         if (comPorts.selectedIndex != -1) sendButton.isEnabled = true
     }
     val centerPane = JPanel()
+    val ardusButton = JButton("SetArdus")
+    var arduArray = usbScanner.getArdus()
+    val ardus = JComboBox(arduArray) // создаем комбобокс с этим списком
+    ardusButton.addActionListener { arg->
+        arduArray = usbScanner.getArdus()
+        ardus.removeAllItems()
+        arduArray.forEach {
+            ardus.addItem(it)
+        }
+    }
+//    println("arduArray = ${arduArray.asList()}")
+    centerPane.add(ardusButton)
+    ardus.selectedIndex = -1 // чтоб не было выбрано ничего в комбобоксе
+    centerPane.add(ardus)
     val slider = JSlider(1, 170, 1)
+    slider.isEnabled = false
+    var serialPortByArdu : SerialPort? = null
+    ardus.addActionListener {arg->
+        if (ardus.selectedIndex != -1) slider.isEnabled = true
+        val choosenArdu = ardus.getItemAt(ardus.selectedIndex)
+
+        if (choosenArdu!=null) serialPortByArdu = usbScanner.getSerialPortByArdu(choosenArdu)
+
+    }
     centerPane.add(slider)
     slider.addChangeListener { arg ->
         println("${slider.value}")
         val textToArdu = "{'device' : 'servo1Angle',  'angle1': ${slider.value}}"
         val choosenPort = comPorts.getItemAt(comPorts.selectedIndex)
-        val serialPort = usbScanner.getSerialPortByName(choosenPort)
-        serialPort?.writeString(textToArdu)
+//        val serialPort = usbScanner.getSerialPortByName(choosenPort)
+        serialPortByArdu?.writeString(textToArdu)
     }
     myFrame.add(northPanel, BorderLayout.NORTH)
 //    myFrame.add(text, BorderLayout.CENTER)
@@ -92,8 +115,7 @@ private fun getButtonSubComponent(container: Container): JButton? { //для п�
 }
 
 class PortScanner {
-    //todo сделать map с именами ардуин и портов
-    //и метод для отправки в порт данных
+    private var portArdus = HashMap<String, SerialPort>()
     private lateinit var portNames : Array<String>
     private lateinit var portsHashMap: HashMap<String, SerialPort>
     private var portInfoJSON = """[]""";
@@ -104,7 +126,9 @@ class PortScanner {
 
     fun getSerialPortByName(str: String) = portsHashMap.get(str)
 
-    private fun convertPortInfoToJSON(str: String){ //для преобразования строки в JSON-объект
+    fun getSerialPortByArdu(str: String) = portArdus.get(str)
+
+    private fun convertPortInfoToJSON(str: String, tempPort: SerialPort){ //для преобразования строки в JSON-объект
         var counter = 0
         println("Converting str = \n$str")
         val devPos = str.indexOf("Devices")
@@ -115,6 +139,7 @@ class PortScanner {
             arduNum = Integer.parseInt(x.trim())
             println("arduNum = $arduNum")
             val arduName = "ardu#"+arduNum
+            portArdus.put(arduName, tempPort)
             var jsonStr = """{"type":"ardu", "name":"$arduName"},""" //сама ардуино
 //            var i = devPos + "Devices:".length+1
             var i = str.indexOf("\n")
@@ -238,7 +263,7 @@ class PortScanner {
                         str = str.trim { it < ' ' && it !='\n'} //убираем лишние символы (типа пробелов, которые могут быть в принятой строке)
                         if (str.contains("end devList")) {
                             println("str = $str")
-                            convertPortInfoToJSON(str)
+                            convertPortInfoToJSON(str, tempPort)
                             val deviceJson = """{"type": "devices", "devices": ${getJSONfromPorts()}}"""
                             println("devicesFromComPorts = $deviceJson" )
                             GlobalScope.async {
@@ -263,6 +288,10 @@ class PortScanner {
 
     fun setUpdaterForPorts(outgoing: SendChannel<Frame>) {
         channelForSockets = outgoing
+    }
+
+    fun getArdus(): Array<String> {
+        return portArdus.keys.toTypedArray()
     }
 
 }
