@@ -2,7 +2,6 @@
 <html>
 	
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<link rel="stylesheet"  href="bootstrap.css">
 		<link rel="stylesheet" href="main.css">
 		<script src="jquery.min.js"></script>
@@ -172,6 +171,47 @@
 			</div>
 		</div>
 		
-	Under construct
+		<div class="left" >
+			Устройства
+			<br>
+			<table	border="0" cellpadding="5" align="left" id = "deviceTable">
+				<tr>
+					<td>  <br> </td>
+				</tr>
+	            
+				<tr>
+					<td>  <br> </td>
+				</tr>
+			</table>
+			<script type="text/javascript">
+				// 		function showCreateProject() {
+				// 			document.getElementById("rightDiv").innerHTML='<object type="text/html" data="PageConstruct.jsp" ></object>';
+				// 		}
+				function showCreateProject() {
+					$('#rightDiv').load('PageConstruct.jsp');
+				}
+				function showMyProject(x) {
+					var prName=x.innerHTML;
+					console.log(prName);
+					// 			document.location.href="/RoboPortal2/CurrentProject?prName="+prName;
+					$('#rightDiv').load('project.jsp?prName='+prName);
+					var currentRow = x.closest('tr');
+					// 			console.log(currentRow
+					var td=currentRow.cells[1];
+					td.appendChild(btn);
+					// 				currentRow.cells[1].innerHTML = '<input type="button" value="Редактировать">';
+					// 			currentId = currentRow.cells[0].getElementsByTagName('input')[0].value;
+					btn.onclick = function(){
+						console.log('edit:'+prName); 
+					};
+				}
+				
+			</script>
+			
+		</div>
+		<div class="right" id="rightDiv">
+		<!-- <iframe src="/RGB_Matrix_1.html" seamless frameborder="0" scrolling="no" onload="resizeIframe(this)"></iframe> -->
+		</div>
+		
 	</body>
 </html>				
