@@ -221,7 +221,8 @@ fun Application.module() {
 //                docs.clear()
 //                iter.into(docs);
 //                val findLogin = docs.filter { it["login"] == login }
-                userData = fromFileToJSON("userData.json")
+                val dm = DataManager(PathToData("userData", "userData.json"))
+                userData = dm.fromFileToJSON("userData")
                 val userArray = JSONArray(" ${userData!!["user"]}")
                 val findLogin = userArray.filter {
                     val jsonArObj = JSONObject("$it")
@@ -280,7 +281,8 @@ fun Application.module() {
                 println("all users = $userArray")
                 userData?.put("user", userArray)
                 println("new userData = $userData")
-                fromJSONtoFile(userData!!, "userData.json")
+                val dm = DataManager(PathToData("userData", "userData.json"))
+                dm.fromJSONtoFile(userData!!, "userData")
 //                var insertDocument = Document()
 //                receivedParams.forEach { s, list ->
 //                    println("   $s   ${list[0]}")

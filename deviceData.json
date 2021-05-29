@@ -1,18 +1,18 @@
 {"device": [
-{ 
-    "type" : "RGB_Matrix_8x8", 
-    "name" : "rgb_matrix#1",
-    "active" : "true"
-},
-{
-    "type" : "DC_motor", 
-    "name" : "dc_motor#1",
-    "active" : "true"
-},
-{ 
-    "type" : "ServoMotor", 
-    "name" : "servo#1",
-    "active" : "true"
-}
-]
+    {
+        "type" : "RGB_Matrix_8x8",
+        "name" : "rgb_matrix#1",
+        "active" : "true"
+    },
+    {
+        "type" : "DC_motor",
+        "name" : "dc_motor#1",
+        "active" : "true"
+    },
+    {
+        "type" : "ServoMotor",
+        "name" : "servo#1",
+        "active" : "true"
+    }
+    ]
 }

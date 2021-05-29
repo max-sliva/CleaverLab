@@ -94,6 +94,7 @@
 						console.log("devices = ", msg.devices);
 						devices = msg.devices;
 						//setDevicesOnTab(devices);
+						console.log("sent devs to konva")
 						// document.querySelector('#clientid').innerHTML += msg.devices[0].name;
 						break;
 				}
@@ -220,9 +221,14 @@
 		</script>
 		<ul class="nav nav-tabs">
 		  <li class="active"><a data-toggle="tab" href="#users">Список пользователей</a></li>
-		  <li><a data-toggle="tab" href="#devices">Список устройств</a></li>
+		  <li><a data-toggle="tab" href="#devices" onclick="tabClick()">Список устройств</a></li>
 		</ul>
-
+		<script>
+			function tabClick(){
+				console.log("tab click!!!")
+				loadDevicesFromServer(devices, ws)
+			}
+		</script>
 		<div class="tab-content">
 		  <div id="users" class="tab-pane fade in active">
 		<table	border="1" cellpadding="5" align="center" id = "usersTable">
