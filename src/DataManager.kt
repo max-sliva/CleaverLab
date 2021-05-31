@@ -6,10 +6,30 @@ import java.io.File
 
 fun main(){
     val dM = DataManager(PathToData("devices","deviceData.json"), PathToData("users", "userData.json"))
-    val usersJSON = dM.fromFileToJSON("users")
+    var usersJSON = dM.fromFileToJSON("users")
     val devicesJSON = dM.fromFileToJSON("devices")
-    val userArray = JSONArray(" ${usersJSON!!["user"]}")
-    println("user1 = ${userArray[1]}")
+    var userArray = JSONArray(" ${usersJSON!!["user"]}")
+    println("userArray = ${userArray}")
+    var jo =  JSONObject()
+    jo.put("login", "user")
+    jo.put("fio", "Some user")
+    jo.put("email", "qw@mail.ru")
+    jo.put("pass", "111".md5())
+    jo.put("status", "User")
+    jo.put("online", false)
+    dM.addUser(jo, "users")
+    usersJSON = dM.fromFileToJSON("users")
+    userArray = JSONArray(" ${usersJSON!!["user"]}")
+    println("userArray = ${userArray}")
+
+/*
+    "pass": "",
+    "devices": [],
+    "online": false,
+    "login": "user",
+    "fio": "Some User",
+    "status": "User"
+*/
 }
 
 data class PathToData(val dataName: String, val dataPath: String)
@@ -25,7 +45,7 @@ class DataManager { //класс для загрузки данных из json-
 
     fun fromFileToJSON(dataName: String): JSONObject { //метод для чтения из файла в json-объект
         val str =  File(pathsToFiles.get(dataName)).readText(Charsets.UTF_8)
-        println("file data = $str")
+       // println("file data = $str")
         return JSONObject(str)
     }
 
@@ -33,11 +53,15 @@ class DataManager { //класс для загрузки данных из json-
         File(pathsToFiles.get(dataName)).writeText(jo.toString())
     }
 
-    fun addUser(userData: JSONObject){
-
+    fun addUser(userData: JSONObject, dataName: String){
+        var usersJSON = fromFileToJSON(dataName)
+        val userArray = JSONArray(" ${usersJSON!!["user"]}")
+        userArray.put(userData)
+        usersJSON.put("user", userArray)
+        fromJSONtoFile(usersJSON, dataName)
     }
 
-    fun changeUser(login: String, userData: JSONObject){
+    fun changeUser(login: String, userData: JSONObject, dataName: String){
 
     }
 
