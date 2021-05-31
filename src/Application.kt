@@ -264,6 +264,28 @@ fun Application.module() {
                 println("Logout")
                 call.respondFile(File("resources/RoboPortal/index.html"))
             }
+
+            post("/EditUser") {
+                println("!!EditUser")
+                val receivedParams = call.receiveParameters()
+                val login = receivedParams["login"]
+                println("login from params = $login")
+                var pass = receivedParams["pass"]
+                val email = receivedParams["email"]
+                var fio = receivedParams["fio"]
+                println("params=$receivedParams")
+                var jo =  JSONObject()
+                jo.put("login", login)
+                jo.put("fio", fio)
+                jo.put("email", email)
+                jo.put("pass", pass?.md5())
+                jo.put("status", "User")
+                jo.put("online", false)
+                val dm = DataManager(PathToData("userData", "userData.json"))
+                dm.changeUser(login.toString(), jo, "userData")
+//                call.respondFile(File("resources/RoboPortal/admin3.html"))
+            }
+
             post("/AddUser") {
                 val userArray = JSONArray(" ${userData?.get("user")}")
                 println("all users = $userArray")

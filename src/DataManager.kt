@@ -62,7 +62,15 @@ class DataManager { //класс для загрузки данных из json-
     }
 
     fun changeUser(login: String, userData: JSONObject, dataName: String){
-
+        var usersJSON = fromFileToJSON(dataName)
+        val userArray = JSONArray(" ${usersJSON!!["user"]}")
+        val findLogin = userArray.filter {
+            val jsonArObj = JSONObject("$it")
+            jsonArObj["login"] == login
+        }
+        println("login = $login")
+        println("old user = $findLogin")
+        //todo сделать замену найденного пользователя на новый объект .forEach { it.iLike = true }
     }
 
 }

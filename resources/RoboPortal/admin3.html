@@ -32,7 +32,8 @@
 				overflow: hidden;
 				background-color: #f0f0f0;
 			}
-			#overlay {
+			/*стиль для оверлея*/
+			.overlay {
 				position: fixed;
 				display: none;
 				width: 100%;
@@ -42,8 +43,33 @@
 				right: 0;
 				bottom: 0;
 				background-color: rgba(0,0,0,0.5);
+				/*background-color: rgba(255,255,255,0.5);*/
 				z-index: 2;
 				cursor: pointer;
+				margin: auto;
+			}
+			/*стиль для блока внутри оверлея*/
+			.overlay2{
+				display: none;
+				/*background-color: rgba(0,0,0,0.5);*/
+				background: black;
+				color: white;
+				border-radius: 1em;
+				padding: 1em;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				margin-right: -50%;
+				transform: translate(-50%, -50%)
+			}
+			.overlay2 .myInput {
+				width: 100%;
+				padding: 12px 20px;
+				margin: 8px 0;
+				box-sizing: border-box;
+				border: none;
+				background-color: #3CBC8D;
+				color: white;
 			}
 		</style>
 	</head>
@@ -131,7 +157,19 @@
 				}, 1000);	
 				//location.reload();
 			}
-			
+
+			function editClick(login) {
+				console.log("edit click login = ", login);
+				document.getElementById("editLogin").value = login;
+				document.getElementById("loginLabel").innerHTML  = login;
+				document.getElementById("overlay").style.display = "block";
+				document.getElementById("editDiv").style.display = "block";
+			}
+			function editClose() {
+				document.getElementById("overlay").style.display = "none";
+				document.getElementById("editDiv").style.display = "none";
+			}
+
 			function setUsersTable(usersArray){
 				console.log(usersArray.length);
 				var table = document.getElementById("usersTable");
@@ -149,16 +187,23 @@
 					cell1 = row.insertCell(4);
 					cell1.innerHTML = usersArray[i].online;
 					cell1 = row.insertCell(5);
-					var btn = document.createElement("img");
-					btn.setAttribute("src", "Images/edit.png");
-					// 	elem.setAttribute("height", "768");
-					btn.setAttribute("width", "30");
-					btn.setAttribute("alt", "Редактировать");
-					btn.id="imgBut";
-					btn.title="Редактировать";
-					btn.style.cursor='pointer';
-					cell1.appendChild(btn);
-					//cell1.innerHTML = '<img src="Images/edit.png" height="30">';
+					if (i!=0){
+						var btn = document.createElement("img");
+						btn.setAttribute("src", "Images/edit.png");
+						// 	elem.setAttribute("height", "768");
+						btn.setAttribute("width", "30");
+						btn.setAttribute("alt", "Редактировать");
+						btn.id = "imgBut";
+						btn.title = "Редактировать";
+						btn.style.cursor = 'pointer';
+						// btn.onclick = editClick;
+						let k = i;
+						btn.addEventListener('click', function () {
+							login = usersArray[k].login;
+							editClick(login);
+						});
+						cell1.appendChild(btn);
+					}					//cell1.innerHTML = '<img src="Images/edit.png" height="30">';
 				}
 			}
 			
@@ -324,7 +369,22 @@
 			</div>
 		</div>
 	  </div>
-		<div id="overlay"></div>
+		<div id="overlay" class = "overlay">
+			<div id="editDiv" class = "overlay2" >
+				<form action="EditUser" method="post" accept-charset="UTF-8">
+					<p id = "loginP">Введите данные</p>
+					<label>Логин:</label> <label id = "loginLabel"> </label><input id="editLogin" name="login" type = "text" hidden> <br />
+					<label>ФИО:</label><input name="fio" required placeholder="Иванов Иван Иванович" type="text" size="25" maxlength="25"
+											  accept-charset="UTF-8" style = "color: black;" autofocus><br />
+					<label>e-mail:</label> <input name="email" required pattern="\S+@[a-z]+.[a-z]+" type="email" size="15"
+												  maxlength="25" style = "color: black;"><br />
+					<br />
+					<label>пароль:</label> <input name="pass" type="password" size="15" maxlength="15" required style = "color: black;"><br />
+					<input type="button" id="closeButton" onclick="editClose()" style = "color: black;" value="Отмена">
+					<input type="submit" id="editUserSave" class="btn btn-default" value="Сохранить">
+				</form>
+			</div>
+		</div>
 <!--		onclick="off()"-->
 <!--		<script>-->
 <!--			function off() {-->
