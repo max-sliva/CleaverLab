@@ -39,7 +39,7 @@ fun Application.module() {
 //    startUSBscanner()
 //    portsWithThread()
     val usbScanner = PortScanner()
-    var curArdu = ""
+    var curArdu = ""  //текущая ардуино, будет прислана с клиента
     usbScanner.startUSBscanner()
     var serialPort: SerialPort? = null
     try {
@@ -116,7 +116,9 @@ fun Application.module() {
 //                                    println("users=$docs")
 //                                    val userCaps = arrayListOf("login", "fio", "status", "devices", "online")
 //                                    outgoing.send(Frame.Text(arrayListToJSON(docs, userCaps, "users")))
-                                    val userData = fromFileToJSON("userData.json")["user"]
+                                    val dm = DataManager(PathToData("userData", "userData.json"))
+                                    val userData = dm.fromFileToJSON("userData")["user"]
+//                                    val userData = fromFileToJSON("userData.json")["user"]
                                     val userJson = "{\"type\": \"users\", \"users\": $userData}"
                                     println("userJson=$userJson")
                                     outgoing.send(Frame.Text(userJson))
@@ -162,7 +164,8 @@ fun Application.module() {
 //                                    println("devices=$devices")
 //                                    val deviceCaps = arrayListOf("type", "name", "active")
 //                                    outgoing.send(Frame.Text(arrayListToJSON(devices, deviceCaps, "devices")))
-                                    val deviceData = fromFileToJSON("deviceData.json")["device"]
+                                    val dm = DataManager(PathToData("deviceData", "device.json"))
+                                    val deviceData = dm.fromFileToJSON("deviceData")["device"]
                                     println("devices=$deviceData")
                                     val deviceJson = """{"type": "devices", "devices": $deviceData}"""
                                     outgoing.send(Frame.Text(deviceJson))
