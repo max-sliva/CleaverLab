@@ -64,13 +64,33 @@ class DataManager { //класс для загрузки данных из json-
     fun changeUser(login: String, userData: JSONObject, dataName: String){
         var usersJSON = fromFileToJSON(dataName)
         val userArray = JSONArray(" ${usersJSON!!["user"]}")
+//        userArray.forEach {
+//            if (it["login"] == login ) {
+//
+//            }
+//        }
         val findLogin = userArray.filter {
             val jsonArObj = JSONObject("$it")
             jsonArObj["login"] == login
         }
-        println("login = $login")
-        println("old user = $findLogin")
-        //todo сделать замену найденного пользователя на новый объект .forEach { it.iLike = true }
+        val index = userArray.indexOf(findLogin[0])
+//        println("findLogin = ${findLogin[0]}")
+//        println("old user index = $index")
+        println("userArray old = ")
+        userArray.forEach {
+            println(it)
+        }
+        userArray.put(3, userData)
+        println("userArray new = ")
+        userArray.forEach {
+            println(it)
+        }
+        usersJSON.put("user", userArray)
+//        println("userJSON = $usersJSON")
+        fromJSONtoFile(usersJSON, dataName)
     }
 
+    fun deleteUSer(login: String, dataName: String){
+
+    }
 }

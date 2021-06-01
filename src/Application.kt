@@ -264,7 +264,13 @@ fun Application.module() {
                 println("Logout")
                 call.respondFile(File("resources/RoboPortal/index.html"))
             }
+            post("/DeleteUser"){
+                println("!!DeleteUser")
+                val receivedParams = call.receiveParameters()
+                val login = receivedParams["login"]
+                println("login from params = $login")
 
+            }
             post("/EditUser") {
                 println("!!EditUser")
                 val receivedParams = call.receiveParameters()
@@ -283,7 +289,7 @@ fun Application.module() {
                 jo.put("online", false)
                 val dm = DataManager(PathToData("userData", "userData.json"))
                 dm.changeUser(login.toString(), jo, "userData")
-//                call.respondFile(File("resources/RoboPortal/admin3.html"))
+                call.respondFile(File("resources/RoboPortal/admin3.html"))
             }
 
             post("/AddUser") {

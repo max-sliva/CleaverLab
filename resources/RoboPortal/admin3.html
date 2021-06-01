@@ -170,6 +170,10 @@
 				document.getElementById("editDiv").style.display = "none";
 			}
 
+			function delClick(login) {
+				console.log("del item with login = ", login)
+			}
+
 			function setUsersTable(usersArray){
 				console.log(usersArray.length);
 				var table = document.getElementById("usersTable");
@@ -188,7 +192,7 @@
 					cell1.innerHTML = usersArray[i].online;
 					cell1 = row.insertCell(5);
 					if (i!=0){
-						var btn = document.createElement("img");
+						let btn = document.createElement("img");
 						btn.setAttribute("src", "Images/edit.png");
 						// 	elem.setAttribute("height", "768");
 						btn.setAttribute("width", "30");
@@ -203,6 +207,24 @@
 							editClick(login);
 						});
 						cell1.appendChild(btn);
+
+						btn = document.createElement("img");
+						btn.setAttribute("src", "Images/del1.png");
+						// 	elem.setAttribute("height", "768");
+						btn.setAttribute("width", "10");
+						btn.setAttribute("alt", "Удалить");
+						btn.style.margin = "00px 0px 0px 20px";
+						btn.id = "imgBut";
+						btn.title = "Удалить";
+						btn.style.cursor = 'pointer';
+						// btn.onclick = editClick;
+						k = i;
+						btn.addEventListener('click', function () {
+							login = usersArray[k].login;
+							delClick(login);
+						});
+						cell1.appendChild(btn);
+
 					}					//cell1.innerHTML = '<img src="Images/edit.png" height="30">';
 				}
 			}
