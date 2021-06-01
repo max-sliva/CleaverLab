@@ -269,6 +269,9 @@ fun Application.module() {
                 val receivedParams = call.receiveParameters()
                 val login = receivedParams["login"]
                 println("login from params = $login")
+                val dm = DataManager(PathToData("userData", "userData.json"))
+                dm.deleteUSer(login.toString(), "userData")
+                call.respondFile(File("resources/RoboPortal/admin3.html"))
 
             }
             post("/EditUser") {

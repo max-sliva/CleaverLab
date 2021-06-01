@@ -76,11 +76,33 @@ class DataManager { //класс для загрузки данных из json-
         val index = userArray.indexOf(findLogin[0])
 //        println("findLogin = ${findLogin[0]}")
 //        println("old user index = $index")
+//        println("userArray old = ")
+//        userArray.forEach {
+//            println(it)
+//        }
+        userArray.put(index, userData)
+//        println("userArray new = ")
+//        userArray.forEach {
+//            println(it)
+//        }
+        usersJSON.put("user", userArray)
+//        println("userJSON = $usersJSON")
+        fromJSONtoFile(usersJSON, dataName)
+    }
+
+    fun deleteUSer(login: String, dataName: String){
+        var usersJSON = fromFileToJSON(dataName)
+        val userArray = JSONArray(" ${usersJSON!!["user"]}")
+        val findLogin = userArray.filter {
+            val jsonArObj = JSONObject("$it")
+            jsonArObj["login"] == login
+        }
+        val index = userArray.indexOf(findLogin[0])
         println("userArray old = ")
         userArray.forEach {
             println(it)
         }
-        userArray.put(3, userData)
+        userArray.remove(index)
         println("userArray new = ")
         userArray.forEach {
             println(it)
@@ -88,9 +110,5 @@ class DataManager { //класс для загрузки данных из json-
         usersJSON.put("user", userArray)
 //        println("userJSON = $usersJSON")
         fromJSONtoFile(usersJSON, dataName)
-    }
-
-    fun deleteUSer(login: String, dataName: String){
-
     }
 }

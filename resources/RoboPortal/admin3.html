@@ -63,6 +63,7 @@
 				transform: translate(-50%, -50%)
 			}
 			.overlay2 .myInput {
+				display: none;
 				width: 100%;
 				padding: 12px 20px;
 				margin: 8px 0;
@@ -169,9 +170,18 @@
 				document.getElementById("overlay").style.display = "none";
 				document.getElementById("editDiv").style.display = "none";
 			}
+			function delClose() {
+				document.getElementById("overlay").style.display = "none";
+				document.getElementById("delDiv").style.display = "none";
+			}
 
 			function delClick(login) {
 				console.log("del item with login = ", login)
+				document.getElementById("delLogin").value = login;
+				document.getElementById("loginForDel").innerHTML  = login;
+				document.getElementById("overlay").style.display = "block";
+				document.getElementById("delDiv").style.display = "block";
+
 			}
 
 			function setUsersTable(usersArray){
@@ -406,6 +416,15 @@
 					<input type="submit" id="editUserSave" class="btn btn-default" value="Сохранить">
 				</form>
 			</div>
+			<div id="delDiv" class = "overlay2" >
+				<form action="DeleteUser" method="post" accept-charset="UTF-8">
+					<p>Вы точно хотете УДАЛИТЬ данные выбранного пользователя? Проверьте логин ниже</p>
+					<label>Логин:</label> <label id = "loginForDel"> </label><input id="delLogin" name="login" type = "text" hidden> <br />
+					<input type="button" id="closeDelButton" onclick="delClose()" style = "color: black;" value="Отмена">
+					<input type="submit" id="delUserSave" class="btn btn-default" value="УДАЛИТЬ!!!">
+				</form>
+			</div>
+
 		</div>
 <!--		onclick="off()"-->
 <!--		<script>-->
