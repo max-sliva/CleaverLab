@@ -175,7 +175,7 @@ fun Application.module() {
                                     outgoing.send(Frame.Text(arrString))
                                 } else { //if received JSON from site
                                     println("From   user = $text")
-                                    serialPort!!.writeString(text) //send data to Arduino
+                                    //serialPort!!.writeString(text) //send data to Arduino, !!раскомментить для работы
                                     if (text.contains(""""ledDot"""")) {
                                         val gson = Gson()
                                         val myObj = gson.fromJson(text, MatrixLed::class.java)
@@ -196,6 +196,22 @@ fun Application.module() {
                                     if (text.contains("'ardu_name:'")){
                                         println("ardu_name = $text")
 //                                        curArdu = text.ardu_name
+                                    }
+                                    if (text.contains("NeedLogins")){
+                                        println("NeedLogins")
+                                        val dm = DataManager(PathToData("userData", "userData.json"))
+                                        val userData = dm.fromFileToJSON("userData")["user"] as JSONArray
+                                        val loginData = JSONArray()
+                                        userData.forEach {
+                                            val user = it as JSONObject
+//                                            println("it = $it")
+                                            loginData.put(it["login"])
+                                        }
+                                        println("loginData = $loginData")
+                                        val loginsJson = """{"type": "logins", "logins": $loginData}"""
+//
+                                        outgoing.send(Frame.Text(loginsJson))
+
                                     }
                                 }
 
@@ -293,6 +309,25 @@ fun Application.module() {
                 val dm = DataManager(PathToData("userData", "userData.json"))
                 dm.changeUser(login.toString(), jo, "userData")
                 call.respondFile(File("resources/RoboPortal/admin3.html"))
+            }
+//            AddUserFromIndex
+            post("/AddUserFromIndex") {
+//                todo сделать передачу данных на страницу админа, может сделать отдельную таблицу с запросами на регистрацию
+                val receivedParams = call.receiveParameters()
+                val login = receivedParams["login"]
+                var pass = receivedParams["pass"]
+                val email = receivedParams["email"]
+                var fio = receivedParams["fio"]
+                println("params=$receivedParams")
+                var jo =  JSONObject()
+                jo.put("login", login)
+                jo.put("fio", fio)
+                jo.put("email", email)
+                jo.put("pass", pass?.md5())
+                jo.put("status", "User")
+                jo.put("online", false)
+
+                call.respondFile(File("resources/RoboPortal/index.html"))
             }
 
             post("/AddUser") {

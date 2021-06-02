@@ -35,7 +35,7 @@ let curItemName = null;
 let devHTML = null;
 
 function off() {
-    document.getElementById("overlay").style.display = "none";
+    document.getElementById("overlay2").style.display = "none";
 }
 
 function blueBoxClick() { //клик по устройству с синей рамкой
@@ -43,8 +43,8 @@ function blueBoxClick() { //клик по устройству с синей р�
     console.log("itemName = ", curItemName);
     console.log("devHTML = ", devHTML);
     socketToServer.send("{'ardu_name': '"+curArduForDevice+"'}");
-    document.getElementById("overlay").style.display = "block";
-    $('#overlay').load(devHTML);
+    document.getElementById("overlay2").style.display = "block";
+    $('#overlay2').load(devHTML);
 }
 
 
@@ -669,6 +669,7 @@ async function clearKonva(){
 
 async function loadDevicesFromServer(devices, ws){
     // await clearKonva();
+    console.log("getDevsFromAdmin")
     socketToServer = ws;
     ws.send("GetDevicesToKonva");
     let objFromServer = {"objects": [], "lines": []};

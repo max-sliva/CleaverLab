@@ -23,6 +23,7 @@
 			var str = window.location.href;
 			var res = str.split("/");
 			ip_adress = res[2]
+			console.log("Location: ",ip_adress);
 			let ws = new WebSocket("ws://"+ip_adress+"/");
 		</script>
 		<style>
@@ -120,8 +121,9 @@
 					case "devices":
 						console.log("devices = ", msg.devices);
 						devices = msg.devices;
-						//setDevicesOnTab(devices);
+						// setDevicesOnTab(devices);
 						console.log("sent devs to konva")
+						loadDevicesFromServer(devices, ws)
 						// document.querySelector('#clientid').innerHTML += msg.devices[0].name;
 						break;
 				}
@@ -325,6 +327,24 @@
 				</td>
 			</tr>    
 		</table>
+<!--			  todo сделать прием заявок через web-сокет и динамически вставлять в таблицу данные-->
+			  <table	border="1" cellpadding="5" align="center" id = "regRequestTable">
+				  <caption><h3 align="center">Заявки на регистрацию </h3> </caption>
+				  <tr> <th>Login</th> <th>FIO</th> <th>Status</th> <th>Devices</th> <th>online</th> </tr>
+				  <tr>
+					  <td>
+					  </td>
+					  <td>
+					  </td>
+					  <td>
+					  </td>
+					  <td>
+					  </td>
+					  <td>
+					  </td>
+				  </tr>
+			  </table>
+
 		  </div>
 		<div id="devices" class="tab-pane fade">
 			<h3 align="center">Устройства</h3>
@@ -401,6 +421,8 @@
 			</div>
 		</div>
 	  </div>
+		<div id="overlay2" class = "overlay">
+		</div>
 		<div id="overlay" class = "overlay">
 			<div id="editDiv" class = "overlay2" >
 				<form action="EditUser" method="post" accept-charset="UTF-8">
