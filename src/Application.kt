@@ -101,6 +101,7 @@ fun Application.module() {
         routing {
             webSocket("/") {
                 println("onConnect session = $this")
+                //todo разобраться с сессиями, как туда добавить что-то
                 webSockSessions.add(this)
                 val thisSession = this
 //                outgoing.send(Frame.Text(loginActive))
@@ -161,7 +162,6 @@ fun Application.module() {
 //                                        curArdu = text.ardu_name
                                 }
                                 if (text.contains("'device'") && curArdu!=null){
-                                //todo сделать передачу данных в нужный порт
                                     val serPort = usbScanner.getSerialPortByArdu(curArdu)
                                     if (serPort != null) {
                                         serPort.writeString(text)
@@ -210,7 +210,7 @@ fun Application.module() {
 //                                        curArdu = text.ardu_name
                                     }
                                     if (text.contains("NeedLogins")){
-                                        println("NeedLogins")
+                                        println("NeedLogins from nonAdmin")
                                         val dm = DataManager(PathToData("userData", "userData.json"))
                                         val userData = dm.fromFileToJSON("userData")["user"] as JSONArray
                                         val loginData = JSONArray()
@@ -222,11 +222,23 @@ fun Application.module() {
                                         println("loginData = $loginData")
                                         val loginsJson = """{"type": "logins", "logins": $loginData}"""
 //
-                                        outgoing.send(Frame.Text(loginsJson))
                                         socketToClient = outgoing
+//                                        println("socketToClient = $socketToClient")
+                                        outgoing.send(Frame.Text(loginsJson))
+                                    }
+                                    if (text.contains("'email'")) {
+                                        println("new user = $text")
+                                        val newUserJson = """{"type": "newUser", "newUser": $text}"""
+                                        //не заходит сюда, если админ залогинен
+                                        webSockSessions.forEach { socket ->
+                                            if (socket != thisSession) {
+                                                println("sending new user")
+                                                socket.send(Frame.Text(newUserJson))
+                                            }
+                                        }
+
                                     }
                                 }
-
                             }
                         }
                     }
@@ -322,7 +334,7 @@ fun Application.module() {
                 var pass = receivedParams["pass"]
                 val email = receivedParams["email"]
                 var fio = receivedParams["fio"]
-                println("params=$receivedParams")
+                println("params in Edit=$receivedParams")
                 var jo =  JSONObject()
                 jo.put("login", login)
                 jo.put("fio", fio)
@@ -342,7 +354,7 @@ fun Application.module() {
                 var pass = receivedParams["pass"]
                 val email = receivedParams["email"]
                 var fio = receivedParams["fio"]
-                println("params=$receivedParams")
+                println("params from AddUserFromIndex=$receivedParams")
                 var jo =  JSONObject()
                 jo.put("login", login)
                 jo.put("fio", fio)
@@ -353,8 +365,14 @@ fun Application.module() {
                 val dm = DataManager(PathToData("regData", "regData.json"))
                 dm.addUser(jo, "regData")
                 val newUserJson = """{"type": "newUser", "newUser": $jo}"""
-                socketToClient?.send(Frame.Text(newUserJson))
+                println("socketToClient = $socketToClient")
+
+//                socketToClient?.send(Frame.Text(newUserJson))
 //todo разобраться с сокетом, чтоб данные отправлять
+//                webSockSessions.forEach { socket ->
+//                    socket.send(Frame.Text(newUserJson))
+//                }
+
                 call.respondFile(File("resources/RoboPortal/index.html"))
             }
 
