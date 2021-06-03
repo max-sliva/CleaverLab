@@ -54,12 +54,20 @@ class DataManager { //класс для загрузки данных из json-
     }
 
     fun addUser(userData: JSONObject, dataName: String){
-        var usersJSON = fromFileToJSON(dataName)
+        val usersJSON = fromFileToJSON(dataName)
         val userArray = JSONArray(" ${usersJSON!!["user"]}")
         userArray.put(userData)
         usersJSON.put("user", userArray)
         fromJSONtoFile(usersJSON, dataName)
     }
+
+//    fun addReg(regData: JSONObject, dataName: String){
+//        val regJSON = fromFileToJSON(dataName)
+//        val regArray = JSONArray(" ${regJSON!!["user"]}")
+//        regArray.put(regData)
+//        regJSON.put("user", regArray)
+//        fromJSONtoFile(regJSON, dataName)
+//    }
 
     fun changeUser(login: String, userData: JSONObject, dataName: String){
         var usersJSON = fromFileToJSON(dataName)

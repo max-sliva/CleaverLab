@@ -1,0 +1,28 @@
+{
+  "user": [
+    {
+      "pass": "698d51a19d8a121ce581499d7b701668",
+      "online": false,
+      "login": "newUser",
+      "fio": "Юзер Обычный",
+      "email": "kkk@in.ru",
+      "status": "User"
+    },
+    {
+      "pass": "698d51a19d8a121ce581499d7b701668",
+      "online": false,
+      "login": "petr",
+      "fio": "Артём Иванович",
+      "email": "persimon@inbox.ru",
+      "status": "User"
+    },
+    {
+      "pass": "698d51a19d8a121ce581499d7b701668",
+      "online": false,
+      "login": "someUser",
+      "fio": "Какой-то юзер",
+      "email": "k@m.ru",
+      "status": "User"
+    }
+  ]
+}

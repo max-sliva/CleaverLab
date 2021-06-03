@@ -19,6 +19,7 @@
 			console.log("user = ", curUser)
 			let logins = [];
 			let users = [];
+			let regUsers = [];
 			let devices = [];
 			var str = window.location.href;
 			var res = str.split("/");
@@ -99,6 +100,7 @@
 			ws.onopen = function () {
 				console.log('connection established')
 				ws.send("NeedUsers");
+				// ws.send("NeedRegs");
 				ws.send("NeedDevices");
 			};
 			ws.onclose = function () {
@@ -125,6 +127,16 @@
 						console.log("sent devs to konva")
 						loadDevicesFromServer(devices, ws)
 						// document.querySelector('#clientid').innerHTML += msg.devices[0].name;
+						break;
+					case "regUsers":
+						console.log("regUsers = ", msg.users);
+						regUsers = msg.users;
+						setRegUsersTable(regUsers);
+						break;
+					case "newUser":
+						//todo сделать добаавление одного пользователя в текущую таблицу
+						console.log("newUser = ", msg.newUser);
+
 						break;
 				}
 				ws.send("ok");
@@ -183,7 +195,6 @@
 				document.getElementById("loginForDel").innerHTML  = login;
 				document.getElementById("overlay").style.display = "block";
 				document.getElementById("delDiv").style.display = "block";
-
 			}
 
 			function setUsersTable(usersArray){
@@ -240,7 +251,59 @@
 					}					//cell1.innerHTML = '<img src="Images/edit.png" height="30">';
 				}
 			}
-			
+
+			function setRegUsersTable(usersArray){
+				console.log(usersArray.length);
+				var table = document.getElementById("regRequestTable");
+				for (var i = 0; i < usersArray.length; i++){
+					var row = table.insertRow(1+i);
+					var cell1 = row.insertCell(0);
+					cell1.innerHTML = usersArray[i].login;
+					logins[i] = usersArray[i].login;
+					cell1 = row.insertCell(1);
+					cell1.innerHTML = usersArray[i].fio;
+					cell1 = row.insertCell(2);
+					cell1.innerHTML = usersArray[i].status;
+					cell1 = row.insertCell(3);
+					cell1.innerHTML = usersArray[i].devices;
+					cell1 = row.insertCell(4);
+					cell1.innerHTML = usersArray[i].online;
+					cell1 = row.insertCell(5);
+						let btn = document.createElement("img");
+						btn.setAttribute("src", "Images/accept.png");
+						// 	elem.setAttribute("height", "768");
+						btn.setAttribute("width", "30");
+						btn.setAttribute("alt", "Принять");
+						btn.id = "imgBut";
+						btn.title = "Принять";
+						btn.style.cursor = 'pointer';
+						// btn.onclick = editClick;
+						let k = i;
+						btn.addEventListener('click', function () {
+							login = usersArray[k].login;
+							acceptClick(login);
+						});
+						cell1.appendChild(btn);
+
+						btn = document.createElement("img");
+						btn.setAttribute("src", "Images/del1.png");
+						// 	elem.setAttribute("height", "768");
+						btn.setAttribute("width", "10");
+						btn.setAttribute("alt", "Удалить");
+						btn.style.margin = "00px 0px 0px 20px";
+						btn.id = "imgBut";
+						btn.title = "Удалить";
+						btn.style.cursor = 'pointer';
+						// btn.onclick = editClick;
+						k = i;
+						btn.addEventListener('click', function () {
+							login = usersArray[k].login;
+							delClick(login);
+						});
+						cell1.appendChild(btn);
+				}
+			}
+
 			function setDevicesOnTab(devicesArray){ //show devices on tab
 				var devicesDiv = document.getElementById("devices");
 				while (devicesDiv.firstChild) {
@@ -327,7 +390,6 @@
 				</td>
 			</tr>    
 		</table>
-<!--			  todo сделать прием заявок через web-сокет и динамически вставлять в таблицу данные-->
 			  <table	border="1" cellpadding="5" align="center" id = "regRequestTable">
 				  <caption><h3 align="center">Заявки на регистрацию </h3> </caption>
 				  <tr> <th>Login</th> <th>FIO</th> <th>Status</th> <th>Devices</th> <th>online</th> </tr>

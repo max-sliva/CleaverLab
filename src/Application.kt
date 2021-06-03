@@ -23,6 +23,7 @@ import io.ktor.sessions.set
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
 import jssc.SerialPort
+import kotlinx.coroutines.channels.SendChannel
 //import org.bson.Document
 import org.json.JSONArray
 import org.json.JSONObject
@@ -38,6 +39,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 fun Application.module() {
 //    startUSBscanner()
 //    portsWithThread()
+    var socketToClient: SendChannel<Frame>? = null
     val usbScanner = PortScanner()
     var curArdu = ""  //текущая ардуино, будет прислана с клиента
     usbScanner.startUSBscanner()
@@ -116,13 +118,23 @@ fun Application.module() {
 //                                    println("users=$docs")
 //                                    val userCaps = arrayListOf("login", "fio", "status", "devices", "online")
 //                                    outgoing.send(Frame.Text(arrayListToJSON(docs, userCaps, "users")))
-                                    val dm = DataManager(PathToData("userData", "userData.json"))
+                                    var dm = DataManager(PathToData("userData", "userData.json"))
                                     val userData = dm.fromFileToJSON("userData")["user"]
 //                                    val userData = fromFileToJSON("userData.json")["user"]
                                     val userJson = "{\"type\": \"users\", \"users\": $userData}"
                                     println("userJson=$userJson")
                                     outgoing.send(Frame.Text(userJson))
-                                } else if (text == "NeedDevices") { //if from site came request for devices
+                                    dm = DataManager(PathToData("regData", "regData.json"))
+                                    val regData = dm.fromFileToJSON("regData")["user"]
+//                                    val userData = fromFileToJSON("userData.json")["user"]
+                                    val regJson = "{\"type\": \"regUsers\", \"users\": $regData}"
+                                    println("regJson=$regJson")
+                                    outgoing.send(Frame.Text(regJson))
+                                }
+//                                else if (text == "NeedRegs"){
+//
+//                                }
+                                else if (text == "NeedDevices") { //if from site came request for devices
 //                                    val iter = deviceCollection.find()
 //                                    devices.clear()
 //                                    iter.into(devices);
@@ -211,7 +223,7 @@ fun Application.module() {
                                         val loginsJson = """{"type": "logins", "logins": $loginData}"""
 //
                                         outgoing.send(Frame.Text(loginsJson))
-
+                                        socketToClient = outgoing
                                     }
                                 }
 
@@ -290,6 +302,18 @@ fun Application.module() {
                 call.respondFile(File("resources/RoboPortal/admin3.html"))
 
             }
+
+            post("/DeleteReg"){
+                println("!!DeleteReg")
+                val receivedParams = call.receiveParameters()
+                val login = receivedParams["login"]
+                println("login from params = $login")
+                val dm = DataManager(PathToData("regData", "regData.json"))
+                dm.deleteUSer(login.toString(), "regData")
+                call.respondFile(File("resources/RoboPortal/admin3.html"))
+
+            }
+
             post("/EditUser") {
                 println("!!EditUser")
                 val receivedParams = call.receiveParameters()
@@ -311,7 +335,7 @@ fun Application.module() {
                 call.respondFile(File("resources/RoboPortal/admin3.html"))
             }
 //            AddUserFromIndex
-            post("/AddUserFromIndex") {
+            post("/AddUserFromIndex") {                         //для получения запросов на регистрацию
 //                todo сделать передачу данных на страницу админа, может сделать отдельную таблицу с запросами на регистрацию
                 val receivedParams = call.receiveParameters()
                 val login = receivedParams["login"]
@@ -326,7 +350,11 @@ fun Application.module() {
                 jo.put("pass", pass?.md5())
                 jo.put("status", "User")
                 jo.put("online", false)
-
+                val dm = DataManager(PathToData("regData", "regData.json"))
+                dm.addUser(jo, "regData")
+                val newUserJson = """{"type": "newUser", "newUser": $jo}"""
+                socketToClient?.send(Frame.Text(newUserJson))
+//todo разобраться с сокетом, чтоб данные отправлять
                 call.respondFile(File("resources/RoboPortal/index.html"))
             }
 
