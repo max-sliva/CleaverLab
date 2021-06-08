@@ -199,7 +199,6 @@ fun Application.module() {
 //                                        curArdu = text.ardu_name
                                 }
                                 if (text.contains("'device'") && curArdu!=null){
-                                //todo сделать передачу данных в нужный порт
                                     val serPort = usbScanner.getSerialPortByArdu(curArdu)
                                     if (serPort != null) {
                                         serPort.writeString(text)
@@ -374,7 +373,6 @@ fun Application.module() {
             }
 //            AddUserFromIndex
             post("/AddUserFromIndex") {                         //для получения запросов на регистрацию
-//                todo сделать передачу данных на страницу админа, может сделать отдельную таблицу с запросами на регистрацию
                 val receivedParams = call.receiveParameters()
                 val login = receivedParams["login"]
                 var pass = receivedParams["pass"]
@@ -392,7 +390,6 @@ fun Application.module() {
                 dm.addUser(jo, "regData")
                 val newUserJson = """{"type": "newUser", "newUser": $jo}"""
 //                socketToClient?.send(Frame.Text(newUserJson))
-//todo разобраться с сокетом, чтоб данные отправлять
                 call.respondFile(File("resources/RoboPortal/index.html"))
             }
 

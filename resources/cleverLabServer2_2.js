@@ -361,7 +361,6 @@ listener2.sockets.on('connection', function(socket){
 
 server.listen(8000, function(){
 	console.log('listening on *:8000');
-	//TODO clear matrix	
 	// serial.use(myPort);
 	// serial.open();
 	// serial.write('0');
