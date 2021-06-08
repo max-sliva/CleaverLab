@@ -26,6 +26,63 @@
 			ip_adress = res[2]
 			console.log("Location: ",ip_adress);
 			let ws = new WebSocket("ws://"+ip_adress+"/");
+
+			var wsUri = "ws://" + ip_adress + "/chat";
+			var output;
+			var websocket;
+			function init() {
+				output = document.getElementById("output");
+				testWebSocket();
+			}
+
+			function testWebSocket() {
+				websocket = new WebSocket(wsUri);
+				websocket.onopen = function (evt) {
+					onOpen(evt)
+				};
+				websocket.onclose = function (evt) {
+					onClose(evt)
+				};
+				websocket.onmessage = function (evt) {
+					onMessage(evt)
+				};
+				websocket.onerror = function (evt) {
+					onError(evt)
+				};
+			}
+
+			function onOpen(evt) {
+				writeToScreen("CONNECTED");
+				doSend("WebSocket rocks");
+			}
+
+			function onClose(evt) {
+				writeToScreen("DISCONNECTED");
+			}
+
+			function onMessage(evt) {
+				writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + '</span>');
+				// websocket.close();
+			}
+
+			function onError(evt) {
+				writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+			}
+
+			function doSend(message) {
+				writeToScreen("SENT: " + message);
+				websocket.send(message);
+			}
+
+			function writeToScreen(message) {
+				var pre = document.createElement("p");
+				pre.style.wordWrap = "break-word";
+				pre.innerHTML = message;
+				output.appendChild(pre);
+			}
+
+			window.addEventListener("load", init, false);
+
 		</script>
 		<style>
 			#container {
@@ -75,27 +132,6 @@
 				color: white;
 			}
 		</style>
-	</head>
-	<body>
-		<div class="navbar">
-			<div class="container">
-				<ul class="pull-left">
-					<li><a href="index.html">Главная</a></li>
-				</ul>
-				<ul class="pull-right">
-					<li><a href="#">Структура сайта</a></li>
-<!--					<li><a href="/Logout?login=Admin">Logout!</a></li>-->
-					<li><a href="/Logout">Logout!</a></li>
-					<li><a href="help.html">Помощь</a></li>
-				</ul>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-xs-6" align="center" >
-			</div>
-			<div class="col-xs-6" align="center" >
-			</div>
-		</div>
 		<script>
 			ws.onopen = function () {
 				console.log('connection established')
@@ -141,7 +177,29 @@
 				}
 				ws.send("ok");
 			};
-
+		</script>
+			</head>
+	<body>
+		<div class="navbar">
+			<div class="container">
+				<ul class="pull-left">
+					<li><a href="index.html">Главная</a></li>
+				</ul>
+				<ul class="pull-right">
+					<li><a href="#">Структура сайта</a></li>
+<!--					<li><a href="/Logout?login=Admin">Logout!</a></li>-->
+					<li><a href="/Logout">Logout!</a></li>
+					<li><a href="help.html">Помощь</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-6" align="center" >
+			</div>
+			<div class="col-xs-6" align="center" >
+			</div>
+		</div>
+		<script>
 			var ar = 0;
 				// socket.on('addUser', data=>{
 				// 	addUser(data);
@@ -516,5 +574,25 @@
 <!--				document.getElementById("overlay").style.display = "none";-->
 <!--			}-->
 <!--		</script>-->
+		<h2>Чат</h2>
+		<div style="margin-left: 10px; margin-top: 10px">
+			<!--поле для ввода текста и кнопка, на метод onclick повешена функция sendText() -->
+			<input type="text" id="textToSend">
+			<button id="sendButton" onclick="sendText()">Send</button>
+		</div>
+		<script>
+			function sendText() { // функция для обработки нажатия на кнопку
+				let textToSend = document.getElementById("textToSend") //находим текстовое поле
+				console.log("Text to send: ", textToSend.value) //отладочный вывод
+				websocket.send(textToSend.value) //отправляем текст, находящийся в текстовом поле
+				let textArea = document.getElementById("Text") // находим область для вывода текста
+				textArea.innerHTML = textArea.innerHTML + " <p style = 'color: blue'>" + "User: "
+						+ textToSend.value //и выводим в нее текст
+				textToSend.value = "" //очищаем текстовое поле
+			}
+		</script>
+
+		<div id="output"></div>
+
 	</body>
 </html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8"/>
+<title>Чат</title>
+<head>
+    <link rel="stylesheet" href="bootstrap.css">
+    <link rel="stylesheet" href="main.css">
+    <script src="jquery.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <!-- 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> -->
+    <!--     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> -->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+    <script language="javascript" type="text/javascript">
+        var str = window.location.href;
+        var res = str.split("/");
+        ip_adress = res[2]
+        console.log("Location: ", ip_adress);
+        // let ws = new WebSocket("ws://"+ip_adress+"/");
+        // let wsChat = new WebSocket("ws://"+ip_adress+"/chat");
+
+        var wsUri = "ws://" + ip_adress + "/chat";
+        var output;
+        var websocket;
+
+        function init() {
+            output = document.getElementById("output");
+            testWebSocket();
+        }
+
+        function testWebSocket() {
+            websocket = new WebSocket(wsUri);
+            websocket.onopen = function (evt) {
+                onOpen(evt)
+            };
+            websocket.onclose = function (evt) {
+                onClose(evt)
+            };
+            websocket.onmessage = function (evt) {
+                onMessage(evt)
+            };
+            websocket.onerror = function (evt) {
+                onError(evt)
+            };
+        }
+
+        function onOpen(evt) {
+            writeToScreen("CONNECTED");
+            doSend("WebSocket rocks");
+        }
+
+        function onClose(evt) {
+            writeToScreen("DISCONNECTED");
+        }
+
+        function onMessage(evt) {
+            writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + '</span>');
+            // websocket.close();
+        }
+
+        function onError(evt) {
+            writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+        }
+
+        function doSend(message) {
+            writeToScreen("SENT: " + message);
+            websocket.send(message);
+        }
+
+        function writeToScreen(message) {
+            var pre = document.createElement("p");
+            pre.style.wordWrap = "break-word";
+            pre.innerHTML = message;
+            output.appendChild(pre);
+        }
+
+        window.addEventListener("load", init, false);
+
+    </script>
+</head>
+    <body>
+    <div class="navbar" style="margin: 0px;">
+        <div class="container">
+            <ul class="pull-left">
+                <li><a href="index.html">Главная</a></li>
+
+
+            </ul>
+            <ul class="pull-right">
+                <li><a href="#">Cтруктура сайта</a></li>
+
+                <li><a href="help.html">Помощь</a></li>
+            </ul>
+        </div>
+    </div>
+        <h2>Чат</h2>
+        <div style="margin-left: 10px; margin-top: 10px">
+            <!--поле для ввода текста и кнопка, на метод onclick повешена функция sendText() -->
+            <input type="text" id="textToSend">
+            <button id="sendButton" onclick="sendText()">Send</button>
+        </div>
+        <script>
+            function sendText() { // функция для обработки нажатия на кнопку
+                let textToSend = document.getElementById("textToSend") //находим текстовое поле
+                console.log("Text to send: ", textToSend.value) //отладочный вывод
+                websocket.send(textToSend.value) //отправляем текст, находящийся в текстовом поле
+                let textArea = document.getElementById("Text") // находим область для вывода текста
+                textArea.innerHTML = textArea.innerHTML + " <p style = 'color: blue'>" + "User: "
+                    + textToSend.value //и выводим в нее текст
+                textToSend.value = "" //очищаем текстовое поле
+            }
+        </script>
+
+        <div id="output"></div>
+    </body>
+</html>

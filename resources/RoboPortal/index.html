@@ -17,6 +17,7 @@
 			ip_adress = res[2]
 			console.log("Location: ",ip_adress);
 			let ws = new WebSocket("ws://"+ip_adress+"/");
+			let wsChat = new WebSocket("ws://"+ip_adress+"/chat");
 
 		</script>
 
@@ -44,6 +45,12 @@
 					console.log("logins = ", msg.logins);
 					logins = msg.logins;
 					break;
+				case "newUser":
+					//todo сделать добаавление одного пользователя в текущую таблицу
+					console.log("newUser = ", msg.newUser);
+
+					break;
+
 			}
 		}
 	</script>
@@ -66,7 +73,8 @@
     <div class="navbar" style="margin: 0px;">
       <div class="container">
         <ul class="pull-left">
-          <li><a href="about.html">О портале</a></li>
+			<li><a href="about.html">О портале</a></li>
+			<li><a href="chat.html">Общий чат</a></li>
         </ul>
         <ul class="pull-right">
           <li><a href="#">Cтруктура сайта</a></li>
@@ -117,9 +125,9 @@
 			<form action="AddUserFromIndex" method="post" accept-charset="UTF-8">
 				<div class="modal-body">
 					<p>Введите данные</p>
-					<label>ФИО:</label><input id = "fio" name="fio" required placeholder="Иванов Иван Иванович" type="text" size="25" maxlength="25"
+					<label>ФИО:</label><input id="fio" name="fio" required placeholder="Иванов Иван Иванович" type="text" size="25" maxlength="25"
 											  accept-charset="UTF-8" autofocus><br />
-					<label>e-mail:</label> <input id = "email" name="email" required pattern="\S+@[a-z]+.[a-z]+" type="email" size="15"
+					<label>e-mail:</label> <input id="email" name="email" required pattern="\S+@[a-z]+.[a-z]+" type="email" size="15"
 												  maxlength="25"><br />
 					<label>Логин:</label> <input id="loginForReg" name="login" pattern="[A-Za-z].+" placeholder="Начинается с буквы" type="text" size="15" maxlength="15" required>
 					<script>
@@ -147,16 +155,19 @@
 				<div class="modal-footer">
 					<input type="submit" id="addUserSave" class="btn btn-default" value="Сохранить" onclick="addUserFromForm()"> <!-- data-dismiss="modal" onclick="javascript: submit()"> -->
 					<button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+					<button type="button" id = "sendMessage" class="btn btn-default" data-dismiss="modal">Send message</button>
 					<script>
-						$('#addUserSave').click(function () {
-							console.log("Add user!");
-							document.getElementById("login").focus();
+						// $('#addUserSave').click(function () {
+						$('#sendMessage').click(function () {
 							const login = document.getElementById("loginForReg").value;
 							const fio = document.getElementById("fio").value;
 							const email = document.getElementById("email").value;
 							const pass = document.getElementById("pass").value;
+							console.log("Add user = {'login' : '"+login+"', 'fio': '"+fio+"', 'email': '"+email+"','pass: '"+pass +"'}");
 							ws.send("{'login' : '"+login+"', 'fio': '"+fio+"', 'email': '"+email+"','pass: '"+pass +"'}");
 							// ws.send("addUser!");
+
+
 						})
 						// function addUserFromForm() {
 						// 	// console.log("Add user!");
