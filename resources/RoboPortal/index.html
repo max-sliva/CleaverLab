@@ -164,7 +164,7 @@
 							const email = document.getElementById("email").value;
 							const pass = document.getElementById("pass").value;
 							console.log("Add user = {'login' : '"+login+"', 'fio': '"+fio+"', 'email': '"+email+"','pass: '"+pass +"'}");
-							ws.send("{'login' : '"+login+"', 'fio': '"+fio+"', 'email': '"+email+"','pass: '"+pass +"'}");
+							wsChat.send('{"login" : "'+login+'", "fio": "'+fio+'", "email": "'+email+'","pass": "'+pass +'"}');
 							// ws.send("addUser!");
 
 

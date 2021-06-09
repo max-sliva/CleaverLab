@@ -109,12 +109,22 @@ fun Application.module() {
                     for (frame in incoming) {
                         frame as? Frame.Text ?: continue
                         val receivedText = frame.readText()
-                        val textWithUsername = "[${thisConnection.name}]: $receivedText"
-                        connections.forEach {
-                            println("sending message")
-                            it?.session?.send(textWithUsername)
-                        }
+
                         println("sent to all")
+                        if (receivedText.contains("{\"login\"")) {
+                            connections.forEach {
+                                println("sending message with user")
+                                val newUserJson = """{"type": "newUser", "newUser": $receivedText}"""
+                                it?.session?.send(newUserJson)
+                            }
+                        }
+                        else {
+                            val textWithUsername = "[${thisConnection.name}]: $receivedText"
+                            connections.forEach {
+                                println("sending message")
+                                it?.session?.send(textWithUsername)
+                            }
+                        }
                     }
                 } catch (e: Exception) {
                     println(e.localizedMessage)
