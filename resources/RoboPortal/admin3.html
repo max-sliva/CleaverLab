@@ -230,11 +230,97 @@
 				cell1 = row.insertCell(4);
 				cell1.innerHTML = user1.online;
 				console.log(logins);
+				cell1 = row.insertCell(5);
+				let btn = document.createElement("img");
+				btn.setAttribute("src", "Images/accept.png");
+				// 	elem.setAttribute("height", "768");
+				btn.setAttribute("width", "30");
+				btn.setAttribute("alt", "Принять");
+				btn.id = "imgBut";
+				btn.title = "Принять";
+				btn.style.cursor = 'pointer';
+				// btn.onclick = editClick;
+				let k = i;
+				btn.addEventListener('click', function () {
+					login = usersArray[k].login;
+					acceptClick(login); //todo проверить работу приема пользователя
+				});
+				cell1.appendChild(btn);
+
+				btn = document.createElement("img");
+				btn.setAttribute("src", "Images/del1.png");
+				// 	elem.setAttribute("height", "768");
+				btn.setAttribute("width", "10");
+				btn.setAttribute("alt", "Удалить");
+				btn.style.margin = "00px 0px 0px 20px";
+				btn.id = "imgBut";
+				btn.title = "Удалить";
+				btn.style.cursor = 'pointer';
+				// btn.onclick = editClick;
+				k = i;
+				btn.addEventListener('click', function () {
+					login = usersArray[k].login;
+					delClickReg(login); //todo проверить работу удаления пользователя
+				});
+				cell1.appendChild(btn);
+
 				// setTimeout(function(){
 				// 		console.log("1000 for new user");
 				// 		window.location.href = "/admin3.html";
 				// }, 1000);
 				//location.reload();
+			}
+
+			function setRegUsersTable(usersArray){
+				console.log(usersArray.length);
+				var table = document.getElementById("regRequestTable");
+				for (var i = 0; i < usersArray.length; i++){
+					var row = table.insertRow(1+i);
+					var cell1 = row.insertCell(0);
+					cell1.innerHTML = usersArray[i].login;
+					logins[i] = usersArray[i].login;
+					cell1 = row.insertCell(1);
+					cell1.innerHTML = usersArray[i].fio;
+					cell1 = row.insertCell(2);
+					cell1.innerHTML = usersArray[i].status;
+					cell1 = row.insertCell(3);
+					cell1.innerHTML = usersArray[i].devices;
+					cell1 = row.insertCell(4);
+					cell1.innerHTML = usersArray[i].online;
+					cell1 = row.insertCell(5);
+					let btn = document.createElement("img");
+					btn.setAttribute("src", "Images/accept.png");
+					// 	elem.setAttribute("height", "768");
+					btn.setAttribute("width", "30");
+					btn.setAttribute("alt", "Принять");
+					btn.id = "imgBut";
+					btn.title = "Принять";
+					btn.style.cursor = 'pointer';
+					// btn.onclick = editClick;
+					let k = i;
+					btn.addEventListener('click', function () {
+						login = usersArray[k].login;
+						acceptClick(login); //todo проверить работу приема пользователя
+					});
+					cell1.appendChild(btn);
+
+					btn = document.createElement("img");
+					btn.setAttribute("src", "Images/del1.png");
+					// 	elem.setAttribute("height", "768");
+					btn.setAttribute("width", "10");
+					btn.setAttribute("alt", "Удалить");
+					btn.style.margin = "00px 0px 0px 20px";
+					btn.id = "imgBut";
+					btn.title = "Удалить";
+					btn.style.cursor = 'pointer';
+					// btn.onclick = editClick;
+					k = i;
+					btn.addEventListener('click', function () {
+						login = usersArray[k].login;
+						delClickReg(login); //todo проверить работу удаления пользователя
+					});
+					cell1.appendChild(btn);
+				}
 			}
 
 			function editClick(login) {
@@ -313,58 +399,6 @@
 						cell1.appendChild(btn);
 
 					}					//cell1.innerHTML = '<img src="Images/edit.png" height="30">';
-				}
-			}
-
-			function setRegUsersTable(usersArray){
-				console.log(usersArray.length);
-				var table = document.getElementById("regRequestTable");
-				for (var i = 0; i < usersArray.length; i++){
-					var row = table.insertRow(1+i);
-					var cell1 = row.insertCell(0);
-					cell1.innerHTML = usersArray[i].login;
-					logins[i] = usersArray[i].login;
-					cell1 = row.insertCell(1);
-					cell1.innerHTML = usersArray[i].fio;
-					cell1 = row.insertCell(2);
-					cell1.innerHTML = usersArray[i].status;
-					cell1 = row.insertCell(3);
-					cell1.innerHTML = usersArray[i].devices;
-					cell1 = row.insertCell(4);
-					cell1.innerHTML = usersArray[i].online;
-					cell1 = row.insertCell(5);
-						let btn = document.createElement("img");
-						btn.setAttribute("src", "Images/accept.png");
-						// 	elem.setAttribute("height", "768");
-						btn.setAttribute("width", "30");
-						btn.setAttribute("alt", "Принять");
-						btn.id = "imgBut";
-						btn.title = "Принять";
-						btn.style.cursor = 'pointer';
-						// btn.onclick = editClick;
-						let k = i;
-						btn.addEventListener('click', function () {
-							login = usersArray[k].login;
-							acceptClick(login);
-						});
-						cell1.appendChild(btn);
-
-						btn = document.createElement("img");
-						btn.setAttribute("src", "Images/del1.png");
-						// 	elem.setAttribute("height", "768");
-						btn.setAttribute("width", "10");
-						btn.setAttribute("alt", "Удалить");
-						btn.style.margin = "00px 0px 0px 20px";
-						btn.id = "imgBut";
-						btn.title = "Удалить";
-						btn.style.cursor = 'pointer';
-						// btn.onclick = editClick;
-						k = i;
-						btn.addEventListener('click', function () {
-							login = usersArray[k].login;
-							delClick(login);
-						});
-						cell1.appendChild(btn);
 				}
 			}
 
