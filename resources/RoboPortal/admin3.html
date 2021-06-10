@@ -180,11 +180,6 @@
 						regUsers = msg.users;
 						setRegUsersTable(regUsers);
 						break;
-					case "newUser":
-						//todo сделать добаавление одного пользователя в текущую таблицу из вебсокета с адресом "chat"
-						console.log("newUser = ", msg.newUser);
-
-						break;
 				}
 				ws.send("ok");
 			};
