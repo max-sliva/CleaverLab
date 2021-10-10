@@ -9,7 +9,7 @@ import io.ktor.routing.*
 import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
 import kotlinx.html.*
-import kotlinx.css.*
+//import kotlinx.css.*
 import io.ktor.http.content.defaultResource
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
@@ -457,16 +457,16 @@ fun Application.module() {
     server.start(wait = true)
 }
 
-fun FlowOrMetaDataContent.styleCss(builder: CSSBuilder.() -> Unit) {
-    style(type = ContentType.Text.CSS.toString()) {
-        +CSSBuilder().apply(builder).toString()
-    }
-}
-
-fun CommonAttributeGroupFacade.style(builder: CSSBuilder.() -> Unit) {
-    this.style = CSSBuilder().apply(builder).toString().trim()
-}
-
-suspend inline fun ApplicationCall.respondCss(builder: CSSBuilder.() -> Unit) {
-    this.respondText(CSSBuilder().apply(builder).toString(), ContentType.Text.CSS)
-}
+//fun FlowOrMetaDataContent.styleCss(builder: CSSBuilder.() -> Unit) {
+//    style(type = ContentType.Text.CSS.toString()) {
+//        +CSSBuilder().apply(builder).toString()
+//    }
+//}
+//
+//fun CommonAttributeGroupFacade.style(builder: CSSBuilder.() -> Unit) {
+//    this.style = CSSBuilder().apply(builder).toString().trim()
+//}
+//
+//suspend inline fun ApplicationCall.respondCss(builder: CSSBuilder.() -> Unit) {
+//    this.respondText(CSSBuilder().apply(builder).toString(), ContentType.Text.CSS)
+//}
