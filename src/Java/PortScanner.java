@@ -1,6 +1,7 @@
 package Java;
 
 import jssc.SerialPort;
+import jssc.SerialPortException;
 import jssc.SerialPortList;
 
 import java.util.ArrayList;
@@ -39,7 +40,21 @@ public class PortScanner {
         portsHashMap = new HashMap<String, SerialPort>();
         String[] portNames2 = SerialPortList.getPortNames(); // получаем список портов, с ним будем потом сравнивать новый список
         printPortsArray();
-
+//todo Дописать с нвоым подходом к автоопределению
     }
 
+    public void setListnerForArdu(String port) throws SerialPortException {
+        SerialPort tempPort = new SerialPort(port);
+        portsHashMap.put(port, tempPort);
+        System.out.println("Set listner for $port");
+//    if (tempPort.isOpened) tempPort.closePort()
+        tempPort.openPort(); //открываем порт
+        tempPort.setParams(
+                9600,
+                8,
+                1,
+                0
+        ); //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
+
+    }
 }
