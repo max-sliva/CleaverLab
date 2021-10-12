@@ -7,6 +7,8 @@ import jssc.SerialPortList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PortScanner {
     private HashMap<String, jssc.SerialPort> portArdus = new HashMap<String, SerialPort>();
@@ -55,6 +57,37 @@ public class PortScanner {
                 1,
                 0
         ); //задаем параметры порта, 9600 - скорость, такую же нужно задать для Serial.begin в Arduino
+        AtomicBoolean first = new AtomicBoolean(true);
+        AtomicReference<String> str = new AtomicReference<>("");
+        tempPort.addEventListener( event ->{
+            if (event.isRXCHAR()) {
+                try {
+                    String temp = tempPort.readString();
+                    if (temp!= null) {
+                        if (temp.contains("\n")) str.get().concat(temp);
+                        else str.get().concat(temp.trim());
+//                        else str += temp.trim { it < ' ' && it !='\n'}
+                        if (str.get().contains("end devList")) {
+                            System.out.println("str = "+str);
 
+                        }
+                        str.set("");
+                        if (first.get()) {
+                            tempPort.writeString("1");
+                            first.set(false);
+                        }
+
+                    } else System.out.println("received null from "+port);
+                } catch (SerialPortException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        });
     }
+
+    public String[] getArdus() {
+        return (String[]) portArdus.keySet().toArray();
+    }
+
 }
