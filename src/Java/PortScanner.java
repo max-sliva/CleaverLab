@@ -42,6 +42,16 @@ public class PortScanner {
         portsHashMap = new HashMap<String, SerialPort>();
         String[] portNames2 = SerialPortList.getPortNames(); // получаем список портов, с ним будем потом сравнивать новый список
         printPortsArray();
+        portNames.forEach ( it -> {
+            try {
+                setListnerForArdu(it);
+            } catch (SerialPortException e) {
+                e.printStackTrace();
+            }
+//            Thread.sleep(2000)
+        });
+        ThreadForPortsUpdate threadForPortsUpdate = new ThreadForPortsUpdate(portNames);
+        threadForPortsUpdate.start();
 //todo Дописать с нвоым подходом к автоопределению
     }
 
