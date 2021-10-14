@@ -30,16 +30,7 @@ public class ThreadForPortsUpdate extends Thread{
             portNames =  (ArrayList<String>) Arrays.asList(SerialPortList.getPortNames());
             if (portNames.size() != portNames2.size()) { //если размер прошлого списка и нового разные
                 printPortsArray();
-                portNames.forEach ( it -> {
-                    if (portNames2.contains(it)){
-                        System.out.println(""+it+" - new");
-                    }
-                    try {
-                        setListnerForArdu(it);
-                    } catch (SerialPortException e) {
-                        e.printStackTrace();
-                    }
-                });
+                checkPorts();
                 portNames2 = portNames;
             } else { //если списки равны по размеру
                 num.set(0);
@@ -52,16 +43,7 @@ public class ThreadForPortsUpdate extends Thread{
                 if (num.get() != portNames.size()) { //если кол-во одинаковых портов меньше кол-ва портов
                     num.set(0);
                     System.out.println("Ports changed 2");
-                    portNames.forEach ( it -> {
-                        if (portNames2.contains(it)){
-                            System.out.println(""+it+" - new");
-                        }
-                        try {
-                            setListnerForArdu(it);
-                        } catch (SerialPortException e) {
-                            e.printStackTrace();
-                        }
-                    });
+                    checkPorts();
                     portNames2 = portNames;
                     printPortsArray();
                 }
@@ -81,6 +63,19 @@ public class ThreadForPortsUpdate extends Thread{
         else portNames.forEach ( it ->
                 System.out.println(it)
         );
+    }
+
+    private void checkPorts(){
+        portNames.forEach ( it -> {
+            if (portNames2.contains(it)){
+                System.out.println(""+it+" - new");
+            }
+            try {
+                setListnerForArdu(it);
+            } catch (SerialPortException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public void setListnerForArdu(String port) throws SerialPortException {
