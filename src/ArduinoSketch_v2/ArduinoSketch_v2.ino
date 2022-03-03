@@ -29,7 +29,7 @@ void setup()
   strip.setBrightness(10);
   OzOled.init();  //initialize Oscar OLED display
   OzOled.printString("Hello World!"); //Print the String
-  delay(1000);
+ // delay(1000);
   // OzOled.clearDisplay();
   myservo.attach(5);
   pinMode(pinA1, OUTPUT);
@@ -83,7 +83,7 @@ void loop()
       const char* pos1 = root["angle1"];
       const char* motor1 = root["motor1"];
       const char* info = root["info"];
-      const char* blinkLed= root["blinkLed"];
+     // const char* blinkLed= root["blinkLed"];
       //       const char* motor1Slider = root["motor1Slider"];
       if (myN)
       {

@@ -18,7 +18,7 @@ public class PortScanner {
 
     public ArrayList<String> getPortNames(){
         return portNames;
-    }
+    } //получение названий портов
 
     public SerialPort getSerialPortByName(String str) {
        return portsHashMap.get(str);
